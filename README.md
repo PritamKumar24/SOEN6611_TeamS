@@ -1,6 +1,6 @@
 Repository SOEN6611_TeamS contains Projects folder inside it. This folder contains all the Projects inside it.
 
-This folder contains three projects: commons-collections, commons-configuration, commons-io and one configuration file.
+This folder contains three projects: commons-collections, commons-configuration, commons-io , one configuration file, spearman_output and a script called get-pip.py
 
 The configuration file contains the plugins used for configuring jacoco and pitest, instructions to run cloc tool, how to calculate spearman coefficient in IntelliJ IDE.
 
