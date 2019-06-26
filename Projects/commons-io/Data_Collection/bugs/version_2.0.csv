@@ -1,0 +1,140 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Outward issue link (Reference),Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment
+BOMInputStream.read(byte[]) can return 0 which it should not,IO-257,12493826,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Critical,Fixed,niallp,teme,teme,12/22/2010 3:13,11/10/2011 18:09,6/19/2019 21:05,12/22/2010 23:06,2,,,,,,,,,2.0.1,Streams/Writers,,0,"BOMInputStream.read(byte[]) returns 0 when it should return -1.
+
+This is not a valid action (unless buf.length == 0) and can cause problems, e.g. ""java.io.IOException: Underlying input stream returned zero bytes - at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:268)""
+
+From java.io.InputStream.read(byte[]) JavaDocs: ""If the length of b is zero, then no bytes are read and 0 is returned; otherwise, there is an attempt to read at least one byte. If no byte is available because the stream is at the end of the file, the value -1 is returned; otherwise, at least one byte is read and stored into b.""
+
+Suggested fix, change line 287 of BOMInputStream.java from
+        return (secondCount < 0) ? firstCount : firstCount + secondCount;
+into
+        return (secondCount < 0) ? (firstCount > 0 ? firstCount : -1) : firstCount + secondCount;
+",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,06:21.2,,,FALSE,,,,,,,,,,,,,,40288,,,Sat Jan 01 16:31:05 UTC 2011,,,,,,0|i0b0yn:,62268,,,,,,,,,"22/Dec/10 23:06;niallp;Thanks for the fix - I have applied the change:
+
+http://svn.apache.org/viewvc?view=revision&revision=1052095",01/Jan/11 16:31;niallp;Commons IO 2.0.1 has been released which resolves this,,,
+"listFiles(File directory, IOFileFilter fileFilter, IOFileFilter dirFilter) does not recurse into subdirectories",IO-602,13216082,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,steve@sjlt.co.uk,steve@sjlt.co.uk,2/15/2019 21:49,2/15/2019 22:50,6/19/2019 21:01,2/15/2019 22:50,2,2.0.1,2.1,2.2,2.3,2.4,2.5,2.6,,,Utilities,,0,"Calling FileUtils.listFiles (someDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE) will only return top level files.
+
+This contradicts the documentation that says the list should walk the file tree.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Feb 15 22:50:15 UTC 2019,,,,,,0|yi11hc:,9.22337E+18,,,,,,,,,15/Feb/19 22:50;steve@sjlt.co.uk;Brain fade - bad test case.,,,,
+FileSystemUtils.freeSpaceKb fails to return correct size for a windows mount point,IO-209,12431235,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,niallp,adityakishore,adityakishore,7/23/2009 10:36,11/10/2011 18:09,6/19/2019 21:05,9/29/2010 19:33,1.4,2,3.x,,,,,,,2,Utilities,,0,"FileSystemUtils.freeSpaceKb fails to return correct result for a NTFS mount point or junction.
+
+Suppose I have a NTFS partition mounted at C:\Data\partition1.
+
+Now assume that the free space on Partition mounted as C: is 1GB and that mounted on ""C:\Data\partition1"" is 2GB. A call to FileSystemUtils.freeSpaceKb(""C:\Data\partition1"") will return the free space on C: and not on ""C:\Data\partition1"".
+
+This is because while running the ""dir /-c"" with the given path, the code just retains first 2 chars i.e. for any path under ""C:\blah\de\blah"", ""dir /-c"" will be called with ""C:"" which will return incorrect result.","Windows XP, Vista, etc",86400,86400,,0%,86400,86400,,,,04/Aug/10 22:33;niallp;IO-209.patch;https://issues.apache.org/jira/secure/attachment/12451276/IO-209.patch,1,,,,,,,,,,,,,,,,,,,33:40.5,,,FALSE,,,,,,,,,,,,,,40295,,,Wed Sep 29 19:33:44 UTC 2010,,,,,,0|i0b127:,62284,,,,,,,,,"04/Aug/10 22:33;niallp;I wondering why that line was put in the first place with the comment ""seems to make it work""
+
+It was added here, but no indication why:
+
+https://svn.apache.org/viewvc?diff_format=h&view=revision&revision=240439","29/Sep/10 19:33;niallp;Looks to me like this was done because windows file names that contain things such as spaces cause the command to fail. Also I guess since whatever directory is passed windows gives the same free space result.
+
+Anyway I've removed that code that just takes the first two characters of the path and added quotes around the file name. This resolves the problems with file names and works on Windows 7 for me.
+
+http://svn.apache.org/viewvc?view=revision&revision=1002819",,,
+CompositeFileComparator(Comparator<File>... delegates) - Using varargs for non-reifiable type goes against type-safety,IO-241,12458405,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Won't Fix,,sebb,sebb,3/7/2010 22:24,11/10/2011 18:09,6/19/2019 21:05,9/28/2010 12:40,2,,,,,,,,,,,,0,"The constructor CompositeFileComparator(Comparator<File>... delegates)  cannot be used without generating a Type safety warning.
+
+This is because the type is not reifiable.
+
+This is a new class, so I suggest this constructor is replaced with something that supports type-safety, for example List.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,16:30.7,,,FALSE,,,,,,,,,,,,,,139654,,,Tue Sep 28 12:40:36 UTC 2010,,,,,,0|i0sluv:,165018,,,,,,,,,04/Aug/10 23:16;niallp;The class already has a constructor which takes an Iterable - so that already covers Lists and more. The varargs constructor is convenient and just because it generates a warning in an IDE isn't IMO a good enough reason to remove it.,28/Sep/10 12:40;niallp;Resolving this as WONTFIX,,,
+FileCleaningTracker Vector performs badly under load,IO-220,12438957,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,niallp,mhaverkamp,mhaverkamp,10/23/2009 20:32,11/10/2011 18:09,6/19/2019 21:05,8/4/2010 0:37,1,1.1,1.2,1.3,1.3.1,1.3.2,1.4,2,3.x,2,,,0,"When subjected to heavy load, the performance of org.apache.commons.io.FileCleaningTracker degrades and becomes a bottleneck to the system.  In our case, we had over 2 millions entries on the ""trackers"" Vector.  Under these conditions, the call to trackers.remove(tracker) on line 214 becomes very inefficient as it causes the Vector to shift and reindex the remaining data.  In addition, calls to trackers.add are forced to wait on the inefficient remove operation.  With the application idle, it took several hours for the File Reaper thread to finish processing the entries on the trackers Vector.
+
+The solution for use was to implement trackers as a HashSet instead of a Vector.  Thus line 52 was changed from:
+    final Collection /* Tracker */ trackers = new Vector();  // synchronized
+to
+    final Collection /* Tracker */ trackers = Collections.synchronizedSet(new HashSet());  // synchronized
+Imports were also change appropriately.",Using commons-io-1.4 via commons-fileupload-1.1.1 in Apache Tomcat/5.5.0 on Java 1.6.,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,37:05.6,,,FALSE,,,,,,,,,,,,,,139641,,,Wed Aug 04 00:37:05 UTC 2010,,,,,,0|i0b10n:,62277,,,,,,,,,"04/Aug/10 00:37;niallp;Fixed thanks
+
+http://svn.apache.org/viewvc?view=revision&revision=982093",,,,
+XmlStreamReader consumes the stream during encoding detection,IO-258,12493941,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,niallp,niallp,niallp,12/23/2010 2:57,11/10/2011 18:09,6/19/2019 21:05,12/23/2010 3:18,2,,,,,,,,,2.0.1,Streams/Writers,,0,"XmlStreamReader reads the underlying InputStream to try and detect the encoding. However once that process is done the bytes read from the stream should still be available to be read - this was accidentally broken in r1004882 by creating the underlying reader with the original InputStream, rather than the wrapped streams used to detect encoding.",,,,,,,,,,IO-162,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,40309,,,Thu Dec 23 03:18:42 UTC 2010,,,,,,0|i0b0yf:,62267,,,,,,,,,"23/Dec/10 03:18;niallp;Fixed:
+http://svn.apache.org/viewvc?view=revision&revision=1052161",,,,
+Test Failures using IBM JDK,IO-253,12477586,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,,niallp,niallp,10/17/2010 22:42,4/23/2017 17:53,6/19/2019 21:05,4/23/2017 17:53,2,,,,,,,,,2.5,,,0,"Jörg Schaible reports the following test failures in RC5 of Commons IO 2.0
+
+    * http://markmail.org/message/eoo5bk6n3pfsvfwk
+
+""IBM JDK 1.5 does not like the OOME handling in the FileCleanerTestCase and FileCleanerTrackingTestCase, while IBM JDK 1.6 has problems with the WriterOutputStream handling UTF16.""",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,28:56.8,,,FALSE,,,,,,,,,,,,,,3166,,,Sun Apr 23 17:53:14 UTC 2017,,,,,,0|i0slt3:,165010,,,,,,,,,"17/Oct/10 22:58;niallp;I managed to download IBM's 1.6 JDK version (eclipse bundle, which is the only windows one available for me) from the following location:
+
+    * https://www.ibm.com/developerworks/java/jdk/
+
+I can reproduce the problem with the UTF16 test in WriterOutputStream handling. From debugging, the last call to CharsetDecoder's  decode(decoderIn, decoderOut, endOfInput) method where the *endOfInput* parameter is *true* (called by the close() method) causes the CharBuffer's position to be reset to zero. As a result the flushOutput() method does nothing.
+
+Why this happens only for UTF-16 I don't know. The source code for the IBM JDK is not available and so it is not possible to determine what exactly its doing. WriterOutputStream is correctly implementing the contract with CharsetDecoder by calling the decode() method a final time, indicating endOfInput and so my conclusion is this is a bug in the IBM JDK.
+
+I don't have access to IBM's JDK 1.5 and so theres nothing I can do to look at the failing FileCleaningTracker tests. These tests though fill up memory to try and get the garbage collector to reclaim some PhantomReferences. Once the garbage collector does that, then the tests check the functionality of FileCleaningTracker. The test failing with an OutOfMemory error means that the test is not operating properly and never getting to the point of actually testing FileCleaningTracker. Therefore it doesn't tell us anything about whether FileCleaningTracker works or not on IBM's JDK 1.5.
+","17/Oct/10 23:24;niallp;I have added WriterOutputStream tests for UTF-16BE and UTF-16LE - which pass using IBM JDK 1.6. I also added a ""buffered"" test for UTF-16 which fails on IBM JDK 1.6.
+
+For the record, the following is the output from the tests on IBM JDK:
+
+{code}
+Testsuite: org.apache.commons.io.output.WriterOutputStreamTest
+Tests run: 12, Failures: 2, Errors: 0, Time elapsed: 0.085 sec
+
+Testcase: testUTF8WithSingleByteWrite took 0.005 sec
+Testcase: testLargeUTF8WithSingleByteWrite took 0.043 sec
+Testcase: testUTF8WithBufferedWrite took 0 sec
+Testcase: testLargeUTF8WithBufferedWrite took 0.002 sec
+Testcase: testUTF16WithSingleByteWrite took 0.005 sec
+	FAILED
+null expected:<[à peine arrivés nous entrâmes dans sa chambre]> but was:<[]>
+junit.framework.ComparisonFailure: null expected:<[à peine arrivés nous entrâmes dans sa chambre]> but was:<[]>
+	at org.apache.commons.io.output.WriterOutputStreamTest.testWithSingleByteWrite(WriterOutputStreamTest.java:47)
+	at org.apache.commons.io.output.WriterOutputStreamTest.testUTF16WithSingleByteWrite(WriterOutputStreamTest.java:81)
+
+Testcase: testUTF16WithBufferedWrite took 0 sec
+	FAILED
+null expected:<[à peine arrivés nous entrâmes dans sa chambre]> but was:<[]>
+junit.framework.ComparisonFailure: null expected:<[à peine arrivés nous entrâmes dans sa chambre]> but was:<[]>
+	at org.apache.commons.io.output.WriterOutputStreamTest.testWithBufferedWrite(WriterOutputStreamTest.java:61)
+	at org.apache.commons.io.output.WriterOutputStreamTest.testUTF16WithBufferedWrite(WriterOutputStreamTest.java:85)
+
+Testcase: testUTF16BEWithSingleByteWrite took 0.001 sec
+Testcase: testUTF16BEWithBufferedWrite took 0 sec
+Testcase: testUTF16LEWithSingleByteWrite took 0.001 sec
+Testcase: testUTF16LEWithBufferedWrite took 0.001 sec
+Testcase: testFlush took 0.001 sec
+Testcase: testWriteImmediately took 0.001 sec
+{code}",07/Nov/10 00:32;niallp;I tried Harmony 6.0M3 but the WriterOutputStream tests all pass,"29/Sep/11 06:28;joehni;Just for the record. The current IBM JDK 6 (1.6.0.9 Linux/x64) has improved, but still fails for UTF-16 only. UTF-16LE and UTF16-BE is handled properly. It might be that UTF-16 defaults here to UTF-16LE although Javadoc specifies UTF-16BE in this case (see Javadoc java.nio.Charset).
+
+{noformat}
+testUTF16WithSingleByteWrite(org.apache.commons.io.output.WriterOutputStreamTest):
+expected:<[à peine arrivés nous entrâmes dans sa chambre]> but was:<[＀瀀攀椀渀 攀 愀爀爀椀瘀猀 渀漀甀猀 攀渀琀爀洀攀猀 搀愀渀猀 猀愀 挀栀愀洀戀爀]>
+{noformat}",23/Apr/17 17:53;pascalschumacher;Should have been fixed by https://github.com/apache/commons-io/commit/e23402c1dc133842c1acef0a2d7cd1f386647de7
+FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash,IO-475,12819096,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,shoof,shoof,4/7/2015 22:06,4/7/2015 23:04,6/19/2019 21:05,,1.4,2,2.0.1,2.1,2.2,2.3,2.4,,,,,,0,"FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash.
+
+The observed behavior is that normalizeNoEndSeparator returns a non-null value for the following unc-path-prefix:
+\\{serverName-or-IP}\
+
+{backSlash}{backSlash}{serverName-or-IP}{backSlash} 
+but returns null for the following unc-path-prefix:
+\\{serverName-or-IP}
+
+{backSlash}{backSlash}{serverName-or-IP}
+
+The markdown seems to eat my backslashes prepended to the serverName-or-IP.
+
+There is nothing in the Microsoft API documentation which would suggest that the second unc-path-prefix would be invalid.
+
+Therefore the expectation is that they should be treated as equivalent by FilenameUtils#normalizeNoEndSeparator.
+
+The handling of unc-path-prefix is inconsistent with how FilenameUtils#normalizeNoEndSeparator handles drive relative and drive absolute path prefixes, where each notation is accepted and returns a non-null --> ( C: and C:\ ).",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,Important,Patch,,,,,,,,9.22337E+18,,,06:00.0,,,,,,0|i2cxq7:,9.22337E+18,,,,,,,,,,,,,
+"When using the 2.0 Commons IO, there is no sort method for LastModifiedFileComparator",IO-283,12521092,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Invalid,,uflynn,uflynn,9/1/2011 18:31,1/29/2015 8:01,6/19/2019 21:05,9/5/2011 21:41,2,,,,,,,,,,,,0,"Although the javadocs and source code from version 2.0 of Apache Commons makes mentions of a sort method, the actual jar does not have the sort method that is available. It seems that the LastModifiedFileComparator in the jar is not extending AbstractFileComparator like it is in the source code.",Sparc Solaris 2.10,,,,,,,,,IO-467,,0,,,,,,,,,,,,,,,,,,,41:22.6,,,FALSE,,,,,,,,,,,,,,62648,,,Thu Jan 29 07:58:12 UTC 2015,,,,,,0|i0slqv:,165000,,,,,,,,,05/Sep/11 21:41;niallp;I have checked Commons IO 2.0 and the sort() method is available. Note that prior to Commons 2.0 LastModifiedFileComparator did not extend AbstractFileComparator and no sort method was available. My guess is that you probably have an older version of Commons Io in your classpath,"29/Jan/15 07:58;lutzreder;The AbstractFileComparator class in Commons IO 2.4 is not declared 'public', so the sort method is not visible outside its package .",,,
+ProxyInputStream: misleading parameter names,IO-206,12425736,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,niallp,jeremias@apache.org,jeremias@apache.org,5/18/2009 16:46,7/21/2010 17:00,6/19/2019 21:05,5/18/2009 19:40,2,,,,,,,,,2,Streams/Writers,,0,"ProxyInputStream has a the following method signatures:
+- public int read(byte[] bts, int st, int end)
+- public void mark(int idx)
+
+But they should be:
+- public int read(byte[] bts, int off, int length)
+- public void mark(int readlimit)
+
+Especially the ""end"" parameter could be misinterpreted.
+",,,,,,,,,,,18/May/09 16:51;jeremias@apache.org;IO-206-ProxyInputStream-Param-Fix.diff;https://issues.apache.org/jira/secure/attachment/12408393/IO-206-ProxyInputStream-Param-Fix.diff,1,,,,,,,,,,,,,,,,,,,40:35.8,,,FALSE,,,,,,,,,,,,,,139631,,,Mon May 18 19:40:35 UTC 2009,,,,,,0|i0b12n:,62286,,,,,,,,,"18/May/09 16:51;jeremias@apache.org;For some reason, I can't currently commit to IO trunk. Attaching the patch.","18/May/09 19:40;niallp;Fixed, thanks for the patch
+
+http://svn.apache.org/viewvc?view=rev&revision=776062
+",,,
+FileUtils.moveFile() JavaDoc should specify FileExistsException thrown,IO-264,12501013,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Fixed,niallp,maciejb,maciejb,3/10/2011 13:09,10/10/2011 15:47,6/19/2019 21:05,3/12/2011 0:48,2,,,,,,,,,2.1,Utilities,,0,FileUtils.moveFile() JavaDoc does specify the behaviour of the method in a case when the destFile exists. It would be helpful to know from the JavaDoc that in such case an exception is thrown as it's not immediately obvious.,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,48:48.8,,,FALSE,,,,,,,,,,,,,,56790,,,Mon Oct 10 15:47:56 UTC 2011,,,,,,0|i0b0w7:,62257,,,,,,,,,"12/Mar/11 00:48;niallp;Thanks, I updated the javadocs for the following methods:
+
+    * moveFile()
+    * moveFileToDirectory()
+    * moveDirectory()
+    * moveToDirectory()
+    * moveDirectoryToDirectory()
+
+http://svn.apache.org/viewvc?view=revision&revision=1080825",12/Mar/11 01:01;maciejb;Thanks!,"10/Oct/11 15:47;ggregory;Closing, we released version 2.1.",,

@@ -1,0 +1,269 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Description,Environment,Log Work,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Outward issue link (Incorporates),Attachment,Attachment,Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+PropertiesConfiguration should not trim whitespace from the property value,CONFIGURATION-715,13186084,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,Frettman,Frettman,9/19/2018 15:37,6/16/2019 10:12,6/19/2019 18:55,10/5/2018 20:06,2.3,,2.4,,,1,"Currently, PropertiesConfiguration will trim all trailing whitespace from property values. This is different from how java.util.Properties behaves. The Javadoc explicitly states
+{code:java}
+All remaining characters on the line become part of the associated element string{code}
+The responsible code is in the method _readProperty()_ of _PropertiesReader_.",,"sebbASF commented on pull request #14: [CONFIGURATION-715/716]: Updated the User's guide to include JupIOFac…
+URL: https://github.com/apache/commons-configuration/pull/14
+ 
+ 
+   
+ 
+----------------------------------------------------------------
+This is an automated message from the Apache Git Service.
+To respond to the message, please log on to GitHub and use the
+URL above to go to the specific comment.
+ 
+For queries about this service, please contact Infrastructure at:
+users@infra.apache.org
+;16/Jun/19 10:12;githubbot;600",,0,600,,,0,600,,CONFIGURATION-716,,,,0,,,,,,,,,,,,,,,,,,,01:56.2,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Fri Oct 05 20:06:05 UTC 2018,,,,,,0|i3y9dj:,9.22337E+18,,,,,,,,,"20/Sep/18 20:01;oheger;It is not necessarily the goal of _PropertiesConfiguration_ to behave exactly like java.util.Properties.
+
+The line trimming has been done from the very first release on. So changing this has a high potential to break client code; it would only be possible to have an option to turn this on if required.
+
+Can you work around the issue by implementing your own _PropertiesReader_? (The reader can be customized.) But there is an additional (and probably superflous) _trim()_ call in _readProperty()_ which would have to be removed.","20/Sep/18 21:15;Frettman;I don't mind useful extensions to the format, but I do think it would be beneficial (for me at least ;)) to stick to the ""specification"" as much as possible to ensure interoperability with java.util.Properties and other tools to manipulate properties files. At least as long as there's no compelling reason to deviate from that.
+
+Backwards compatibility is important, so maybe something like an alternative IOFactory could work. That could also cover my other issues from CONFIGURATION-715 without breaking existing client code.
+
+My current minimally invasive workaround for this specific issue is to override the method _readLine()_ of the _PropertiesReader_ and replace a trailing whitespace with its escape sequence. That won't get trimmed away and will be replaced with its original character later on. This solution is good enough for my needs.
+
+If you decide that compatibility with java.util.Properties is nothing you want to go for, you might at least consider escaping the first leading and last trailing space when saving. One can manually use \u0020 to avoid the trimming, but loading and saving will replace that with a regular space which will be gone the next time the file is loaded.",22/Sep/18 13:49;oheger;An alternative IOFactory that tries to mimic the behavior of java.util.Properties would really be a good enhancement. Are you willing to work on this? We are happy to review and accept patches.,"24/Sep/18 08:22;Frettman;I'm not saying I'll do it...but I already started.
+
+Is there by any chance a Java formatter profile for Eclipse, so I don't have to extrapolate code conventions from existing code?","24/Sep/18 16:00;oheger;This is great!
+
+Regarding Eclipse formatter: There is none that I am aware of. Unfortunately, (probably for historical reasons) Commons Components do not use a uniform code format. But if you build the site with _mvn site,_ the Checkstyle report can tell you if some style guides have been violated.","30/Sep/18 12:39;Frettman;I just created a [pull request|https://github.com/apache/commons-configuration/pull/13] that also covers CONFIGURATION-716, plus a bit more related to compatibility with java.util.Properties. Let me know what you think.",30/Sep/18 19:57;oheger;Many thanks! I will have a look (probably in a few days).,"02/Oct/18 19:55;oheger;Impressive patch! I have applied it (with minor changes, just added some @since tags) in revision 1842650.
+
+Ideally, we could add a sentence to the user's guide mentioning the new IOFactory class as an alternative when stricter compatibility to java.util.Properties is required. Do you want to create a corresponding patch, too?
+
+Also, if you want to be added to the contributors section in pom.xml, just send us the data you want to get in.
+
+Many thanks again!",04/Oct/18 20:24;Frettman;I created a [pull request|https://github.com/apache/commons-configuration/pull/14] for the user's guide and an incomplete Javadoc on JupIOFactory that I missed. For the contributors section just take the name and email address from my commit.,"05/Oct/18 20:06;oheger;Patch was applied, and you have been added to the contributors section.
+
+Many thanks again!"
+Fix CI build break after upgraded from Java 7 to 8,CONFIGURATION-732,13198627,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,HCOONa,HCOONa,11/15/2018 13:22,11/15/2018 15:08,6/19/2019 19:05,11/15/2018 15:08,2.3,2.4,2.5,Build,,0,"The Travis CI build broken after upgrading from Java 7 to 8.
+
+ 
+{panel:title=Maven Error Message}
+
+
+The command ""eval mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V "" failed. Retrying, 2 of 3.
+ 
+Picked up _JAVA_OPTIONS: -Xmx2048m -Xms512m
+Apache Maven 3.5.2 (138edd61fd100ec658bfa2d307c43b76940a5d7d; 2017-10-18T07:58:13Z)
+Maven home: /usr/local/maven-3.5.2
+Java version: 1.7.0_151, vendor: Oracle Corporation
+Java home: /usr/lib/jvm/java-7-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: ""linux"", version: ""4.14.12-041412-generic"", arch: ""amd64"", family: ""unix""
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Apache Commons Configuration 2.5-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:3.0.0-M2:enforce (enforce-maven-version) @ commons-configuration2 ---
+[WARNING] Rule 1: org.apache.maven.plugins.enforcer.RequireJavaVersion failed with message:
+Detected JDK Version: 1.7.0-151 is not in the allowed range 1.8.{panel}",,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,08:48.5,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Thu Nov 15 15:08:48 UTC 2018,,,,,,0|s00j74:,9.22337E+18,,,,,,,,,15/Nov/18 15:08;ggregory;Fixed in SVN trunk.,,,,,,,,,
+PropertiesConfiguration: Escape sequence handling different from Properties,CONFIGURATION-716,13186301,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,Frettman,Frettman,9/20/2018 10:38,10/5/2018 20:06,6/19/2019 18:55,10/5/2018 20:06,2.3,,2.4,,,0,"The escape sequence handling in PropertiesConfiguration is different from java.util.Properties.
+
+The Javadoc (of java.util.Properties) basically states that if an escape sequence (backslash + character) is not understood, the backslash is simply removed. PropertiesConfiguration keeps the backslash. E.g. ""\ "" (backslash + space) should result in just a space. This sequence is used by Properties to escape the first leading space in a property value when writing to a properties-file. PropertiesConfiguration does not understand this syntax. Also (which is technically a different issue but pretty close to this one) does not preserve leading spaces in property values when saving. One could use \u0020 to encode the first leading space, but it would be nicer if it could just use the simpler ""\ "".",,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,56:25.0,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Fri Oct 05 20:06:50 UTC 2018,,,,,,0|i3yapb:,9.22337E+18,,,,,,,,,02/Oct/18 19:56;oheger;The patch for CONFIGURATION-715 covers this issue as well.,05/Oct/18 20:06;oheger;Fixed together with CONFIGURATION-715.,,,,,,,,
+7A,CONFIGURATION-719,13187265,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,Riza,Riza,9/25/2018 11:27,9/25/2018 11:34,6/19/2019 18:55,9/25/2018 11:34,2.3,,2.3,,,0,"Menghapus spam work, issue. terima kasih",Menghapus gangguan issue,,,,,,,,,,HADOOP-12938,,,,0,,,,,,,,,,,,,,,,,,,,,Issue spam work,FALSE,,,,,,,,,,,,9.22337E+18,,,27:16.0,,,,,,0|i3ygmn:,9.22337E+18,,,,,,,,,,,,,,,,,,
+PropertiesConfiguration builder.getConfiguration fails,CONFIGURATION-714,13185849,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Not A Bug,,jpsacha,jpsacha,9/18/2018 16:37,9/19/2018 12:38,6/19/2019 18:55,9/19/2018 12:38,2.3,,,,,0,"Call to FileBasedConfigurationBuilder.getConfiguration fails with an exception:
+
+{noformat}
+Could not locate: org.apache.commons.configuration2.io.FileLocator@57fd91c9[fileName=usergui.properties,basePath=<null>,sourceURL=,encoding=ISO-8859-1,fileSystem=<null>,locationStrategy=<null>]
+org.apache.commons.configuration2.ex.ConfigurationException: Could not locate: org.apache.commons.configuration2.io.FileLocator@57fd91c9[fileName=usergui.properties,basePath=<null>,sourceURL=,encoding=ISO-8859-1,fileSystem=<null>,locationStrategy=<null>]
+	at org.apache.commons.configuration2.io.FileLocatorUtils.locateOrThrow(FileLocatorUtils.java:346)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:972)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:702)
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initFileHandler(FileBasedConfigurationBuilder.java:312)
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initResultInstance(FileBasedConfigurationBuilder.java:291)
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initResultInstance(FileBasedConfigurationBuilder.java:60)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResult(BasicConfigurationBuilder.java:421)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.getConfiguration(BasicConfigurationBuilder.java:285)
+{noformat}
+
+
+This can be reproduced with the example code from the User Guide [https://commons.apache.org/proper/commons-configuration/userguide/howto_properties.html#Using_PropertiesConfiguration]
+
+ {code:java}
+Parameters params = new Parameters();
+
+FileBasedConfigurationBuilder<FileBasedConfiguration> builder = 
+  new FileBasedConfigurationBuilder<FileBasedConfiguration(
+    PropertiesConfiguration.class)
+      .configure(params.properties()
+        .setFileName(""usergui.properties"")
+        .setListDelimiterHandler(new DefaultListDelimiterHandler(',')));
+
+Configuration config = builder.getConfiguration();
+
+config.setProperty(""colors.background"", ""#000000"");
+
+builder.save();
+{code}",Tested on Windows 10 with Java 10.,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,10:34.2,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Wed Sep 19 12:38:03 UTC 2018,,,,,,0|i3y7xj:,9.22337E+18,,,,,,,,,"18/Sep/18 20:10;oheger;According to the exception the file cannot be located. Does it exist in one of the folders that are searched for by default?
+
+Please note that Jira is not a support forum. If you have questions about using the library, write a mail to the user mailing list: [http://commons.apache.org/proper/commons-configuration/mailing-lists.html]","19/Sep/18 12:38;jpsacha;You are correct that file did not exist. 
+
+I needed to save a configuration created by my code (porting from Configuration v.1*). I was confused by the title of the section in the User Guide: [""Saving""|https://commons.apache.org/proper/commons-configuration/userguide/howto_properties.html#Saving]. I did not fully understand what is going on in the example. The example rather than just saving a configuration, it first loads a configuration, then saves. Since my file did not exist yet I got that exception.
+
+You can close this issue.
+
+Just for the record. Here is that code that worked for me when saving a new configuration as properties:
+
+{code:java}
+// Create your configuration somewhere in the code
+BaseConfiguration conf = ...
+
+// Copy source configuration to PropertiesConfiguration
+PropertiesConfiguration properties = new PropertiesConfiguration()
+ConfigurationUtils.copy(conf, properties)
+
+// Save PropertiesConfiguration
+FileHandler handler = new FileHandler(properties)
+handler.save(file)
+{code}",,,,,,,,
+FileHandlerReloadingDetector Does Not Correctly Initialize File Last Modified,CONFIGURATION-712,13180555,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,rllndhbb,rllndhbb,8/22/2018 20:56,9/16/2018 20:24,6/19/2019 18:57,9/16/2018 20:24,2.3,,2.4,File reloading,,0,"[FileHandlerReloadingDetector|https://commons.apache.org/proper/commons-configuration/apidocs/src-html/org/apache/commons/configuration2/reloading/FileHandlerReloadingDetector.html] declares the following method:
+
+ 
+{code:java}
+150    @Override
+151    public boolean isReloadingRequired()
+152    {
+153        long now = System.currentTimeMillis();
+154        if (now >= lastChecked + getRefreshDelay())
+155        {
+156            lastChecked = now;
+157
+158            long modified = getLastModificationDate();
+159            if (modified > 0)
+160            {
+161                if (lastModified == 0)
+162                {
+163                    // initialization
+164                    updateLastModified(modified);
+165                }
+166                else
+167                {
+168                    if (modified != lastModified)
+169                    {
+170                        return true;
+171                    }
+172                }
+173            }
+174        }
+175
+176        return false;
+177    }
+{code}
+ 
+
+During initialization of FileHandlerReloadingDetector, lastModified is never instantiated, so the first time isReloadingRequired() is invoked lastModified will be 0.
+
+ 
+
+This results in two issues:
+
+ 
+
+Test #1
+ * Scenario Steps 
+ ## Initialize ReloadingFileBasedConfigurationBuilder without invoking builder.getConfiguration()
+ ## Wait longer than refreshDelay
+ ## Invoke builder.getReloadingController().checkForReloading(null) to notify the FileHandlerReloadingDetector to check for reload
+ ## Invoke bulider.getConfiguration()
+ ## Update the properties file
+ ## Wait longer than refreshDelay
+ ## Invoke builder.getReloadingController().checkForReloading(null) to notify the FileHandlerReloadingDetector to check for reload
+ ## Invoke bulider.getConfiguration()
+ * Result - the Configuration does not have the updated value.
+
+ 
+
+Test #2
+ * Scenario Steps 
+ ## Initialize ReloadingFileBasedConfigurationBuilder without invoking builder.getConfiguration()
+ ## Invoke bulider.getConfiguration()
+ ## Update the properties file
+ ## Wait longer than refreshDelay
+ ## Invoke builder.getReloadingController().checkForReloading(null) to notify the FileHandlerReloadingDetector to check for reload
+ ## Invoke bulider.getConfiguration()
+ ## Update the properties file
+ ## Wait longer than refreshDelay
+ ## Invoke builder.getReloadingController().checkForReloading(null) to notify the FileHandlerReloadingDetector to check for reload
+ ## Invoke bulider.getConfiguration()
+ * Result - For the first two invocations, the Configuration is not updated. One the third invocation of builder.getConfiguration() the property is updated to the new value.
+
+ 
+
+As potential solution, the constructor of FileHandlerReloadingDetector should either call isReloadingRequired() or updateLastModified(getLastModificationDate()) to initialize the lastModified instance variable to the file current lastModified value.",,,86400,86400,,0%,86400,86400,,,,16/Sep/18 05:37;rllndhbb;CONFIGURATION-712-InitializeLastModified.patch;https://issues.apache.org/jira/secure/attachment/12939864/CONFIGURATION-712-InitializeLastModified.patch,30/Aug/18 16:17;rllndhbb;ReloadingFileBasedConfigurationBuilderExampleTest.java;https://issues.apache.org/jira/secure/attachment/12937781/ReloadingFileBasedConfigurationBuilderExampleTest.java,22/Aug/18 20:44;rllndhbb;ReloadingFileBasedConfigurationBuilderTest.java;https://issues.apache.org/jira/secure/attachment/12936702/ReloadingFileBasedConfigurationBuilderTest.java,3,,,,,,,,,,,,,,,,,,,10:09.1,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Sun Sep 16 20:24:11 UTC 2018,,,,,,0|i3xbkv:,9.22337E+18,,,,,,,,,"25/Aug/18 19:10;oheger;Thanks for this report.
+
+I am not sure whether this is a bug, however, as the behavior is documented in the class comment:
+
+????
+
+{color:#808080}* To initialize an instance either {{color}{color:#808080}@code {color}{color:#808080}isReloadingRequired()} or
+{color}{color:#808080}* {{color}{color:#808080}@code {color}{color:#808080}reloadingPerformed()} can be called. The first call of
+{color}{color:#808080}* {{color}{color:#808080}@code {color}{color:#808080}isReloadingRequired} does not perform a check, but obtains the initial
+{color}{color:#808080}* modification date of the monitored file. {{color}{color:#808080}@code {color}{color:#808080}reloadingPerformed()} always
+{color}{color:#808080}* obtains the file's modification date and stores it internally.
+{color}
+
+The correct initialization of the reloading detector is indeed tricky. The solutions you describe are a bit problematic because they would require the constructor to call non-final methods on this instance.
+
+The assumption was that the behavior as implemented will probably not be an issue in practice. Do you encounter a real problem in production or is this only a theoretical observation?","30/Aug/18 16:21;rllndhbb;I saw the comment in FileHandlerReloadingDetector, however the ReloadingFileBasedConfigurationBuilder initializes this class using DefaultReloadingDetectorFactory so wouldn't the responsibility be for the factory to fully initialize FileHandlerReloadingDetector?
+
+ 
+
+I also saw other places in the documentation state, ""If the underlying file has not been changed, this check has no effect. However, if the file has been changed by an external source, an updated last-modified date is detected, and the reloading detector signals a need for a reload"" ([https://commons.apache.org/proper/commons-configuration/userguide/howto_reloading.html)], with no mention of requiring further initialization of the ReloadingDetector.
+
+ 
+
+Given the example in the documentation, both test scenarios fail.
+ * Test #1 behaves the same as my example - incorrectly returns the initial configuration value (""1"" not ""2"")
+ * Test #2 behaves the same as my example - incorrectly returns the initial configuration value for both the first and second invocations, and returns the updated value for the third invocation (""3"" and the change of ""2"" is never seen)
+
+ 
+
+I am unable to take my implementation to production because these tests scenarios fail. Given Test #1, if I change the trigger period to be 24 hours, and update the properties after 24 hours, the application would not see the updated changes. And, given Test #2 the changes would only be seen if the properties were updated a second time, and then only after another cycle of the triggering period (in the case of 24 hours only after 48 hours), but the first change would never be seen by the application.
+
+ ","01/Sep/18 15:07;oheger;Letting {{DefaultReloadingDetectorFactory}} take care for the initialization of the reloading detector is a good idea. We can change this. Do you want to create a patch for this?
+
+Also, if you have concrete suggestions how to improve documentation, please let us know; this is highly appreciated.","10/Sep/18 13:59;rllndhbb;I have attached a patch for the change fix.
+
+I ended up creating a new refresh() method on FileHandlerReloadingDetector, which initializes the last modified field. I thought it was confusing for the factory to invoke reloadingPerformed() in order to initialize last modified. I considered other approaches for this fix, but decided on this approach as it was the most isolated change and the least impact.
+
+If other *ReloadingDetector implementations will need the ability of initializing state, maybe a new interface could be created to define refresh()?","14/Sep/18 18:37;oheger;Thanks for the patch!
+
+It looks good, and I also like the idea with the new refresh() method. The only thing I am not sure about is the change on the isReloadingRequired() method. Is this really necessary?
+
+If I understand correctly, the changed method now expects that refresh() has been called before. This would change the behavior for users that create an instance of FileHandlerReloadingDetector directly without the factory. If the method was not changed, it would now still work correctly with the updated factory, wouldn't it?","14/Sep/18 19:21;rllndhbb;That's a fair point, which I did not consider.
+
+I don't think it is necessary to include the change for the isReloadingRequired() method.
+
+I can recreate the patch and rerun the unit tests to verify.","15/Sep/18 15:45;oheger;Yes, this would be great. Many thanks in advance!","16/Sep/18 05:38;rllndhbb;I have attached the updated patch. I reverted the change in the isReloadingRequired() method of FileHandlerReloadingDetector. I also reverted the two test methods that were changed (leaving these methods unchanged to validate the original functionality), and added two new methods to test the new functionality with invoking the refresh method after instantiation.
+
+ 
+
+Since you asked about documentation, I think it would be worth adding a note to FileHandlerReloadingDetector along the lines of:
+{quote}There is a cycle between the instantiation of FileHandlerReloadingDetector and the first invocation of isReloadingRequired() where no file changes are detected. The first file change detected by default is after the first invocation of isReloadingRequired(), and because FileHandlerReloadingDetector is recreated when the configuration is reset, this ""unobserved cycle"" is repeated after every reload of a configuration. To eliminate this ""unobserved cycle"", the refresh() method can be invoked after instantiation to force the FileHandlerReloadingDetector to load the file's current last modified date, which is used in future calls of isReloadingRequired() to determine if the file has changed.
+{quote}","16/Sep/18 20:24;oheger;Patch applied in SVN revision 1841034. Many thanks again!
+
+If you want to be added to the contributor's section in pom.xml, please post the data you want to get in.",
+"inconsistency in ""Quick start guide""",CONFIGURATION-729,13194817,Bug,Open,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Trivial,Unresolved,,M0,M0,10/29/2018 11:56,6/16/2019 10:12,6/19/2019 18:57,,2.3,,,Documentation,,0,"The guide states 
+{quote}We assume that it is stored as {{database.properties}} in the local file system:
+{quote}
+but in the code example below the name _config.properties_ is used:
+{quote}Configuration config = configs.properties(new File(""config.properties""));
+{quote}",,"sebbASF commented on pull request #15: CONFIGURATION-729: fixes inconsistency in example
+URL: https://github.com/apache/commons-configuration/pull/15
+ 
+ 
+   
+ 
+----------------------------------------------------------------
+This is an automated message from the Apache Git Service.
+To respond to the message, please log on to GitHub and use the
+URL above to go to the specific comment.
+ 
+For queries about this service, please contact Infrastructure at:
+users@infra.apache.org
+;16/Jun/19 10:12;githubbot;600",,0,600,,,0,600,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,https://github.com/apache/commons-configuration/pull/15,,,,,,,,9.22337E+18,,,Mon Oct 29 12:25:13 UTC 2018,,,,,,0|i3zqzr:,9.22337E+18,,,,,,,,,29/Oct/18 12:25;M0;please find a proposed trivial fix at [https://github.com/apache/commons-configuration/pull/15|https://github.com/apache/commons-configuration/pull/15],,,,,,,,,

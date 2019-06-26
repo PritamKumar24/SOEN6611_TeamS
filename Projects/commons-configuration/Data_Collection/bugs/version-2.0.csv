@@ -1,0 +1,479 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Labels,Labels,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Outward issue link (Duplicate),Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+Interpolation with multi-valued properties does not work,CONFIGURATION-633,12973115,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,oheger,oheger,5/26/2016 16:14,8/21/2016 19:39,6/19/2019 18:59,5/26/2016 19:14,2,,,,,2.1,Interpolation,,0,,,"In the current implementation (making use of commons lang's {{StrSubstitutor}}, interpolation is alway string-based. This works well for primitive property values, but not if a property has multiple values. A variable referencing such a property is replaced by the string-representation of the list of values.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,48:52.6,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Tue Jun 28 23:51:33 UTC 2016,,,,,,0|i2yjrr:,9.22337E+18,,,,,,,,,"26/May/16 16:17;oheger;If a property value consists of multiple variables or a variable embedded into other content, there is probably no way around a string-based substitution. But if only a single variable is referenced, the interpolation should result in the real value of this variable and not force a string conversion.",26/May/16 19:14;oheger;Fixed in revision 1745634.,"28/Jun/16 15:48;philippe.perrault@gmail.com;Hi Oliver,
+Will you fix this issue in 1.x branch?
+thanks",28/Jun/16 15:53;ggregory;[~philippe.perrault@gmail.com]: Feel free to provide a patch to speed up the process (with unit tests). ;-),"28/Jun/16 17:05;oheger;Development currently focuses exclusively on 2.x. Unless somebody steps up who is interested in the 1.x line, it is unlikely that another release on this branch happens.","28/Jun/16 23:51;philippe.perrault@gmail.com;Cool!
+will do it then :)",,,,,,,,,,
+Composite configuration list variable interpolation return first element only,CONFIGURATION-632,12971922,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,philippe.perrault@gmail.com,philippe.perrault@gmail.com,5/23/2016 1:25,8/21/2016 19:39,6/19/2019 18:59,5/27/2016 18:46,1.9,2,,,,2.1,Interpolation,,0,,,"CompositeConfiguration.getStringArray, with variable interpolation returns only the first element of the list
+e.g.
+key1=a,b,c
+key2=${key1}
+
+CompositeConfiguration.getStringArray(key2) = a",linux,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,02:20.2,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Fri May 27 18:46:00 UTC 2016,,,,,,0|i2ycfb:,9.22337E+18,,,,,,,,,"24/May/16 20:02;oheger;Thank you for the report. In order to easier reproduce the problem, could you please post a short code fragment how the composite configuration is created and initialized? Thanks.","25/May/16 01:52;philippe.perrault@gmail.com;Hi Oliver,
+Here is an exampe code:
+{code}
+CompositeConfiguration compositeConfiguration = new CompositeConfiguration();
+compositeConfiguration.addConfiguration(new PropertiesConfiguration(""props.properties""));
+
+String[] values = compositeConfiguration.getStringArray(""key1"");
+System.out.println(values); // ""a, b, c,""
+values = compositeConfiguration.getStringArray(""key2"");
+System.out.println(values); // ""a""
+{code}
+
+with
+{code:title=props.properties}
+key1 = a,b,c
+key2 = ${key1}
+{code}
+
+I am expecting the get an array ""a, b, c"" for key2 but I get only ""a""
+thanks!
+",26/May/16 17:52;oheger;When testing I found a general problem with interpolation of properties with multiple values. I created CONFIGURATION-633 for this problem. This has to be fixed first.,"27/May/16 18:46;oheger;A fix has been applied to SVN. Together with the fix for CONFIGURATION-633 interpolation should now work for variables referencing properties with multiple values.
+
+However, the current implementation is still limited and does not handle all possible constellations. For instance, if elements in the referenced list or array contain variables themselves, those will not be replaced. Let's wait until anybody actually needs this functionality.",,,,,,,,,,,,
+BasePath is incorrectly computed while init of CompositeConfiguration,CONFIGURATION-634,12981426,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,bond_,bond_,6/21/2016 17:32,8/21/2016 19:39,6/19/2019 18:59,6/24/2016 15:52,2,,,,,2.1,,,0,,,"The base path should be just ""app"" instead of {noformat}file:///C:/path/to/app{noformat} because of which the code is trying to locate config.properties in the following path: {noformat}C:\path\to\file:\C:\path\to\app\config.properties{noformat}
+
+
+In the below snippet basepath is good when handler.locate() runs but fails when running handler.load()
+{code:java|title=org.apache.commons.configuration2.builder.FileLocatorUtils}
+protected void initFileHandler(FileHandler handler)
+            throws ConfigurationException
+    {
+        initEncoding(handler);
+        if (handler.isLocationDefined())
+        {
+            handler.locate();
+            handler.load();
+        }
+    }
+{code}
+
+If you would like to see the basepath being manipulated keep a debug point at file.isFile() in the below snippet
+{code:java|title=org.apache.commons.configuration2.io.HomeDirectoryLocationStrategy}
+public URL locate(FileSystem fileSystem, FileLocator locator)
+    {
+        if (StringUtils.isNotEmpty(locator.getFileName()))
+        {
+            String basePath = fetchBasePath(locator);
+            File file =
+                    FileLocatorUtils.constructFile(basePath,
+                            locator.getFileName());
+            if (file.isFile())
+            {
+                return FileLocatorUtils.convertFileToURL(file);
+            }
+        }
+
+        return null;
+    }
+{code}
+
+Snippet failing:
+{code:java}
+CompositeConfiguration config = new CompositeConfiguration();
+config.addConfiguration(new SystemConfiguration());
+
+final FileBasedConfigurationBuilder<FileBasedConfiguration> homeDirConfigurationBuilder
+        = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
+final PropertiesBuilderParameters homeDirProperties = new Parameters().properties();
+final FileBasedConfigurationBuilder<FileBasedConfiguration> configurationBuilder
+        = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class);
+final PropertiesBuilderParameters properties = new Parameters().properties();
+
+FileBasedConfigurationBuilder<FileBasedConfiguration> builder1 = homeDirConfigurationBuilder.configure(
+        homeDirProperties.setLocationStrategy(new HomeDirectoryLocationStrategy(true))
+                .setBasePath(""app"")
+                .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                .setFileName(""config.properties""));
+FileBasedConfigurationBuilder<FileBasedConfiguration> builder2 = configurationBuilder.configure(
+        properties.setLocationStrategy(new ClasspathLocationStrategy())
+                .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                .setFileName(""default_config.properties""));
+try {
+    // TODO Fails due to a bug in commons configuration FileLocatorUtils#createFullyInitializedLocatorFromURL
+    config.addConfiguration(builder1.getConfiguration());
+    config.addConfiguration(builder2.getConfiguration());
+} catch (ConfigurationException e) {
+    log.warn(configMarker, ""Failed to load the properties file, loading defaults"", e);
+}
+{code}
+
+Stacktrace:
+{noformat}
+org.apache.commons.configuration2.ex.ConfigurationException: Could not locate: org.apache.commons.configuration2.io.FileLocator@353d0772[fileName=config.properties,basePath=file:///C:/path/to/app/,sourceURL=file:/C:/path/to/app/config.properties,encoding=ISO-8859-1,fileSystem=<null>,locationStrategy=org.apache.commons.configuration2.io.HomeDirectoryLocationStrategy@10e41621]
+	at org.apache.commons.configuration2.io.FileLocatorUtils.locateOrThrow(FileLocatorUtils.java:346) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:972) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:702) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initFileHandler(FileBasedConfigurationBuilder.java:312) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initResultInstance(FileBasedConfigurationBuilder.java:291) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initResultInstance(FileBasedConfigurationBuilder.java:60) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResult(BasicConfigurationBuilder.java:421) ~[commons-configuration2-2.0.jar:2.0]
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.getConfiguration(BasicConfigurationBuilder.java:285) ~[commons-configuration2-2.0.jar:2.0]
+{noformat}","Windows Server 2008 R2
+Oracle JDK 1.8.0_92",,,,,,,,,,21/Jun/16 20:37;bond_;CONF634.zip;https://issues.apache.org/jira/secure/attachment/12812292/CONF634.zip,1,,,,,,,,,,,,,,,,,,,12:10.4,,,FALSE,,,,,Important,,,,,,,,9.22337E+18,,,Thu Jul 21 20:02:03 UTC 2016,,,,,,0|i2ztpb:,9.22337E+18,,,,,,,,,"21/Jun/16 20:12;oheger;Thanks for this report.
+
+So are you saying that the bug is in {{HomeDirectoryLocationStrategy}}? Any chance you can provide a unit test (maybe a stripped-down variant of the code fragment above)?","21/Jun/16 20:37;bond_;[~oliver.heger@t-online.de], I've attached a sample project reproducing the same [^CONF634.zip]
+
+# Prerequisite to run the code: Install gradle
+# Create a file called config.properties in your user home.
+** In windows it would be: {noformat}%HOMEPATH%\app\config.properties{noformat}
+** In linux it would be: {noformat}$HOME/app/config.properties{noformat}
+# Go into CONF634 folder and run {noformat}gradle run{noformat}","22/Jun/16 16:21;bond_;[~issues@commons.apache.org]/[~oliver.heger@t-online.de], Do you have anyone who can work on this?","22/Jun/16 18:04;ggregory;We are all volunteers here, so expect people to be busy with work and so on. 
+
+Feel free to provide a patch with unit tests though :-)","22/Jun/16 18:54;bond_;[~garydgregory], I'll try and see if I can find a solution. I was able to see how it is happening but unsure of why it was happening.","22/Jun/16 20:26;bond_;[~garydgregory], [~oliver.heger@t-online.de] Submitted a pull request for review: https://github.com/apache/commons-configuration/pull/3
+
+It would also be great if a point release or a hotfix release can happen with this fix.","23/Jun/16 13:00;bond_;[~garydgregory], [~oliver.heger@t-online.de], Good morning. Sorry if I'm pushing too much, has anyone had a chance to review this code :)? I need this fix for my production to work smoothly.","23/Jun/16 17:02;oheger;Thank you very much for the patch. I agree that the problem is caused by the fact that the base path is changed when the FileLocator gets resolved. Your patch solve this.
+
+I am just a bit worried whether this change impacts other clients because the behavior of the getBasePath() method is now slightly changed. Maybe it would be safer to add another property to FileLocator that stores the _unresolvedBasePath_, i.e. the path that was explicitly set by the user before the _locate()_ method has been called. The locator strategy could then query this property to get the original base path while other client code calling _getBasePath()_ still sees the resolved path.
+
+OTOH, I don't think that many clients will be affected by the change. The exact behavior of _getBasePath()_ was not documented to that detail.
+
+WDYT?","23/Jun/16 17:23;bond_;I don't think those changes are necessary, I feel it would be overkill to check for unresolvedBasePath. 
+
+I based my patch based on the javadocs found in FileLocator#fullyInitializedLocator. Ideally it should set only the ones which were not initialized.
+
+In general sense basepath should be set once and used any number of times. It should not be manipulated mid-way. I'm also good if you wish to call in for a vote to decide what's the best fix.
+
+Note: I ran the testcases which were triggered with {noformat}mvn clean test{noformat}. If this project has good test coverage I feel this patch is good to go.","24/Jun/16 15:52;oheger;Okay, patch applied with slight changes in revision r1750127.
+
+Thanks again. If you want to be listed in the _contributors_ section of the pom, just provide the data you want to have added (name, email, organization).","25/Jun/16 02:56;bond_;[~oliver.heger@t-online.de], Yes please.
+
+{code:xml}
+<contributor>
+  <name>Raviteja Lokineni</name>
+  <email>raviteja.lokineni@gmail.com</email>
+  <organization></organization>
+</contributor>
+{code}
+
+",25/Jun/16 15:45;oheger;Done.,"20/Jul/16 13:55;bond_;[~issues@commons.apache.org], Is 2.1 ready for release, any blockers?",21/Jul/16 08:54;neon.knight80;New release with that fix will be awesome,"21/Jul/16 19:19;oheger;I *hope* that I can prepare a release and call for the release vote next week, but I cannot promise.",21/Jul/16 20:02;ggregory;Sweet!
+"Writing INI file, keys with . become ..",CONFIGURATION-622,12958610,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,sbin,sbin,4/13/2016 20:59,4/16/2016 15:02,6/19/2019 18:59,4/16/2016 15:02,2,,,,,,Format,,0,,,"Here is sample input config:
+[learningtask]
+trains.lp = 5
+
+after new INIConfiguration(conf).write() it becomes:
+
+[learningtask]
+trains..lp = 5
+
+seems related to the escaping of keys in the ExpressionEngine",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,18:38.7,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Sat Apr 16 15:02:57 UTC 2016,,,,,,0|i2w307:,9.22337E+18,,,,,,,,,14/Apr/16 20:18;oheger;Thanks for the report. I will have a look.,"16/Apr/16 15:02;oheger;The problem was in INIConfiguration.write(). Here keys that might have been escaped were written to disk. The write() method has been rewritten to operate on configuration nodes directly. These nodes have the correct names.
+
+Fixed in SVN in revision 1739472.",,,,,,,,,,,,,,
+Version 2.0-beta1 not published to maven repository as documented,CONFIGURATION-606,12855372,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,norrisjeremy,norrisjeremy,8/11/2015 22:19,3/24/2016 20:23,6/19/2019 18:59,3/24/2016 20:23,2,,,,,2,Documentation,,0,,,"The webpage at
+
+https://commons.apache.org/proper/commons-configuration/dependency-info.html
+
+documents the following maven dependency snippet for version 2.0-beta1, but it does not work since this version has not actually been published to the maven repos:
+
+<dependency>
+  <groupId>org.apache.commons</groupId>
+  <artifactId>commons-configuration2</artifactId>
+  <version>2.0-beta1</version>
+</dependency>
+
+Please consider either correctly publish the jars as documented, or remove this documentation from the website, as it is misleading to users.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,42:20.6,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu Mar 24 20:23:41 UTC 2016,,,,,,0|i2islj:,9.22337E+18,,,,,,,,,"17/Aug/15 19:42;oheger;Okay, I understand that the current situation can be confusing.
+
+The release has deliberately not be published to Maven central because breaking changes cannot be excluded until the final release. Having multiple binary incompatible versions in central with the same group and artifact IDs is very problematic.
+
+OTOH, the _Dependency Information_ page you are referring to is automatically generated. I guess, it is possible to override it temporarily, but do you think a corresponding note on the main page would be sufficient?",24/Mar/16 20:23;oheger;This issue should be fixed now with the availability of Commons Configuration 2.0 final.,,,,,,,,,,,,,,
+"When using a VFSFileSystem on a PropertiesConfiguration, processing an include token defaults back to DefaultFileSystem",CONFIGURATION-609,12858598,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,nuttybrewer,nuttybrewer,8/25/2015 12:19,3/24/2016 20:20,6/19/2019 18:59,9/1/2015 14:27,2,,,,,2,File reloading,,0,,,"I have uploaded two files to HDFS.
+-----
+bob.properties:
+==
+include=fred.properties
+==
+----
+fred.properties
+==
+key=value
+==
+---
+
+If I load fred.properties and evaluated the ""key"", value is returned as expected. If I load bob.properties, I get a ConfigurationException.
+
+Here is the code snippet, please change setFileName() to reflect both cases:
+
+		FileSystem fsTest = new VFSFileSystem();
+		fsTest.setFileOptionsProvider(new HDFSOptionsProvider());
+		
+		Parameters params = new Parameters();
+		FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+		    new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+		    .configure(params.fileBased()
+		    	.setLocationStrategy(new FileSystemLocationStrategy())
+		    	.setBasePath(""hdfs://localhost:8020/user/myusername"")
+		        .setFileName(""bob.properties"")
+		        .setFileSystem(fsTest));
+		
+		Configuration config;
+		try {
+			config = builder.getConfiguration();
+			System.out.println(config.getString(""key""));
+		} catch (ConfigurationException e) {
+			e.printStackTrace();
+		}
+
+--------------------
+HDFSOptionsProvider.java:
+==
+public class HDFSOptionsProvider implements FileOptionsProvider {
+
+	@Override
+	public Map<String, Object> getOptions() {
+		Map<String, Object> opts = new HashMap<String, Object>();
+		opts.put(""DefaultProvider"", HdfsFileProvider.class);
+		return  opts;
+	}
+}
+==
+-------------
+Here is the Exception trace:
+15/08/25 14:14:46 INFO impl.StandardFileSystemManager: Using ""/tmp/vfs_cache"" as temporary files store.
+15/08/25 14:14:47 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+org.apache.commons.configuration2.ex.ConfigurationException: Unable to load the configuration from the URL hdfs://localhost:8020/user/myusername/fred.properties
+	at org.apache.commons.configuration2.io.DefaultFileSystem.getInputStream(DefaultFileSystem.java:56)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:979)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:740)
+	at org.apache.commons.configuration2.PropertiesConfiguration.loadIncludeFile(PropertiesConfiguration.java:1419)
+	at org.apache.commons.configuration2.PropertiesConfiguration.propertyLoaded(PropertiesConfiguration.java:571)
+	at org.apache.commons.configuration2.PropertiesConfigurationLayout.load(PropertiesConfigurationLayout.java:494)
+	at org.apache.commons.configuration2.PropertiesConfiguration.read(PropertiesConfiguration.java:509)
+	at org.apache.commons.configuration2.io.FileHandler.loadFromReader(FileHandler.java:1124)
+	at org.apache.commons.configuration2.io.FileHandler.loadFromTransformedStream(FileHandler.java:1110)
+	at org.apache.commons.configuration2.io.FileHandler.loadFromStream(FileHandler.java:1049)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:980)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:963)
+	at org.apache.commons.configuration2.io.FileHandler.load(FileHandler.java:692)
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initFileHandler(FileBasedConfigurationBuilder.java:312)
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initResultInstance(FileBasedConfigurationBuilder.java:291)
+	at org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder.initResultInstance(FileBasedConfigurationBuilder.java:60)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResult(BasicConfigurationBuilder.java:421)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.getConfiguration(BasicConfigurationBuilder.java:285)
+	at com.secureops.config.TestLoadConf.main(TestLoadConf.java:33)
+Caused by: java.io.IOException: VFS URLs can only be used with VFS APIs
+	at org.apache.commons.configuration2.io.VFSFileSystem$VFSURLStreamHandler.openConnection(VFSFileSystem.java:368)
+	at java.net.URL.openConnection(URL.java:975)
+	at java.net.URL.openStream(URL.java:1041)
+	at org.apache.commons.configuration2.io.DefaultFileSystem.getInputStream(DefaultFileSystem.java:52)
+	... 18 more
+",OSX using Eclipse/Maven,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,42:39.3,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Tue Sep 01 14:27:29 UTC 2015,,,,,,0|i2jc53:,9.22337E+18,,,,,,,,,26/Aug/15 19:42;oheger;This looks indeed like a bug. I will have a look (in the next few days). Thanks for the report.,"26/Aug/15 19:49;nuttybrewer;I'm still working this out locally, but switching to the 1.10 version with
+similar code it seems to not be a problem. Only thing is, with the v1.10
+I'm need to using a configuration file descriptor to get this to work.
+Haven't used a configuration file descriptor with v2 yet.
+
+On Wed, Aug 26, 2015 at 9:42 PM, Oliver Heger (JIRA) <jira@apache.org>
+
+","01/Sep/15 14:27;oheger;Fixed in subversion in revision 1700566.
+
+The problem was that the FileHandler used to load the include file was newly created and only initialized with the URL of the file to be loaded. Now the handler is created as a copy from the original FileHandler and thus inherits all properties like file system or location strategy.",,,,,,,,,,,,,
+BeanHelper exception on XMLConfiguration builder.getConfiguration(),CONFIGURATION-627,12965119,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,technosf,technosf,5/4/2016 22:54,2/8/2017 19:27,6/19/2019 18:59,10/6/2016 19:54,2,,,,,2.1.1,,,0,,,"Creating an *XMLConfiguration* from a file with a builder:
+{code:java}
+builder =
+        new FileBasedConfigurationBuilder<XMLConfiguration>(
+                XMLConfiguration.class)
+                        .configure(params.xml()
+                                .setFileName(
+                                        propsFile.getCanonicalPath())
+                                .setValidating(false));
+
+config = builder.getConfiguration();
+{code}
+
+Causes a non-halting exception originating in *org.apache.commons.configuration2.beanutils.BeanHelper*, method 
+*private static boolean isPropertyWriteable(Object bean, String propName)* with parameters *XMLConfiguration*, *""validating""*.
+
+The exception:
+{noformat}
+    May 04, 2016 3:29:26 PM org.apache.commons.beanutils.FluentPropertyBeanIntrospector introspect
+    WARNING: Error when creating PropertyDescriptor for public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)! Ignoring this property.
+    java.beans.IntrospectionException: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)
+        at java.beans.PropertyDescriptor.findPropertyType(PropertyDescriptor.java:657)
+        at java.beans.PropertyDescriptor.setWriteMethod(PropertyDescriptor.java:327)
+        at java.beans.PropertyDescriptor.<init>(PropertyDescriptor.java:139)
+        at org.apache.commons.beanutils.FluentPropertyBeanIntrospector.createFluentPropertyDescritor(FluentPropertyBeanIntrospector.java:177)
+        at org.apache.commons.beanutils.FluentPropertyBeanIntrospector.introspect(FluentPropertyBeanIntrospector.java:140)
+        at org.apache.commons.beanutils.PropertyUtilsBean.fetchIntrospectionData(PropertyUtilsBean.java:2234)
+        at org.apache.commons.beanutils.PropertyUtilsBean.getIntrospectionData(PropertyUtilsBean.java:2215)
+        at org.apache.commons.beanutils.PropertyUtilsBean.getPropertyDescriptor(PropertyUtilsBean.java:950)
+        at org.apache.commons.beanutils.PropertyUtilsBean.isWriteable(PropertyUtilsBean.java:1466)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.isPropertyWriteable(BeanHelper.java:521)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.initProperty(BeanHelper.java:357)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.initBeanProperties(BeanHelper.java:273)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.initBean(BeanHelper.java:192)
+        at org.apache.commons.configuration2.beanutils.BeanHelper$BeanCreationContextImpl.initBean(BeanHelper.java:669)
+        at org.apache.commons.configuration2.beanutils.DefaultBeanFactory.initBeanInstance(DefaultBeanFactory.java:162)
+        at org.apache.commons.configuration2.beanutils.DefaultBeanFactory.createBean(DefaultBeanFactory.java:116)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:459)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:479)
+        at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:492)
+        at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResultInstance(BasicConfigurationBuilder.java:447)
+        at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResult(BasicConfigurationBuilder.java:417)
+    at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.getConfiguration(BasicConfigurationBuilder.java:285)
+{noformat}","JDK 1.8, Maven 3.3.9",,,,,,,,,BEANUTILS-477,,0,,,,,,,,,,,,,,,,,,,15:04.1,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu Oct 06 19:54:41 UTC 2016,,,,,,0|i2x6kf:,9.22337E+18,,,,,,,,,05/May/16 16:15;oheger;This is actually a problem of Commons Beanutils. Please see the discussion in the linked issue.,"01/Aug/16 01:59;matteg;I used to be a government worker before I retired.  We were often accused of ""passing the buck"" to someone else and then calling the job done.  I always resented that accusation and so I have to protest this JIRA being flagged as ""Resolved"".
+
+This JIRA accurately describes a problem that prevents XMLConfiguration builder.getConfiguration() from executing.  Deciding that the problem is caused by an error in Bean Utils (JIRA BEANUTILS-477 which in turn passes the buck to BEANUTILS-492) does not resolve the original issue.
+
+If you had even identified a work around for the problem there might be justification for flagging it as resolved.
+
+IMHOP you should return this JIRA to status ""Open"" until a fix or a work-around is identified and the issue successfully passes testing.","01/Aug/16 19:31;ggregory;Re-opening: Once the issue is fixed in BeanUtils, we should update our dependency on BeanUtils and test. 
+
+*A unit test for this issue here would be good as well.*","01/Aug/16 19:41;oheger;Huh? How can an exception message written to the log file prevent the getConfiguration() method from being executed?
+
+There is actually a work-around: Adapt the logging configuration.","01/Aug/16 20:31;matteg;Thanks to both of you for prompt action: 
+Gary for re-opening this JIRA and recomending a test case and 
+also thanks to Oliver for identifying the workaround - which caused me to realise this was a non halting exception and my code was actually working [I retested].
+","27/Sep/16 13:43;bond_;So the linked bugs seem resolved. Can you guys let me know if the following stacktrace is related:
+
+{noformat}
+ WARN o.a.c.b.FluentPropertyBeanIntrospector - Error when creating PropertyDescriptor for public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)! Ignoring this property.
+java.beans.IntrospectionException: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)
+        at java.beans.PropertyDescriptor.findPropertyType(PropertyDescriptor.java:657) ~[?:1.8.0_92]
+        at java.beans.PropertyDescriptor.setWriteMethod(PropertyDescriptor.java:327) ~[?:1.8.0_92]
+        at java.beans.PropertyDescriptor.<init>(PropertyDescriptor.java:139) ~[?:1.8.0_92]
+        at org.apache.commons.beanutils.FluentPropertyBeanIntrospector.createFluentPropertyDescritor(FluentPropertyBeanIntrospector.java:177) ~[commons-beanutils-1.9.2.jar:1.9.2]
+        at org.apache.commons.beanutils.FluentPropertyBeanIntrospector.introspect(FluentPropertyBeanIntrospector.java:140) ~[commons-beanutils-1.9.2.jar:1.9.2]
+        at org.apache.commons.beanutils.PropertyUtilsBean.fetchIntrospectionData(PropertyUtilsBean.java:2234) ~[commons-beanutils-1.9.2.jar:1.9.2]
+        at org.apache.commons.beanutils.PropertyUtilsBean.getIntrospectionData(PropertyUtilsBean.java:2215) ~[commons-beanutils-1.9.2.jar:1.9.2]
+        at org.apache.commons.beanutils.PropertyUtilsBean.getPropertyDescriptor(PropertyUtilsBean.java:950) ~[commons-beanutils-1.9.2.jar:1.9.2]
+        at org.apache.commons.beanutils.PropertyUtilsBean.isWriteable(PropertyUtilsBean.java:1466) ~[commons-beanutils-1.9.2.jar:1.9.2]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.isPropertyWriteable(BeanHelper.java:521) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.initProperty(BeanHelper.java:357) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.initBeanProperties(BeanHelper.java:273) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.initBean(BeanHelper.java:192) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper$BeanCreationContextImpl.initBean(BeanHelper.java:669) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.DefaultBeanFactory.initBeanInstance(DefaultBeanFactory.java:162) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.DefaultBeanFactory.createBean(DefaultBeanFactory.java:116) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:459) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:479) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:492) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResultInstance(BasicConfigurationBuilder.java:447) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResult(BasicConfigurationBuilder.java:417) ~[commons-configuration2-2.1.jar:2.1]
+        at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.getConfiguration(BasicConfigurationBuilder.java:285) ~[commons-configuration2-2.1.jar:2.1]
+
+{noformat}
+
+Sample code [CONF634.zip|https://issues.apache.org/jira/secure/attachment/12812292/CONF634.zip]","27/Sep/16 18:33;bond_;New error message after using commons-beanutils:commons-beanutils:1.9.3 in my source code:
+
+{noformat}
+INFO o.a.c.b.FluentPropertyBeanIntrospector - Error when creating PropertyDescriptor for public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)! Ignoring this property.
+{noformat}",27/Sep/16 19:28;oheger;This is what the fix for BEANUTILS-477 does: The original warning message is now logged on level INFO; the stacktrace gets logged on DEBUG level.,"27/Sep/16 20:27;bond_;[~oliver.heger@t-online.de], So will Commons Configuration be fixing the root cause of the issue?","28/Sep/16 19:32;oheger;I don' t think there is anything to fix in Commons Configuration.
+
+BeanUtils's {{FluentPropertyBeanIntrospector}} scans classes for property access methods. If it encounters a set() method whose signature is not compatible with a property setter method, it issues this log message. When applied on a Configuration object this happens for the _setProperty()_ method (which obviously cannot be renamed).
+
+The original bug report was that an exception stack trace on level WARN was logged. This has been changed to a message on INFO level which might be useful for diagnostic purposes. (I am not sure whether a low-level library like BeanUtils actually needs logging, but so is the current implementation.) 
+
+Do you mean this INFO message is still a problem?","28/Sep/16 20:06;bond_;[~oliver.heger@t-online.de], I was trying to understand the root cause and beanutils is still like a black box to me. In process of getting my head around the issue, I was suspecting that the error message on INFO level is still a problem.","28/Sep/16 20:26;oheger;So is the root cause now clear or do you still have questions?
+
+I would like to update the dependency from Commons Configuration to BeanUtils to the new version and then close this ticket.","28/Sep/16 20:31;bond_;Yep, go ahead.",06/Oct/16 19:54;oheger;Fixed in revision 1763651 by updating the dependency to Commons BeanUtils to the new version 1.9.3. This version does no longer log the exception stacktrace (on warning level).,,
+Header comment duplicated when saving,CONFIGURATION-644,13023970,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,ademaria,ademaria,11/29/2016 5:58,2/8/2017 19:27,6/19/2019 18:59,11/30/2016 20:53,2,2.1,2.1.1,,,2.1.1,File reloading,,0,,,"If I set the header comment for the properties layout, then load a configuration with a header comment already existing, then save, I end up with duplicate header comments.
+
+I have a patch to fix this issue, and will attach when JIRA decides to cooperate.",,,,,,,,,,,29/Nov/16 06:00;ademaria;patch;https://issues.apache.org/jira/secure/attachment/12840811/patch,1,,,,,,,,,,,,,,,,,,,53:43.2,,,FALSE,,,,,Patch,,,,,,,,9.22337E+18,,,Wed Nov 30 20:53:43 UTC 2016,,,,,,0|i36vv3:,9.22337E+18,,,,,,,,,"30/Nov/16 20:53;oheger;Patch applied in revision 1772115. Many thanks!
+
+If you want to be added to the contributors section of the pom, just post your data.",,,,,,,,,,,,,,,
+Fix PropertyDescriptor warning for AbstractConfiguration.setProperty,CONFIGURATION-629,12969846,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Duplicate,,deki,deki,5/15/2016 17:39,8/21/2016 19:39,6/19/2019 18:59,6/27/2016 7:48,2,,,,,2.1,,,0,,,"Although it's just a warning message it should be fixed to avoid spam in logfiles:
+
+{noformat}
+WARNUNG: Error when creating PropertyDescriptor for public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)! Ignoring this property.
+java.beans.IntrospectionException: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty(java.lang.String,java.lang.Object)
+	at java.beans.PropertyDescriptor.findPropertyType(PropertyDescriptor.java:657)
+	at java.beans.PropertyDescriptor.setWriteMethod(PropertyDescriptor.java:327)
+	at java.beans.PropertyDescriptor.<init>(PropertyDescriptor.java:139)
+	at org.apache.commons.beanutils.FluentPropertyBeanIntrospector.createFluentPropertyDescritor(FluentPropertyBeanIntrospector.java:177)
+	at org.apache.commons.beanutils.FluentPropertyBeanIntrospector.introspect(FluentPropertyBeanIntrospector.java:140)
+	at org.apache.commons.beanutils.PropertyUtilsBean.fetchIntrospectionData(PropertyUtilsBean.java:2234)
+	at org.apache.commons.beanutils.PropertyUtilsBean.getIntrospectionData(PropertyUtilsBean.java:2215)
+	at org.apache.commons.beanutils.PropertyUtilsBean.getPropertyDescriptor(PropertyUtilsBean.java:950)
+	at org.apache.commons.beanutils.PropertyUtilsBean.isWriteable(PropertyUtilsBean.java:1466)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.isPropertyWriteable(BeanHelper.java:521)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.initProperty(BeanHelper.java:357)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.initBeanProperties(BeanHelper.java:273)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.initBean(BeanHelper.java:192)
+	at org.apache.commons.configuration2.beanutils.BeanHelper$BeanCreationContextImpl.initBean(BeanHelper.java:669)
+	at org.apache.commons.configuration2.beanutils.DefaultBeanFactory.initBeanInstance(DefaultBeanFactory.java:162)
+	at org.apache.commons.configuration2.beanutils.DefaultBeanFactory.createBean(DefaultBeanFactory.java:116)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:459)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:479)
+	at org.apache.commons.configuration2.beanutils.BeanHelper.createBean(BeanHelper.java:492)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResultInstance(BasicConfigurationBuilder.java:447)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.createResult(BasicConfigurationBuilder.java:417)
+	at org.apache.commons.configuration2.builder.BasicConfigurationBuilder.getConfiguration(BasicConfigurationBuilder.java:285)
+{noformat}",,,,,,,,,,BEANUTILS-477,,0,,,,,,,,,,,,,,,,,,,00:05.8,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Mon Jun 27 07:48:22 UTC 2016,,,,,,0|i2xzmf:,9.22337E+18,,,,,,,,,25/Jun/16 03:00;bond_;This is not a issue with commons-configuration AFAIK. Refer to: BEANUTILS-477,27/Jun/16 07:48;deki;Ok resolving this as duplicate.,,,,,,,,,,,,,,
+Oracle invalid idenitifer when using a resevered keyword for column name,CONFIGURATION-637,12993277,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Invalid,,ademaria,ademaria,7/28/2016 16:22,7/28/2016 16:56,6/19/2019 18:59,7/28/2016 16:56,2,,,,,,,,0,,,"I have the following create table for oracle to store configs. Notice that the ""scope"" column name is properly escaped:
+
+{noformat}
+create table PROPERTY_CONTROL (
+  ""scope"" VARCHAR2(32),
+  ""key"" VARCHAR2(128),
+  ""value"" VARCHAR2(512),
+  CONSTRAINT property_control_pk PRIMARY KEY (""scope"", ""key"")
+);
+{noformat}
+
+However, this causes the following stack trace (slightly modified for sensitive class names):
+
+{noformat}
+java.sql.SQLSyntaxErrorException: ORA-00904: ""SCOPE"": invalid identifier
+
+	at oracle.jdbc.driver.T4CTTIoer.processError(T4CTTIoer.java:457)
+	at oracle.jdbc.driver.T4CTTIoer.processError(T4CTTIoer.java:400)
+	at oracle.jdbc.driver.T4C8Oall.processError(T4C8Oall.java:926)
+	at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:476)
+	at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:200)
+	at oracle.jdbc.driver.T4C8Oall.doOALL(T4C8Oall.java:543)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:238)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeForDescribe(T4CPreparedStatement.java:1244)
+	at oracle.jdbc.driver.OracleStatement.executeMaybeDescribe(OracleStatement.java:1492)
+	at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:1710)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeInternal(OraclePreparedStatement.java:4372)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeQuery(OraclePreparedStatement.java:4453)
+	at oracle.jdbc.driver.OraclePreparedStatementWrapper.executeQuery(OraclePreparedStatementWrapper.java:6270)
+	at com.zaxxer.hikari.proxy.PreparedStatementProxy.executeQuery(PreparedStatementProxy.java:52)
+	at com.zaxxer.hikari.proxy.HikariPreparedStatementProxy.executeQuery(HikariPreparedStatementProxy.java)
+	at org.apache.commons.configuration2.DatabaseConfiguration$JdbcOperation.openResultSet(DatabaseConfiguration.java:847)
+	at org.apache.commons.configuration2.DatabaseConfiguration$4.performOperation(DatabaseConfiguration.java:487)
+	at org.apache.commons.configuration2.DatabaseConfiguration$4.performOperation(DatabaseConfiguration.java:483)
+	at org.apache.commons.configuration2.DatabaseConfiguration$JdbcOperation.execute(DatabaseConfiguration.java:742)
+	at org.apache.commons.configuration2.DatabaseConfiguration.containsKeyInternal(DatabaseConfiguration.java:494)
+	at org.apache.commons.configuration2.AbstractConfiguration.containsKey(AbstractConfiguration.java:1086)
+	at org.apache.commons.configuration2.CompositeConfiguration.containsKeyInternal(CompositeConfiguration.java:374)
+	at org.apache.commons.configuration2.AbstractConfiguration.containsKey(AbstractConfiguration.java:1086)
+{noformat}
+","Oracle, Java 1.8",,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,22:35.0,,,,,,0|i31mpz:,9.22337E+18,,,,,,,,,,,,,,,,,,,,,,,,
+multiple line issue,CONFIGURATION-630,12970330,Bug,Open,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Unresolved,,julius.yang,julius.yang,5/17/2016 10:24,5/19/2016 19:40,6/19/2019 18:59,,2,,,,,,,,1,,,"source:
+SOLR_HEAP=""512m""
+GC_TUNE=""-XX:NewRatio=3 \
+-XX:SurvivorRatio=4""
+
+code:
+		FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+			    new FileBasedConfigurationBuilder<PropertiesConfiguration>(PropertiesConfiguration.class)
+			    .configure(new Parameters().properties().setFileName(fileName)
+			    		.setThrowExceptionOnMissing(true));
+			PropertiesConfiguration config = builder.getConfiguration();
+			config.setProperty(""SOLR_HEAP"", ""\""525m\"""");
+			builder.save();
+
+result:
+SOLR_HEAP=""525m""
+GC_TUNE=""-XX:NewRatio=3 -XX:SurvivorRatio=4""",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,22:59.6,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu May 19 19:40:38 UTC 2016,,,,,,0|i2y2lz:,9.22337E+18,,,,,,,,,18/May/16 19:22;oheger;Thanks for this report. Could you please elaborate a bit: Is this only a formatting issue (the line break is lost on saving) or are there other problems (e.g. the value of the property is not correctly read)?,"19/May/16 00:53;julius.yang;Yes,this is only a formatting issue, the line break is lost on saving.","19/May/16 19:40;oheger;Thanks for clarifying.
+
+Unfortunately, I have no idea how this behavior can be fixed easily. There is the {{PropertiesConfigurationLayout}} class which stores some information related to the formatting of the properties file. But line continuations are not stored here. They are already processed by the reader that reads the file. In the configuration only the processed value is stored (this is the value which has to be returned to requesting clients); so the original representation is lost.
+
+If anybody comes up with a clever solution idea, this would be highly appreciated.",,,,,,,,,,,,,
+Missing maven dependency,CONFIGURATION-625,12964183,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Invalid,joehni,daanbiesterbos,daanbiesterbos,5/2/2016 0:12,5/2/2016 17:44,6/19/2019 18:59,5/2/2016 17:44,2,,,,,2.x,,,0,,,"When I use maven to include configuration 2.* in my project I get the following error:
+Exception in thread ""main"" java.lang.NoClassDefFoundError: org/apache/commons/beanutils/BeanIntrospector.
+
+The code that crashed did nothing but loading a few .properties files and add the property configuration to a composite. How to load .properties files is different in 2.0 so all I was copying the example from the documentation and modified the parameters. 
+
+I fixed the problem by adding the following dependency to maven:
+
+<dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.2</version>
+</dependency>
+
+The 1.8 version of beanutils does not fix it.
+
+P.S. Thanks for reviving this project. :-)",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,44:21.4,,,FALSE,,,,,Patch,,,,,,,,9.22337E+18,,,Mon May 02 17:44:21 UTC 2016,,,,,,0|i2x0sn:,9.22337E+18,,,,,,,,,"02/May/16 17:44;joehni;Look into the POM, beanutils 1.9.2 is declared as dependency. However, since not everyone uses the BeanFactory, this dependency is optional on purpose. Therefore you have to declare beanutils as dependency yourself if you want to use the feature. Just as you already did.",,,,,,,,,,,,,,,
+apidocs linked incorrectly on site,CONFIGURATION-417,12465499,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,hdiwan,hdiwan,5/26/2010 19:44,7/31/2012 19:34,6/19/2019 18:59,7/31/2012 19:34,1.7,1.8,2,2.x,Nightly Builds,1.8,Documentation,,0,javadoc,maven,"http://commons.apache.org/configuration/userguide/apidocs/org/apache/commons/configuration/PropertiesConfiguration.html ought to be http://commons.apache.org/configuration/apidocs/org/apache/commons/configuration/PropertiesConfiguration.html instead, for instance",,900,900,,0%,900,900,,,,,0,,,,,,,,,,,,,,,,,,,19:40.2,,,FALSE,,,,,,,,,,,,,110864,,,Tue Jul 31 19:34:08 UTC 2012,,,,,,0|i0uq73:,177385,,,,,,,,,"26/May/10 20:19;oheger;I think this has already been fixed in subversion. When I build the site locally, the links are now correct (at least the ones I tested).",31/Jul/12 19:34;oheger;This issue slipped off my radar. The links from the user's guide to API classes work correctly now.,,,,,,,,,,,,,,

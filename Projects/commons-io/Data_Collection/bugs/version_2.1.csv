@@ -1,0 +1,238 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Labels,Labels,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Attachment,Attachment,Attachment,Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+FileUtils.sizeOfDirectory follows symbolic links.,IO-319,12548889,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Critical,Fixed,,raviprak,raviprak,3/30/2012 23:03,11/8/2016 17:57,6/19/2019 21:05,4/16/2012 13:07,2.1,,,,,,,,2.4,,,0,,,"First of all Thanks tons Apache Commons folks for all the amazing work! :) My first JIRA. Yayyy. I contributed B-)
+
+A symbolic link may create a cycle and so sizeOfDirectory crashes with an IllegalArgumentException. e.g. 
+{noformat}
+$ tree test
+test
+├── file
+└── ravi
+    ├── cycle -> ../../test
+    └── file
+{noformat}
+
+causes FileUtils.sizeOfDirectory to crash like so
+
+{noformat}
+java TestJAVA
+Exception in thread ""main"" java.lang.IllegalArgumentException: <somepath>/test/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle/ravi/cycle does not exist
+        at org.apache.commons.io.FileUtils.sizeOf(FileUtils.java:2053)
+        at org.apache.commons.io.FileUtils.sizeOfDirectory(FileUtils.java:2089)
+        at org.apache.commons.io.FileUtils.sizeOf(FileUtils.java:2057)
+        at org.apache.commons.io.FileUtils.sizeOfDirectory(FileUtils.java:2089)
+        at org.apache.commons.io.FileUtils.sizeOf(FileUtils.java:2057)
+        at org.apache.commons.io.FileUtils.sizeOfDirectory(FileUtils.java:2089)
+        at org.apache.commons.io.FileUtils.sizeOf(FileUtils.java:2057)
+        at org.apache.commons.io.FileUtils.sizeOfDirectory(FileUtils.java:2089)
+{noformat}
+
+We faced the same issue in Hadoop :(. Checkout https://issues.apache.org/jira/browse/HADOOP-6963 for our solution",,,,,,,,,,11/Apr/12 16:53;raviprak;commons-io-319.patch;https://issues.apache.org/jira/secure/attachment/12522275/commons-io-319.patch,11/Apr/12 14:54;raviprak;commons-io-319.patch;https://issues.apache.org/jira/secure/attachment/12522258/commons-io-319.patch,,,2,,,,,,,,,,,,,,,,,,,04:11.0,,,FALSE,,,,,,,,,,,,,,233986,,,Mon Apr 16 13:07:07 UTC 2012,,,,,,0|i0b0mn:,62214,,,,,,,,,09/Apr/12 12:04;ggregory;Can you provide a patch for [io] trunk please?,"11/Apr/12 14:28;raviprak;I'll be happy to. I'm working on it now. I'm not sure how platform-independent the test code needs to be, but I'll give it a fair shot and hopefully you'll be able to guide me to a better iteration.
+","11/Apr/12 14:30;ggregory;Great, thank you Ravi. ","11/Apr/12 14:54;raviprak;Hi Gary,
+
+Could you please review this patch? I wasn't able to find a way to create symlinks under Windows (FAT doesn't seem to support it) so the test code only checks under non-windows systems.
+","11/Apr/12 15:33;ggregory;On Windows, the sym link is called an NTFS junction point. This has been available since Windows 2000 according to https://en.wikipedia.org/wiki/NTFS_symbolic_link
+
+{noformat}
+MKLINK [[/D] | [/H] | [/J]] Link Target
+
+        /D      Creates a directory symbolic link.  Default is a file
+                symbolic link.
+        /H      Creates a hard link instead of a symbolic link.
+        /J      Creates a Directory Junction.
+        Link    specifies the new symbolic link name.
+        Target  specifies the path (relative or absolute) that the new link
+                refers to.
+{noformat}
+
+Can you inlude Windows support in your patch? I am on Windows myself.
+
+Thank you!",11/Apr/12 16:53;raviprak;Thanks for the review and pointer Gary! I've updated the patch for windows. I'm afraid I do not have a Windows machine to test this on. Could you please?,"11/Apr/12 17:09;ggregory;Thank you Ravi, the patch applies and tests OK but... How can this really work when FileUtils.isSymlink(File file) always returns true on Windows?","11/Apr/12 17:30;raviprak;Thanks Gary! Aah! I did not notice that. You probably meant isSymLink always returns false
+bq. Note: the current implementation always returns false if the system is detected as Windows using FilenameUtils#isSystemWindows()
+causing isSymLink to always be true on Windows. I guess the real fix would be to make the isSymlink() method not do that. Could you please append to the patch and fix it on Windows? I'm sorry I don't have a Windows machine :(","11/Apr/12 17:45;sebb;Symbolic links are likely to be very rare on Windows.
+IMO it does not matter if the patch does not fix the crash for Windows hosts, so long as it does not otherwise change the behaviour on Windows.
+","11/Apr/12 17:47;ggregory;Ok, I'll plan to apply the patch after 2.3 is out or if 2.3 requires a new RC.",16/Apr/12 13:07;ggregory;In SVN.
+Various methods of class 'org.apache.commons.io.FileUtils' incorrectly suppress 'java.io.IOException's.,IO-298,12537522,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Critical,Fixed,,schulte77,schulte77,1/6/2012 15:08,3/29/2012 21:30,6/19/2019 21:05,3/1/2012 15:31,2.1,,,,,,,,2.2,Utilities,,0,patch,,,,,,,,,,,,06/Jan/12 15:10;schulte77;IO-298.patch;https://issues.apache.org/jira/secure/attachment/12509688/IO-298.patch,,,,1,,,,,,,,,,,,,,,,,,,30:52.0,,,FALSE,,,,,,,,,,,,,,223028,,,Thu Mar 29 21:30:51 UTC 2012,,,,,,0|i0b0rj:,62236,,,,,,,,,"06/Jan/12 15:10;schulte77;Patch adding 'close' calls without suppressing 'java.io.IOException's.
+
+",29/Mar/12 21:30;ggregory;Version 2.2 has been released and addresses this issue.,,,,,,,,,
+"listFiles(File directory, IOFileFilter fileFilter, IOFileFilter dirFilter) does not recurse into subdirectories",IO-602,13216082,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,steve@sjlt.co.uk,steve@sjlt.co.uk,2/15/2019 21:49,2/15/2019 22:50,6/19/2019 21:01,2/15/2019 22:50,2,2.0.1,2.1,2.2,2.3,2.4,2.5,2.6,,Utilities,,0,,,"Calling FileUtils.listFiles (someDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE) will only return top level files.
+
+This contradicts the documentation that says the list should walk the file tree.",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Feb 15 22:50:15 UTC 2019,,,,,,0|yi11hc:,9.22337E+18,,,,,,,,,15/Feb/19 22:50;steve@sjlt.co.uk;Brain fade - bad test case.,,,,,,,,,,
+getPrefixLength returns null if filename has leading slashes,IO-299,12538613,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,latrine,latrine,1/17/2012 9:57,11/8/2016 17:59,6/19/2019 21:05,4/22/2013 17:52,2.0.1,2.1,,,,,,,2.5,Utilities,,0,,,"Situation:
+FilenameUtils.getPrefixLength is used in FilenameUtils.doNormalize.
+FilenameUtils.normalize(""////I don't want to become null!"") returns null.
+
+Problem:
+Expected was: ""I don't want to become null!""
+The method FilenameUtils.getPrefixLength returns -1 for the mentioned string.
+The root problem is found in following lines of code:
+{code:title=FilenameUtils.getPrefixLength}
+...
+                int posUnix = filename.indexOf(UNIX_SEPARATOR, 2);
+                int posWin = filename.indexOf(WINDOWS_SEPARATOR, 2);
+                if ((posUnix == -1 && posWin == -1) || posUnix == 2 || posWin == 2) {
+                    return -1;
+                }
+...
+{code}
+
+Solution:
+All leading slashes should be ignored at all, but considering the rest of the string.",,7200,7200,,0%,7200,7200,,,,,,,0,,,,,,,,,,,,,,,,,,,06:10.3,,,FALSE,,,,,,,,,,,,,,224117,,,Mon Apr 22 17:52:42 UTC 2013,,,,,,0|i0slpj:,164994,,,,,,,,,"12/Feb/12 16:06;thdamp;In this case for your input ""////I don't want to become null!"", I think the expected output should be
+In Unix: 
+""//I don't want to become null!""
+
+In Windows: 
+Same with the other slash
+
+Any ideas on this?","13/Feb/12 09:10;joehni;Slashes in Unix are merged, so {noformat}ls ////////tmp{noformat} is actually {noformat}ls /tmp{noformat}","13/Feb/12 11:05;sebb;The Javadoc says clearly that Unix and Windows are treated the same, also that invalid names return null.
+
+Although double-slashes are collapsed to a single slash, this does not apply at the start of a path, because there they are used for UNC names in Windows.
+
+As far as I can tell, the current behaviour is correct, because UNC paths must have a valid server name.
+
+The Javadoc should probably be updated to clarify this; it would help to add some examples (and test cases if necessary).","22/Apr/13 17:52;sebb;Updated Javadoc and test cases; current behaviour is correct.
+
+URL: http://svn.apache.org/r1470636
+Log:
+IO-299  getPrefixLength returns null if filename has leading slashes
+        Javadoc: add examples to show correct behaviour; add unit tests
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FilenameUtils.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/FilenameUtilsTestCase.java",,,,,,,
+Regression in FileUtils.readFileToString from 2.0.1,IO-453,12728035,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,schristou88,schristou88,7/17/2014 20:43,11/8/2016 17:59,6/19/2019 21:05,7/30/2014 23:21,2.1,2.2,2.3,2.4,,,,,2.5,Utilities,,1,,,"FileUtils.readFileToString has changed it's behavior to make a call from {{IOUtils.toByteArray(in)}} to {{IOUtils.toByteArray(in, file.length())}} in {{FileUtils.readFileToString}}. This is a regression because if the file.length = 0, then it will return 0. According to the javadocs for [File#length|http://docs.oracle.com/javase/6/docs/api/java/io/File.html#length()], it is possible to return 0 if it is a System dependent entities, so even though the File.length might return 0, the stream is still open and  
+
+Steps to reproduce (Ubuntu):
+1. Execute {{nohup sleep 10000 &}} in a terminal, and get the process id of the sleep command ({{ps -ef | grep sleep}}).
+2. Call {{FileUtils.readFileToString(new File(""/proc/$PID/environ""));}} where $PID is the process ID from step 1.
+
+You will notice that in 2.0.1 it returns several elements, however in 2.1 it will return nothing.
+
+See [~ndeloof]'s comment in https://github.com/apache/commons-io/commit/53a40a6d9dcaaa616b404255406edc30fe2d524c.",,,,,,,,,,19/Jul/14 09:19;schristou88;IO-453.diff;https://issues.apache.org/jira/secure/attachment/12656718/IO-453.diff,,,,1,,,,,,,,,,,,,,,,,,,20:18.9,,,FALSE,,,,,,,,,,,,,,406140,,,Mon Nov 09 15:07:38 UTC 2015,,,,,,0|i1xw33:,406160,,,,,,,,,19/Jul/14 09:19;schristou88;I am attaching a diff of the code changes.,"30/Jul/14 23:20;sebb;Agreed - it was a mistake to try to use the file length.
+","30/Jul/14 23:21;sebb;URL: http://svn.apache.org/r1614791
+Log:
+NET-453 - Regression in FileUtils.readFileToString from 2.0.1
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+",09/Nov/15 15:07;sebb;The log comment above should refer to IO-453,,,,,,,
+FileUtils.isSymlinks misses symlink folders on Windows,IO-295,12536566,Bug,Reopened,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,ripper234,ripper234,12/29/2011 10:50,4/10/2014 8:57,6/19/2019 21:05,,2.1,,,,,,,,,,,0,,,"I created a symlink folder via mklink.
+Then, while debugging, I noticed that FileUtils.isSymlink() returns false on this directory, while Java 7's Files.isSymbolicLink() returns true.","Windows 7 64 bit, Oracle Java 7",,,,,,,,,18/Mar/12 21:14;detinho;IO-295-1.patch;https://issues.apache.org/jira/secure/attachment/12518853/IO-295-1.patch,17/Mar/12 21:35;detinho;IO-295.patch;https://issues.apache.org/jira/secure/attachment/12518809/IO-295.patch,,,2,,,,,,,,,,,,,,,,,,,01:40.8,,,FALSE,,,,,,,,,,,,,,222249,,,Thu Apr 10 08:57:36 UTC 2014,,,,,,0|i0slpr:,164995,,,,,,,,,"14/Mar/12 03:01;sebb;At present, the method always returns false for Windows systems.
+Not sure whether it's possible to detect symbolic links on Windows (except by using Java 7 of course).","17/Mar/12 21:35;detinho;I thought a, in my opinion, workaround implementation: on windows, execute a dir command on the symlink and check if it contains <SYMLINK> or <SYMLINKD> (for files and directories).
+I attached a prototype patch. If the idea get accepted, I'll work to improve the patch (maybe use commons exec?).","18/Mar/12 14:28;sebb;It's far from ideal using a command shell for this, but if it is the only way it might be worth it.
+
+The class FileSystemUtils currently uses the same approach for getting the system free space, so if it is necessary to use a shell, we can re-use the process code from that class.","18/Mar/12 21:14;detinho;A new patch.
+Moved the shell execution code to a new package protected class ExecUtils.","17/Apr/13 02:10;sebb;Looks like DIR does not list symlinks without adding either * or ? to the end of the path.
+This means that the DIR command may return details for other symbolic links that happen to match the wildard expression.
+The suggested patch would need enhancing to prevent false matches.",21/Apr/13 04:42;bayard;How about an (if JAVA_7) return isSymbolicLink at the top of our method?,22/Apr/13 17:39;sebb;There's little point fixing this now; Java 7 users can just use java.nio.file.Files.isSymbolicLink(Path path) which works for all OSes,"03/Apr/14 19:57;werickson;I disagree.
+
+Apache Commons code also calls this flawed implementation instead of calling java.nio.file.Files.isSymbolicLink.
+
+Here's an example:
+http://grepcode.com/file/repo1.maven.org/maven2/commons-io/commons-io/2.4/org/apache/commons/io/FileUtils.java/#1529
+
+In this particular case calling deleteDirectory() in windows will give vastly different results than it does in Linux/Unix
+
+If you're going to tell people to stop using this implementation, you should also follow your own advice, and stop using it internally too.","03/Apr/14 21:50;sguillory6;Guys,
+     This is not a Windows only issue. This bit us today in our CI build on an Ubuntu build node. In migrating our build nodes, we moved to a raid disk array, and starting using symbolic links to keep our build configs the same, and a number of unit tests starting failing due to FileUtils.isSymbolicLink() falsely reporting that leaf file was a symbolic link.
+     I agree with Will Erickson. The Commons IO FileUtils.deleteDirectory() is calling the defective method and should be fixed.",10/Apr/14 08:57;bayard;Reopening per the comments.,
+ArrayIndexOutOfBoundsException in BOMInputStream when reading a file without BOM multiple times,IO-302,12542374,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,ggregory,jsteuerwald,jsteuerwald,2/13/2012 8:16,3/29/2012 21:31,6/19/2019 21:05,2/22/2012 19:23,2.1,,,,,,,,2.2,Streams/Writers,,0,,,"Resetting the BOMInputStream doesn't reset the _fbLength_ member variable. This causes _fbLength_ to grow bigger than the _firstBytes_ array (when the file doesn't contain a BOM), which leads to an ArrayIndexOutOfBoundsException in the _readFirstBytes_ method.
+
+The attached test case reveals the problem.","Win7 64bit, Java 6 32bit",,,,,,,,,22/Feb/12 02:39;detinho;IO-302.patch;https://issues.apache.org/jira/secure/attachment/12515527/IO-302.patch,14/Feb/12 08:14;jsteuerwald;Test.java;https://issues.apache.org/jira/secure/attachment/12514465/Test.java,14/Feb/12 08:15;jsteuerwald;testfileBOM.xml;https://issues.apache.org/jira/secure/attachment/12514466/testfileBOM.xml,14/Feb/12 08:15;jsteuerwald;testfileNoBOM.xml;https://issues.apache.org/jira/secure/attachment/12514467/testfileNoBOM.xml,4,,,,,,,,,,,,,,,,,,,12:15.0,,,FALSE,,,,,,,,,,,,,,227661,,,Thu Mar 29 21:31:26 UTC 2012,,,,,,0|i0b0r3:,62234,,,,,,,,,13/Feb/12 18:12;ggregory;Could post this as a unit test patch file with a license grant to Apache (this can be done by selecting the check-box when you attach a file). Supplying the test files will help too. Thank you!,"22/Feb/12 02:39;detinho;Hi all!
+Please, take a look for this correction.
+I cleaned up the test case to make it more clear and cut the sample file.",22/Feb/12 19:23;ggregory;In SVN.,29/Mar/12 21:31;ggregory;Version 2.2 has been released and addresses this issue.,,,,,,,
+"ReaderInputStream#read(byte[] b, int off, int len) should always return 0 for length == 0",IO-306,12546263,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,sebb,sebb,3/13/2012 17:25,3/29/2012 21:29,6/19/2019 21:05,3/13/2012 17:42,2.1,,,,,,,,2.2,,,0,,,"The method read(byte[] b, int off, int len) should always return 0 if the requested length == 0, even if the stream is empty or at EOF, as that is how the overridden java.io.InputStream method is documented to behave.",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,29:13.9,,,FALSE,,,,,,,,,,,,,,231421,,,Thu Mar 29 21:29:13 UTC 2012,,,,,,0|i0b0qf:,62231,,,,,,,,,29/Mar/12 21:29;ggregory;Version 2.2 has been released and addresses this issue.,,,,,,,,,,
+"ReaderInputStream#read(byte[] b, int off, int len) should check for valid parameters",IO-307,12546264,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,sebb,sebb,3/13/2012 17:40,3/29/2012 21:28,6/19/2019 21:05,3/14/2012 2:09,2.1,,,,,,,,2.2,,,0,,,"If the buffer is null, the method should throw NPE immediately (rather than letting it occur later)
+
+If the offset or length are < 0 or would overflow the buffer, then throw IndexOutOfBoundsException with details of the values.",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,28:31.3,,,FALSE,,,,,,,,,,,,,,231422,,,Thu Mar 29 21:28:31 UTC 2012,,,,,,0|i0b0q7:,62230,,,,,,,,,29/Mar/12 21:28;ggregory;Version 2.2 has been released and addresses this issue.,,,,,,,,,,
+The second constructor of Tailer  class does not pass 'delay' to the third one,IO-304,12544731,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,ggregory,liangly,liangly,3/1/2012 6:35,3/2/2012 2:04,6/19/2019 21:05,3/1/2012 14:39,2.1,,,,,,,,2.2,,,0,,,"Here is the second contructor of Tailer class:
+{code:}
+    public Tailer(File file, TailerListener listener, long delay) {
+        this(file, listener, 1000, false);
+    }
+{code}",,,,,,,,,,01/Mar/12 06:47;liangly;tailer.diff;https://issues.apache.org/jira/secure/attachment/12516648/tailer.diff,,,,1,,,,,,,,,,,,,,,,,,,39:50.8,,,FALSE,,,,,,,,,,,,,,229917,,,Thu Mar 01 14:39:50 UTC 2012,,,,,,0|i0b0qn:,62232,,,,,,,,,"01/Mar/12 06:47;liangly;It should be 
+{code:}
+    public Tailer(File file, TailerListener listener, long delay) {
+        this(file, listener, delay, false);
+    }
+{code}",01/Mar/12 14:39;ggregory;Committed revision 1295587.,,,,,,,,,
+TeeOutputStream does not call branch.close() when main.close() throws an exception,IO-303,12543033,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,ggregory,fabian.barney,fabian.barney,2/17/2012 9:20,2/25/2012 23:50,6/19/2019 21:05,2/17/2012 20:51,2.1,,,,,,,,2.2,Streams/Writers,,0,close,stream,"TeeOutputStream.close() looks like this:
+{code:title=TeeOutputStream.java|borderStyle=solid}
+    /**
+     * Closes both streams. 
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    public void close() throws IOException {
+        super.close();
+        this.branch.close();
+    }
+{code} 
+
+It is obvious that {{this.branch.close()}} is not executed when {{super.close()}} raises an exception. {{super.close()}} may in fact raise an IOException since {{ProxyOutputStream.handleIOException(IOException)}} is not overridden.",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,56:38.4,,,FALSE,,,,,,,,,,,,,,228319,,,Fri Feb 17 23:07:31 UTC 2012,,,,,,0|i0b0qv:,62233,,,,,,,,,"17/Feb/12 13:56;ggregory;If both close() methods throw an exception, which exception does the method throw? I am guessing the first.
+","17/Feb/12 15:58;fabian.barney;In my code I prefer throwing the first one. There is one exception when a latter Throwable occurrs and it is an Error and the former not.
+In my opinion this is the Throwable you want to see.
+
+Another approach is to throw something like a MultiIOException containing all occurred exceptions.
+
+I agree that this all is not a real pleasure, but better than leaving resources open that can be closed successfully.
+I've written a MultiOutputStream yesterday: https://github.com/fabian-barney/Utils/blob/master/utils/src/com/barney4j/utils/io/MultiOutputStream.java
+
+I am not sure for myself that I made the right decision here.","17/Feb/12 20:51;ggregory;This is the solution I implemented. For simplicity's sake, note that the exception thrown is the last exception encountered.
+
+{code:java}
+    /**
+     * Closes both output streams.
+     * 
+     * If closing the main output stream throws an exception, attempt to close the branch output stream.
+     * 
+     * If closing the main and branch output streams both throw exceptions, which exceptions is thrown by this method is
+     * currently unspecified and subject to change.
+     * 
+     * @throws IOException
+     *             if an I/O error occurs
+     */
+    @Override
+    public void close() throws IOException {        
+        try {
+            super.close();
+        } catch (IOException e) {
+            this.branch.close();
+            throw e;
+        }
+        this.branch.close();
+    }
+{code}","17/Feb/12 22:33;fabian.barney;Thanks for addressing this issue that fast! 
+Here's how I would write it but it is just a matter of taste...
+{noformat}
+    @Override
+    public void close() throws IOException {        
+        try {
+            super.close();
+        } 
+        finally {
+            this.branch.close();
+        }
+    }
+{noformat} 
+","17/Feb/12 23:05;ggregory;Looks reasonable, re-implemented in SVN as above.","17/Feb/12 23:07;ggregory;YW. 
+BTW, feel free to contribute patches and to improve the test coverage too! :)",,,,,
+FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash,IO-475,12819096,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,shoof,shoof,4/7/2015 22:06,4/7/2015 23:04,6/19/2019 21:05,,1.4,2,2.0.1,2.1,2.2,2.3,2.4,,,,,0,,,"FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash.
+
+The observed behavior is that normalizeNoEndSeparator returns a non-null value for the following unc-path-prefix:
+\\{serverName-or-IP}\
+
+{backSlash}{backSlash}{serverName-or-IP}{backSlash} 
+but returns null for the following unc-path-prefix:
+\\{serverName-or-IP}
+
+{backSlash}{backSlash}{serverName-or-IP}
+
+The markdown seems to eat my backslashes prepended to the serverName-or-IP.
+
+There is nothing in the Microsoft API documentation which would suggest that the second unc-path-prefix would be invalid.
+
+Therefore the expectation is that they should be treated as equivalent by FilenameUtils#normalizeNoEndSeparator.
+
+The handling of unc-path-prefix is inconsistent with how FilenameUtils#normalizeNoEndSeparator handles drive relative and drive absolute path prefixes, where each notation is accepted and returns a non-null --> ( C: and C:\ ).",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,Important,Patch,,,,,,,,9.22337E+18,,,06:00.0,,,,,,0|i2cxq7:,9.22337E+18,,,,,,,,,,,,,,,,,,,

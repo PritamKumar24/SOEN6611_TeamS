@@ -1,0 +1,207 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Labels,Labels,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Outward issue link (Duplicate),Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment
+FilenameUtils.concat fails if second argument (fullFilenameToAdd) starts with '~' (tilde),IO-552,13107180,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Critical,Unresolved,,jtuemmer,jtuemmer,10/5/2017 9:20,10/12/2017 7:51,6/19/2019 21:05,,2.2,2.5,,,,,,,,Utilities,,0,,,"{{FilenameUtils.concat(""c:/temp"", ""~abc.txt"") returns ""~abc.txt/"" instead of ""c:/temp/~abc.txt"".}}
+
+As a result, the file would be created in the user's home directory instead of c:/temp.
+
+(Note: I Had to replace all instances of double backslashes that would normally appear in the java code with forward slashes as the editor cannot handle backslashes properly.)
+
+commons io 2.2. and 2.5 behave the same. 2.3 and 2.4 not tested.","Windows 7 64bit, JavaVM 1.8 32bit",,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,22:23.0,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Oct 12 07:51:34 UTC 2017,,,,,,0|i3kwof:,9.22337E+18,,,,,,,,,"12/Oct/17 07:22;kinow;FWIW, checked out the latest code, quickly tried the provided sample code, and successfully reproduced the issue.","12/Oct/17 07:51;kinow;Interesting. I didn't know, but looks like in Linux ~kinow is equivalent to /home/kinow, or to ~ if kinow is the currently logged-in user. My user is kinow, and trying `mkdir ~kinow` fails with directory already exists. But a random `mkdir ~jj` works. But so does `touch ~123`. Which means you can have a file or directory that starts with ~.
+
+The [getPrefixLength() method|https://github.com/apache/commons-io/blob/43720d02405e0b96939b331c1be7812fe5fec877/src/main/java/org/apache/commons/io/FilenameUtils.java#L651] seems to assume that a file like ~kinow is going to be a directory. Thus moving the prefix to the last character + 1. 
+
+When that happens, the [doNormalize()|https://github.com/apache/commons-io/blob/43720d02405e0b96939b331c1be7812fe5fec877/src/main/java/org/apache/commons/io/FilenameUtils.java#L348] simply appends the / to the end of the file name.
+
+Altering the getPrefixLength() method to return 0 instead of the length+1 for the case in question, results in ""c:/temp/~abc.txt"", which I believe is the intended output.
+
+However, this change also breaks 7 tests.
+
+{noformat}
+Results :
+
+Failed tests: 
+  FilenameUtilsTestCase.testConcat:474 expected:<[~user/]> but was:<[a/b/~user]>
+  FilenameUtilsTestCase.testGetFullPath:744 expected:<[~user/]> but was:<[]>
+  FilenameUtilsTestCase.testGetFullPathNoEndSeparator:779 expected:<[~user]> but was:<[]>
+  FilenameUtilsTestCase.testGetPrefix:603 expected:<[~user/]> but was:<[]>
+  FilenameUtilsTestCase.testGetPrefixLength:535 expected:<6> but was:<0>
+  FilenameUtilsTestCase.testNormalize:192 expected:<~user[/]> but was:<~user[]>
+  FilenameUtilsTestCase.testNormalizeNoEndSeparator:368 expected:<~user[/]> but was:<~user[]>
+
+Tests run: 1318, Failures: 7, Errors: 0, Skipped: 4
+{noformat}
+
+Not sure how to fix it now. Might need to think about it some more. But would be easier if someone else chimed in to add a second opinion or alternatives. At work I am using FilenameUtils for parsing some file names in RESTful URL's. So might get some extra time to work on it if it impact us.
+
+",,
+"listFiles(File directory, IOFileFilter fileFilter, IOFileFilter dirFilter) does not recurse into subdirectories",IO-602,13216082,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,steve@sjlt.co.uk,steve@sjlt.co.uk,2/15/2019 21:49,2/15/2019 22:50,6/19/2019 21:01,2/15/2019 22:50,2,2.0.1,2.1,2.2,2.3,2.4,2.5,2.6,,Utilities,,0,,,"Calling FileUtils.listFiles (someDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE) will only return top level files.
+
+This contradicts the documentation that says the list should walk the file tree.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Feb 15 22:50:15 UTC 2019,,,,,,0|yi11hc:,9.22337E+18,,,,,,,,,15/Feb/19 22:50;steve@sjlt.co.uk;Brain fade - bad test case.,,,
+Unexpected behavior of FileNameUtils.normalize may lead to limited path traversal vulnerabilies,IO-556,13119433,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Duplicate,,Lukas Euler,Lukas Euler,11/18/2017 18:27,11/30/2017 20:34,6/19/2019 20:58,11/30/2017 20:34,2.2,2.3,2.4,2.5,2.6,,,,,Utilities,,0,security,security-issue,"I sent this report in an Email to security@apache.org on 2017-10-16. I did not receive any kind of response yet (2017-11-18 as of writing). I am now posting it publicly, to open the issue up for discussion, and hopefully initiate a fix.
+
+This report is not about a vulnerability in {{commons-io}} per se, but an unexpected behavior that has a high chance of introducing a path traversal vulnerability when using {{FileNameUtils.normalize}} to sanitize user input. The traversal is limited to a single out-of-bounds-stepping ""/../"" segment.
+
+
+h5. Reproduction
+
+{Code}
+FileNameUtils.normalize(""//../foo"");        // returns ""//../foo"" or ""\\\\..\\foo"", based on java.io.File.separatorChar
+FileNameUtils.normalize(""\\\\..\\foo"");        // returns ""//../foo"" or ""\\\\..\\foo"", based on java.io.File.separatorChar
+{Code}
+
+h5. Possible impact (example)
+
+Consider a web-application that uses {{FileNameUtils.normalize}} to sanitize a user-supplied file name string, and then appends the sanitized value to a configured upload directory to store the uploaded content in:
+
+{Code}
+String fileName = ""//../foo"";            // actually user-supplied (e.g. from multipart-POST request)
+fileName = FileNameUtils.normalize(fileName);    // still holds the same value (""//../foo"")   
+           
+if (fileName != null) {
+    File newFile = new File(""/base/uploads"", fileName);    // java.io.File treats double forward slashes as singles
+                                // newFile now points to ""/base/uploads//../foo""
+    newFile = newFile.getCanonicalFile();            // newFile now points to ""/base/foo"", which should be inaccessible
+
+    // Write contents to newFile...
+} else {
+    // Assume malicious activity, handle error
+}
+{Code}
+
+
+h5. Relevant code locations
+
+* {{org.apache.commons.io.FilenameUtils#getPrefixLength}} : everything between a leading ""//"" and the next ""/"" is treated as a UNC server name, and ignored in all further validation logic of {{org.apache.commons.io.FilenameUtils#doNormalize}} .
+
+
+h5. Discussion
+
+One might argue that the given example is a misuse of the {{FileNameUtils.normalize}} method, and that everyone using it should expect absolute paths, full UNC paths, etc. to be returned by the method.
+Furthermore, the vulnerability can only occur due to the lax behavior of {{java.io.File}} .
+
+On the other hand, I believe that the JavaDoc of {{FileNameUtils.normalize}} suggests to most readers, that this method is exactly what is needed to sanitize file names:
+{noformat}
+//-----------------------------------------------------------------------
+    /**
+     * Normalizes a path, removing double and single dot path steps,
+     * and removing any final directory separator.
+     * <p>
+     * This method normalizes a path to a standard format.
+     * The input may contain separators in either Unix or Windows format.
+     * The output will contain separators in the format of the system.
+     * <p>
+     * A trailing slash will be removed.
+     * A double slash will be merged to a single slash (but UNC names are handled).
+     * A single dot path segment will be removed.
+     * A double dot will cause that path segment and the one before to be removed.
+     * If the double dot has no parent path segment to work with, {@code null}
+     * is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except
+     * for the separator character.
+     * <pre>
+     * /foo//               --&gt;   /foo
+     * /foo/./              --&gt;   /foo
+     * /foo/../bar          --&gt;   /bar
+     * /foo/../bar/         --&gt;   /bar
+     * /foo/../bar/../baz   --&gt;   /baz
+     * //foo//./bar         --&gt;   /foo/bar
+     * /../                 --&gt;   null
+     * ../foo               --&gt;   null
+     * foo/bar/..           --&gt;   foo
+     * foo/../../bar        --&gt;   null
+     * foo/../bar           --&gt;   bar
+     * //server/foo/../bar  --&gt;   //server/bar
+     * //server/../bar      --&gt;   null
+     * C:\foo\..\bar        --&gt;   C:\bar
+     * C:\..\bar            --&gt;   null
+     * ~/foo/../bar/        --&gt;   ~/bar
+     * ~/../bar             --&gt;   null
+     * </pre>
+     * (Note the file separator returned will be correct for Windows/Unix)
+     *
+     * @param filename  the filename to normalize, null returns null
+     * @return the normalized filename, or null if invalid. Null bytes inside string will be removed
+     */
+{noformat}
+
+I have done a quick survey of the usages of the method in public GitHub repositories. I have found numerous projects that suffer from the limited path traversal vulnerability that is described here because of this very issue. This includes Webservers, Web-Frameworks, Archive-Extraction-Software, and others.
+
+Preventing path traversal attacks is not trivial, and many people turn to libraries like {{commons-io}} to avoid making mistakes when implementing parsing logic on their own. They trust that {{FileNameUtils}} will provide them with the most complete, and suitable sanitation logic for file names.
+In addition, "".."" is not a valid UNC host name according to https://msdn.microsoft.com/de-de/library/gg465305.aspx , so prohibiting it shouldn't result in any major problems.",all,,,,,,,,,IO-559,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,27:37.0,,,,,,0|i3myon:,9.22337E+18,,,,,,,,,,,,
+Regression in FileUtils.readFileToString from 2.0.1,IO-453,12728035,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,schristou88,schristou88,7/17/2014 20:43,11/8/2016 17:59,6/19/2019 21:05,7/30/2014 23:21,2.1,2.2,2.3,2.4,,,,,2.5,Utilities,,1,,,"FileUtils.readFileToString has changed it's behavior to make a call from {{IOUtils.toByteArray(in)}} to {{IOUtils.toByteArray(in, file.length())}} in {{FileUtils.readFileToString}}. This is a regression because if the file.length = 0, then it will return 0. According to the javadocs for [File#length|http://docs.oracle.com/javase/6/docs/api/java/io/File.html#length()], it is possible to return 0 if it is a System dependent entities, so even though the File.length might return 0, the stream is still open and  
+
+Steps to reproduce (Ubuntu):
+1. Execute {{nohup sleep 10000 &}} in a terminal, and get the process id of the sleep command ({{ps -ef | grep sleep}}).
+2. Call {{FileUtils.readFileToString(new File(""/proc/$PID/environ""));}} where $PID is the process ID from step 1.
+
+You will notice that in 2.0.1 it returns several elements, however in 2.1 it will return nothing.
+
+See [~ndeloof]'s comment in https://github.com/apache/commons-io/commit/53a40a6d9dcaaa616b404255406edc30fe2d524c.",,,,,,,,,,,19/Jul/14 09:19;schristou88;IO-453.diff;https://issues.apache.org/jira/secure/attachment/12656718/IO-453.diff,1,,,,,,,,,,,,,,,,,,,20:18.9,,,FALSE,,,,,,,,,,,,,,406140,,,Mon Nov 09 15:07:38 UTC 2015,,,,,,0|i1xw33:,406160,,,,,,,,,19/Jul/14 09:19;schristou88;I am attaching a diff of the code changes.,"30/Jul/14 23:20;sebb;Agreed - it was a mistake to try to use the file length.
+","30/Jul/14 23:21;sebb;URL: http://svn.apache.org/r1614791
+Log:
+NET-453 - Regression in FileUtils.readFileToString from 2.0.1
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+",09/Nov/15 15:07;sebb;The log comment above should refer to IO-453
+FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash,IO-475,12819096,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,shoof,shoof,4/7/2015 22:06,4/7/2015 23:04,6/19/2019 21:05,,1.4,2,2.0.1,2.1,2.2,2.3,2.4,,,,,0,,,"FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash.
+
+The observed behavior is that normalizeNoEndSeparator returns a non-null value for the following unc-path-prefix:
+\\{serverName-or-IP}\
+
+{backSlash}{backSlash}{serverName-or-IP}{backSlash} 
+but returns null for the following unc-path-prefix:
+\\{serverName-or-IP}
+
+{backSlash}{backSlash}{serverName-or-IP}
+
+The markdown seems to eat my backslashes prepended to the serverName-or-IP.
+
+There is nothing in the Microsoft API documentation which would suggest that the second unc-path-prefix would be invalid.
+
+Therefore the expectation is that they should be treated as equivalent by FilenameUtils#normalizeNoEndSeparator.
+
+The handling of unc-path-prefix is inconsistent with how FilenameUtils#normalizeNoEndSeparator handles drive relative and drive absolute path prefixes, where each notation is accepted and returns a non-null --> ( C: and C:\ ).",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,Important,Patch,,,,,,,,9.22337E+18,,,06:00.0,,,,,,0|i2cxq7:,9.22337E+18,,,,,,,,,,,,
+NullPointerException IOUtils,IO-365,12630124,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Won't Fix,,mrusful,mrusful,1/31/2013 12:20,11/8/2016 18:04,6/19/2019 21:05,2/1/2013 10:10,2.2,,,,,,,,,Utilities,,0,,,"This is normal way to do like this?
+{code}
+    public static InputStream toInputStream(String input) { // if i put null here?
+        byte[] bytes = input.getBytes();
+        return new ByteArrayInputStream(bytes);
+    }
+{code}
+
+You might to warn users of framework, you know throw some or handle it.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,11:38.6,,,FALSE,,,,,,,,,,,,,,310620,,,Fri Feb 01 10:05:13 UTC 2013,,,,,,0|i1hluf:,310965,,,,,,,,,"31/Jan/13 20:11;sebb;A null parameter will generate a NullPointerException for most of the method parameters in IOUtils.
+
+Is it really worth checking for null and reporting IllegalArgumentException?
+
+For most cases, the check will just be unnecessary, and it should be fairly obvious what the cause of the problem is.
+
+[later]
+-However, it might be worth adding explicit Javadoc.- 
+I've checked some Javadoc from the standard libraries, e.g. java.lang.String.
+The code does not check for null and does not document the NPE.
+
+-Patches welome.-","01/Feb/13 07:47;mrusful;Sebb, maybe you right i can check what i pass to method myself. But user should know what expect to him. I found out only when download sources.
+
+IOUtils line 964 version 2.2 not contain warning about exception in Javadoc. What i should to do if i want help to fix it? Thanks.","01/Feb/13 10:05;sebb;Javadoc should always say if null is allowed, and if so, what null means.
+The Javadoc should also say if methods can return null, and if so, under which circumstances.
+
+But unless null is documented as allowable, the caller should assume it is not allowed.
+If an NPE then occurs, then the first thing to check the parameters.
+
+For example, try the following:
+
+{code}
+char []ca = null;
+new String(ca);
+{code}
+
+Running the code generates an NPE. 
+
+Note that the Javadoc does not state this; it is assumed.
+
+==
+
+There is one occasion when it might perhaps be worth checking for null (or at least documenting the behaviour).
+That is where the NPE occurs somewhere remote from the called method. That is not the case here.",

@@ -1,0 +1,357 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Labels,Labels,Labels,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Outward issue link (Duplicate),Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+"listFiles(File directory, IOFileFilter fileFilter, IOFileFilter dirFilter) does not recurse into subdirectories",IO-602,13216082,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,steve@sjlt.co.uk,steve@sjlt.co.uk,2/15/2019 21:49,2/15/2019 22:50,6/19/2019 21:01,2/15/2019 22:50,2,2.0.1,2.1,2.2,2.3,2.4,2.5,2.6,,Utilities,,0,,,,"Calling FileUtils.listFiles (someDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE) will only return top level files.
+
+This contradicts the documentation that says the list should walk the file tree.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Feb 15 22:50:15 UTC 2019,,,,,,0|yi11hc:,9.22337E+18,,,,,,,,,15/Feb/19 22:50;steve@sjlt.co.uk;Brain fade - bad test case.,,,,,,,,,
+Unexpected behavior of FileNameUtils.normalize may lead to limited path traversal vulnerabilies,IO-556,13119433,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Duplicate,,Lukas Euler,Lukas Euler,11/18/2017 18:27,11/30/2017 20:34,6/19/2019 20:58,11/30/2017 20:34,2.2,2.3,2.4,2.5,2.6,,,,,Utilities,,0,security,security-issue,,"I sent this report in an Email to security@apache.org on 2017-10-16. I did not receive any kind of response yet (2017-11-18 as of writing). I am now posting it publicly, to open the issue up for discussion, and hopefully initiate a fix.
+
+This report is not about a vulnerability in {{commons-io}} per se, but an unexpected behavior that has a high chance of introducing a path traversal vulnerability when using {{FileNameUtils.normalize}} to sanitize user input. The traversal is limited to a single out-of-bounds-stepping ""/../"" segment.
+
+
+h5. Reproduction
+
+{Code}
+FileNameUtils.normalize(""//../foo"");        // returns ""//../foo"" or ""\\\\..\\foo"", based on java.io.File.separatorChar
+FileNameUtils.normalize(""\\\\..\\foo"");        // returns ""//../foo"" or ""\\\\..\\foo"", based on java.io.File.separatorChar
+{Code}
+
+h5. Possible impact (example)
+
+Consider a web-application that uses {{FileNameUtils.normalize}} to sanitize a user-supplied file name string, and then appends the sanitized value to a configured upload directory to store the uploaded content in:
+
+{Code}
+String fileName = ""//../foo"";            // actually user-supplied (e.g. from multipart-POST request)
+fileName = FileNameUtils.normalize(fileName);    // still holds the same value (""//../foo"")   
+           
+if (fileName != null) {
+    File newFile = new File(""/base/uploads"", fileName);    // java.io.File treats double forward slashes as singles
+                                // newFile now points to ""/base/uploads//../foo""
+    newFile = newFile.getCanonicalFile();            // newFile now points to ""/base/foo"", which should be inaccessible
+
+    // Write contents to newFile...
+} else {
+    // Assume malicious activity, handle error
+}
+{Code}
+
+
+h5. Relevant code locations
+
+* {{org.apache.commons.io.FilenameUtils#getPrefixLength}} : everything between a leading ""//"" and the next ""/"" is treated as a UNC server name, and ignored in all further validation logic of {{org.apache.commons.io.FilenameUtils#doNormalize}} .
+
+
+h5. Discussion
+
+One might argue that the given example is a misuse of the {{FileNameUtils.normalize}} method, and that everyone using it should expect absolute paths, full UNC paths, etc. to be returned by the method.
+Furthermore, the vulnerability can only occur due to the lax behavior of {{java.io.File}} .
+
+On the other hand, I believe that the JavaDoc of {{FileNameUtils.normalize}} suggests to most readers, that this method is exactly what is needed to sanitize file names:
+{noformat}
+//-----------------------------------------------------------------------
+    /**
+     * Normalizes a path, removing double and single dot path steps,
+     * and removing any final directory separator.
+     * <p>
+     * This method normalizes a path to a standard format.
+     * The input may contain separators in either Unix or Windows format.
+     * The output will contain separators in the format of the system.
+     * <p>
+     * A trailing slash will be removed.
+     * A double slash will be merged to a single slash (but UNC names are handled).
+     * A single dot path segment will be removed.
+     * A double dot will cause that path segment and the one before to be removed.
+     * If the double dot has no parent path segment to work with, {@code null}
+     * is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except
+     * for the separator character.
+     * <pre>
+     * /foo//               --&gt;   /foo
+     * /foo/./              --&gt;   /foo
+     * /foo/../bar          --&gt;   /bar
+     * /foo/../bar/         --&gt;   /bar
+     * /foo/../bar/../baz   --&gt;   /baz
+     * //foo//./bar         --&gt;   /foo/bar
+     * /../                 --&gt;   null
+     * ../foo               --&gt;   null
+     * foo/bar/..           --&gt;   foo
+     * foo/../../bar        --&gt;   null
+     * foo/../bar           --&gt;   bar
+     * //server/foo/../bar  --&gt;   //server/bar
+     * //server/../bar      --&gt;   null
+     * C:\foo\..\bar        --&gt;   C:\bar
+     * C:\..\bar            --&gt;   null
+     * ~/foo/../bar/        --&gt;   ~/bar
+     * ~/../bar             --&gt;   null
+     * </pre>
+     * (Note the file separator returned will be correct for Windows/Unix)
+     *
+     * @param filename  the filename to normalize, null returns null
+     * @return the normalized filename, or null if invalid. Null bytes inside string will be removed
+     */
+{noformat}
+
+I have done a quick survey of the usages of the method in public GitHub repositories. I have found numerous projects that suffer from the limited path traversal vulnerability that is described here because of this very issue. This includes Webservers, Web-Frameworks, Archive-Extraction-Software, and others.
+
+Preventing path traversal attacks is not trivial, and many people turn to libraries like {{commons-io}} to avoid making mistakes when implementing parsing logic on their own. They trust that {{FileNameUtils}} will provide them with the most complete, and suitable sanitation logic for file names.
+In addition, "".."" is not a valid UNC host name according to https://msdn.microsoft.com/de-de/library/gg465305.aspx , so prohibiting it shouldn't result in any major problems.",all,,,,,,,,,IO-559,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,27:37.0,,,,,,0|i3myon:,9.22337E+18,,,,,,,,,,,,,,,,,,
+What should happen in FileUtils.sizeOf[Directory] when an overflow takes place?,IO-323,12551055,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,ggregory,ggregory,4/16/2012 13:09,11/8/2016 17:59,6/19/2019 21:05,4/16/2013 22:09,2.3,,,,,,,,2.5,Utilities,,0,,,,FileUtils.sizeOf[Directory] adds longs. What should happen when an overflow happens?,"Apache Maven 3.0.4 (r1232337; 2012-01-17 03:44:56-0500)
+Maven home: C:\Java\apache-maven-3.0.4\bin\..
+Java version: 1.6.0_31, vendor: Sun Microsystems Inc.
+Java home: C:\Program Files\Java\jdk1.6.0_31\jre
+Default locale: en_US, platform encoding: Cp1252
+OS name: ""windows 7"", version: ""6.1"", arch: ""amd64"", family: ""windows""",,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,50:04.6,,,FALSE,,,,,,,,,,,,,,235919,,,Tue Apr 16 22:09:24 UTC 2013,,,,,,0|i0kmzz:,118543,,,,,,,,,"16/Apr/12 14:50;sebb;What are the options? I can think of the following:
+
+# throw a runtime exception
+# ignore the problem
+# return a ""special"" value, e.g. -1
+
+The same problem may apply elsewhere in IO.","16/Apr/12 14:52;ggregory;Hm, how about -1 for the current API and adding an API that uses BigInteger if you really care about huge sizes?
+
+There is no point on keeping on counting once you overflow.","16/Apr/12 19:04;sebb;bq. There is no point on keeping on counting once you overflow.
+
+True, but one has to detect the overflow in the first place.
+This adds extra code for every invocation.
+
+Overflow by upto Long.MAX_VALUE will result in a negative value, so the caller can detect many cases of overflow.
+
+Long.MAX_VALUE + Long.MAX_VALUE => -2
+
+So we could opt for option (2), and document the possible overflow.","16/Apr/12 19:08;ggregory;Ok, we can ignore and document for now.
+
+How about a BigInteger method that will give you the right answer no matter now big?
+
+Gary","16/Apr/12 19:13;sebb;bq. How about a BigInteger method that will give you the right answer no matter now big?
+
+File a separate JIRA enhancement request?","16/Apr/12 19:29;ggregory;.bq File a separate JIRA enhancement request?
+
+Reasonable, pertinent and in process :)","16/Apr/13 22:09;sebb;URL: http://svn.apache.org/r1468637
+Log:
+IO-323 What should happen in FileUtils.sizeOf[Directory] when an overflow takes place?
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+",,,
+IOUtils copyLarge() and skip() methods are performance hogs,IO-355,12614198,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,apache.k.ulib@recursor.net,apache.k.ulib@recursor.net,10/31/2012 16:25,11/8/2016 17:59,6/19/2019 21:05,4/16/2013 20:51,2.3,2.4,,,,,,,2.5,Utilities,,0,,,,"IOUtils.skip(InputStream, long) and IOUtils.skip(Reader, long) have the worst possible performance as they always use read() on the input instead of using skip(). In many cases, using skip() from a subclass of InputStream is much faster than read(), as the skip() can be implemented via a disk seek.
+
+The IOUtils.skip() methods are also used in the copyLarge() methods that involve a skip.
+
+Case in point: I have observed this performance degradation with Java 7 on Windows 7. A series of consecutive copyLarge() invocations on a large file on disk that involved skips changed my performance from 30 secs as my baseline to 10 minutes after starting to use IOUtils.copyLarge().",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,26:52.7,,,FALSE,,,,,,,,,,,,,,253429,,,Tue Apr 16 20:51:05 UTC 2013,,,,,,0|i0dngf:,77729,,,,,,,,,31/Oct/12 17:26;ggregory;Can you provide a patch?,"31/Oct/12 17:45;apache.k.ulib@recursor.net;Can't provide one currently, sorry.","31/Oct/12 19:44;sebb;See IO-203 where the skip() methods were added.
+
+The problem is that some implementations of skip() - e.g. FileInputStream - allow skipping past EOF.
+That is why we use our own implementation using read() rather than delegating to the implementation class.
+
+Also, in the case of InputStream#skip(), the Javadoc says it throws:
+
+bq. IOException - if the stream does not support seek or ...
+
+An unconditional change to using skip from the implementation class could break some applications.","31/Oct/12 20:06;apache.k.ulib@recursor.net;Yes, the API contract is a little different than the original skip. The problem is that it causes skips and reads with skips to be needlessly slow in many cases. Anyone using these general-purpose APIs suddenly has a millstone on their foot without noticing.","31/Oct/12 20:25;sebb;The API change is deliberate.
+
+I've added Javadoc to note that the performance may not be as good as using skip.
+
+I'm not sure that it is possible to fix the code without breaking the API and existing applications that depend on the guaranteed skip behaviour that the methods provide.","31/Oct/12 20:37;apache.k.ulib@recursor.net;Make sure to change the javadoc for all the read and readFully methods as well, as a typical user like myself expects reasonable performance from these methods.
+
+Seems to set a bad precedent for usability of Apache Commons.
+
+","31/Oct/12 20:46;sebb;bq. Make sure to change the javadoc for all the read and readFully methods as well
+
+Did you mean skip and skipFully?
+The read and readFully methods use the implementation provided, so I don't see how they can be less performant.
+
+bq. Seems to set a bad precedent for usability of Apache Commons.
+
+The point of the IOUtils#skip() methods is to guarantee that the correct number of bytes/chars is skipped.
+This does not not appear to be possible using the subclass skip() implementations for the reasons already given.","31/Oct/12 21:31;apache.k.ulib@recursor.net;Was referring to the wrong methods. I meant the copyLarge() methods that call IOUtils.skip() - Javadoc should say that the skip will not do a seek and may be slower than they expect.
+
+Preferably I hope you will consider changing the methods to have them call the InputStream.skip() or Reader.skip() directly - I bet that 99.99% of the users of these methods are not interested in the redefined skip() contract, but want convenient methods to copy things from an input to an output while skipping some data. They are most likely not interested in getting a bad deal on performance.
+
+Or add copyLargeFast() methods or something similar.
+
+","16/Apr/13 20:51;sebb;The Javadoc has been updated to mention the possible slowness of the skip methods.
+
+If the user wants to use the faster (but possibly inaccurate) skip method, they can do so before calling copyLarge.",
+Commons IO Tailer does not respect UTF-8 Charset,IO-354,12613739,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,liyuyi,liyuyi,10/27/2012 0:08,11/8/2016 17:59,6/19/2019 21:05,5/16/2013 13:33,2.3,,,,,,,,2.5,Utilities,,0,Charset,Encoding,Tailer,"I just realized there is a defect in the source code of ""org.apache.commons.io.input.Tailer.java"". Basically, the current implementation does not work for multi-byte encoded files. See the following snippet,
+
+448    private long readLines(RandomAccessFile reader) throws IOException {
+449        StringBuilder sb = new StringBuilder();
+450
+451        long pos = reader.getFilePointer();
+452        long rePos = pos; // position to re-read
+453
+454        int num;
+455        boolean seenCR = false;
+456        while (run && ((num = reader.read(inbuf)) != -1)) {
+457            for (int i = 0; i < num; i++) {
+458                byte ch = inbuf[i];
+459                switch (ch) {
+460                case '\n':
+461                    seenCR = false; // swallow CR before LF
+462                    listener.handle(sb.toString());
+463                    sb.setLength(0);
+464                    rePos = pos + i + 1;
+465                    break;
+466                case '\r':
+467                    if (seenCR) {
+468                        sb.append('\r');
+469                    }
+470                    seenCR = true;
+471                    break;
+472                default:
+473                    if (seenCR) {
+474                        seenCR = false; // swallow final CR
+475                        listener.handle(sb.toString());
+476                        sb.setLength(0);
+477                        rePos = pos + i + 1;
+478                    }
+479                    sb.append((char) ch); // add character, not its ascii value
+480                }
+481            }
+482
+483            pos = reader.getFilePointer();
+484        }
+485
+486        reader.seek(rePos); // Ensure we can re-read if necessary
+487        return rePos;
+488    }
+
+At line 479, the conversion of byte to char type breaks the encoding.","JDK 7 
+RHEL Linux
+Apache Commons IO version 2.4",,,,,,,,,,10/Apr/13 00:07;idle_sun;Tailer-commonsio-354.patch;https://issues.apache.org/jira/secure/attachment/12577931/Tailer-commonsio-354.patch,1,,,,,,,,,,,,,,,,,,,34:39.8,,,FALSE,,,,,,,,,,,,,,252487,,,Fri May 30 09:16:55 UTC 2014,,,,,,0|i0ctbb:,72693,,,,,,,,,"27/Oct/12 00:09;liyuyi;I used a ""hacky"" fix to reconstruct the String with right encoding in the handler class. 
+
+	private String rebuildUTF8String(String line) {
+		int len = line.length();
+		byte[] bytes = new byte[len];
+		for (int i=0; i<len; i++) {
+			bytes[i] = (byte)line.charAt(i);
+		}
+		return new String(bytes, UTF8);
+	}
+
+However, the right approach is to pass in the encoding in the ""create"" method and handle it in the Tailer.",28/Oct/12 00:34;ggregory;Feel free to provide a patch! :),"02/Nov/12 05:53;liyuyi;OK, I'll give it a shot, as a return to the community. Hope this process is a smooth one :-)
+",10/Apr/13 00:07;idle_sun;submit a path [Tailer-commonsio-354.patch ]including test cases and tested on Linux/Windows,"16/Apr/13 22:47;sebb;Thanks for the patch.
+
+There's a minor issue with the patch, which is that the conversion from bytes to String relies on the default encoding.
+This was probably true of the original implementation.
+
+Perhaps the class needs to support methods which take an encoding parameter?","17/Apr/13 01:04;sebb;URL: http://svn.apache.org/r1468703
+Log:
+IO-354 Commons IO Tailer does not respect UTF-8 Charset
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/input/Tailer.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/input/TailerTest.java
+
+Created IO-377 to deal with the default charset issue.","16/May/13 11:48;sebb;Using the default charset for String conversion does not fix the UTF-8 issue.
+Need to redo the fix","16/May/13 13:25;sebb;URL: http://svn.apache.org/r1483340
+Log:
+IO-354 Commons IO Tailer does not respect UTF-8 Charset
+Rework to allow charset to be specified
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/input/Tailer.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/input/TailerTest.java
+",16/May/13 13:33;sebb;Hope this is really fixed now!,"30/May/14 09:16;kriegaex;This was fixed 1 year+ ago now. I have just bumped into the same problem right after having used Commons IO for the very first time. Are there any plans to release v2.5 anytime soon? I am reluctant to use a developer build, I would prefer to stay on Maven Central as my only upstream repo."
+Regression in FileUtils.readFileToString from 2.0.1,IO-453,12728035,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,schristou88,schristou88,7/17/2014 20:43,11/8/2016 17:59,6/19/2019 21:05,7/30/2014 23:21,2.1,2.2,2.3,2.4,,,,,2.5,Utilities,,1,,,,"FileUtils.readFileToString has changed it's behavior to make a call from {{IOUtils.toByteArray(in)}} to {{IOUtils.toByteArray(in, file.length())}} in {{FileUtils.readFileToString}}. This is a regression because if the file.length = 0, then it will return 0. According to the javadocs for [File#length|http://docs.oracle.com/javase/6/docs/api/java/io/File.html#length()], it is possible to return 0 if it is a System dependent entities, so even though the File.length might return 0, the stream is still open and  
+
+Steps to reproduce (Ubuntu):
+1. Execute {{nohup sleep 10000 &}} in a terminal, and get the process id of the sleep command ({{ps -ef | grep sleep}}).
+2. Call {{FileUtils.readFileToString(new File(""/proc/$PID/environ""));}} where $PID is the process ID from step 1.
+
+You will notice that in 2.0.1 it returns several elements, however in 2.1 it will return nothing.
+
+See [~ndeloof]'s comment in https://github.com/apache/commons-io/commit/53a40a6d9dcaaa616b404255406edc30fe2d524c.",,,,,,,,,,,19/Jul/14 09:19;schristou88;IO-453.diff;https://issues.apache.org/jira/secure/attachment/12656718/IO-453.diff,1,,,,,,,,,,,,,,,,,,,20:18.9,,,FALSE,,,,,,,,,,,,,,406140,,,Mon Nov 09 15:07:38 UTC 2015,,,,,,0|i1xw33:,406160,,,,,,,,,19/Jul/14 09:19;schristou88;I am attaching a diff of the code changes.,"30/Jul/14 23:20;sebb;Agreed - it was a mistake to try to use the file length.
+","30/Jul/14 23:21;sebb;URL: http://svn.apache.org/r1614791
+Log:
+NET-453 - Regression in FileUtils.readFileToString from 2.0.1
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+",09/Nov/15 15:07;sebb;The log comment above should refer to IO-453,,,,,,
+BOMInputStream wrongly detects UTF-32LE_BOM files as UTF-16LE_BOM files in method getBOM(),IO-331,12558913,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,davidgjm,davidgjm,6/1/2012 4:20,11/8/2016 17:57,6/19/2019 21:05,6/5/2012 14:48,2.3,,,,,,,,2.4,Streams/Writers,,0,BOMInputStream,UTF-32LE,,"Hi,
+
+The BOMInputStream works great for most UTF encoded files when detecting Byte Order Marks. However, if a file is UTF-32LE encoded with BOM the class takes it as UTF-16LE instead. This is not expected behavior.
+
+The problem comes from method getBOM(). And the first two bytes for UTF-16LE and UTF-32LE are the same, which might be the root cause of the problem.
+
+The following lists the bytes for UTF encodings for reference. The content is a BOM followed by letter 't'.
+||Encoding||Byte 1||Byte 2||Byte 3||Byte 4|| || || || ||
+|UTF8|EF|BB|BF|74| | | | |
+|UTF16-LE|FF|FE|74|00| | | | |
+|UTF16-BE|FE|FF|00|74| | | | |
+|UTF32-LE|FF|FE|00|00|74|00|00|00
+|UTF32-BE|00|00|FE|FF|00|00|00|74
+
+
+I personally used the following code to work around this problem at the moment. Hope it helps.
+
+{code}
+	private void detectBOM(InputStream in) throws IOException{
+		List<ByteOrderMark> all=availableBOMs();
+		int max=0;
+        for (ByteOrderMark bom : all) {
+            max = Math.max(max, bom.length());
+        }
+		byte[] firstBytes=new byte[max];
+		for (int i = 0; i < max; i++) {
+			firstBytes[i]=(byte) in.read();
+			System.out.print(Integer.toHexString(firstBytes[i] & 0xff).toUpperCase()+"" "");
+		}
+		
+		boolean found=false;
+		for (int j = max; j >1; j--) {
+			byte[] _copy=Arrays.copyOf(firstBytes, j);
+			for (ByteOrderMark mark : all) {
+				found=Arrays.equals(_copy, mark.getBytes());
+				if (found) {
+					System.out.println(""\nBOM is: ""+mark.getCharsetName());
+					break;
+				}
+			}
+			if (found) break;
+		}
+	}
+	
+	private static List<ByteOrderMark> availableBOMs(){
+		List<ByteOrderMark> all=new ArrayList<ByteOrderMark>();
+		all.add(ByteOrderMark.UTF_8);
+		all.add(ByteOrderMark.UTF_16BE);
+		all.add(ByteOrderMark.UTF_16LE);
+		all.add(ByteOrderMark.UTF_32BE);
+		all.add(ByteOrderMark.UTF_32LE);
+		return all;
+	}
+{code}","OS: Win 7 x64
+JDK: 1.7.03",,,,,,,,,,01/Jun/12 04:21;davidgjm;UTF-32LE_Y.txt;https://issues.apache.org/jira/secure/attachment/12530511/UTF-32LE_Y.txt,1,,,,,,,,,,,,,,,,,,,27:52.7,,,FALSE,,,,,,,,,,,,,,250749,,,Tue Jun 05 14:48:40 UTC 2012,,,,,,0|i0b0m7:,62212,,,,,,,,,01/Jun/12 04:21;davidgjm;UTF-32LE_BOM encoded sample file.,01/Jun/12 04:27;ggregory;See also IO-320.,05/Jun/12 14:48;ggregory;Committed revision 1346400.,,,,,,,
+FileUtils.writeLines uses unbuffered IO,IO-329,12558328,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,tivv,tivv,5/28/2012 12:11,11/8/2016 17:57,6/19/2019 21:05,5/28/2012 13:43,2.3,,,,,,,,2.4,Streams/Writers,,0,,,,"FileUtils.writeLines looks like next:
+
+ out = openOutputStream(file, append);
+ IOUtils.writeLines(lines, lineEnding, out, encoding);
+
+openOutputStream opens plain FileOutputStream without any buffering and IOUtils.writeLines does not add abyt buffering. This means each line require 2 write syscalls (one for the line and one for line separator). This makes call very slow, especially for short lines",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,43:31.8,,,FALSE,,,,,,,,,,,,,,250750,,,Mon May 28 13:43:31 UTC 2012,,,,,,0|i0b0mf:,62213,,,,,,,,,28/May/12 13:43;ggregory;Committed revision 1343253.,,,,,,,,,
+Yottabyte (YB) incorrectly defined in FileUtils,IO-336,12560395,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,,rleavelle,rleavelle,6/12/2012 20:27,11/8/2016 17:57,6/19/2019 21:05,6/12/2012 20:39,2.3,,,,,,,,2.4,Utilities,,0,,,,"In FileUtils, a yottabyte is currently defined as follows:
+
+public static final BigInteger ONE_YB = ONE_ZB.multiply(BigInteger.valueOf(ONE_EB));
+
+I believe this should be:
+
+public static final BigInteger ONE_YB = ONE_ZB.multiply(BigInteger.valueOf(ONE_KB));",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,39:51.2,,,FALSE,,,,,,,,,,,,,,250746,,,Tue Jun 12 20:39:51 UTC 2012,,,,,,0|i0b0lj:,62209,,,,,,,,,12/Jun/12 20:39;ggregory;Committed revision 1349509.,,,,,,,,,
+FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash,IO-475,12819096,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,shoof,shoof,4/7/2015 22:06,4/7/2015 23:04,6/19/2019 21:05,,1.4,2,2.0.1,2.1,2.2,2.3,2.4,,,,,0,,,,"FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash.
+
+The observed behavior is that normalizeNoEndSeparator returns a non-null value for the following unc-path-prefix:
+\\{serverName-or-IP}\
+
+{backSlash}{backSlash}{serverName-or-IP}{backSlash} 
+but returns null for the following unc-path-prefix:
+\\{serverName-or-IP}
+
+{backSlash}{backSlash}{serverName-or-IP}
+
+The markdown seems to eat my backslashes prepended to the serverName-or-IP.
+
+There is nothing in the Microsoft API documentation which would suggest that the second unc-path-prefix would be invalid.
+
+Therefore the expectation is that they should be treated as equivalent by FilenameUtils#normalizeNoEndSeparator.
+
+The handling of unc-path-prefix is inconsistent with how FilenameUtils#normalizeNoEndSeparator handles drive relative and drive absolute path prefixes, where each notation is accepted and returns a non-null --> ( C: and C:\ ).",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,Important,Patch,,,,,,,,9.22337E+18,,,06:00.0,,,,,,0|i2cxq7:,9.22337E+18,,,,,,,,,,,,,,,,,,

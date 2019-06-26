@@ -1,0 +1,382 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Labels,Labels,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Attachment,Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+XMLConfiguration.load may throw NPE,CONFIGURATION-641,13021969,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,claudenw,claudenw,11/19/2016 23:40,3/22/2017 9:12,6/19/2019 18:58,12/1/2016 21:00,2.1,,,2.1.1,,,0,,,"I expect that 
+{noformat}
+    URL url = Test.class.getResource( ""/Test.xml"");	
+    XMLConfiguration config = new XMLConfiguration();
+    config.read( url.openStream());
+{noformat}
+
+Would read the XML file.  However it will throw a NPE at line 967
+
+{noformat}
+ private void load(InputSource source) throws ConfigurationException
+    {
+        try
+        {
+            URL sourceURL = locator.getSourceURL(); // <- NPE here
+            if (sourceURL != null)
+            {
+                source.setSystemId(sourceURL.toString());
+            }
+{noformat}
+
+I believe that testing for locator == null first will solve the problem as the rest of the code in the method does not appear to use it.
+
+",Java 8 / Linux,3600,3600,,0%,3600,3600,,,,,0,,,,,,,,,,,,,,,,,,,07:25.9,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Wed Mar 22 09:12:09 UTC 2017,,,,,,0|i36jif:,9.22337E+18,,,,,,,,,"20/Nov/16 17:07;oheger;Agreed that it is not a good style to throw a NPE here. However, the underlying problem here is that the read() method should not be called directly, but a {{FileHandler}} object should be used to load or save a configuration as described at
+http://commons.apache.org/proper/commons-configuration/userguide/howto_filebased.html#File_Operations_on_Configurations
+
+The documentation of read() and write() methods should be improved to state this.","21/Nov/16 09:11;claudenw;(posted to user@commons.apache.org)  For background see:
+https://issues.apache.org/jira/browse/CONFIGURATION-641?
+page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel&
+focusedCommentId=15681474#comment-15681474
+
+Perhaps there is a bigger problem with the semantics of the classes.  I
+come late to this project having used version 1.x and not participated or
+followed any of the development discussion for 2.x versions.  So from a
+pseudo-noob point of view perhaps the Configuration objects should not have
+a read/write method that does not take a FileHandler object.
+
+I think this makes sense in that you can create a configuration and do a
+lot with it without reading or writeing it.  The read/write issues arise
+because of resolution issues in reading/writing (e.g. resolving include
+statements).
+
+Perhaps in version 2.2 the read/write methods could be deprecated in favor
+of _read() and _write() (renaming the methods in FileBased) and FileHandler
+could be renamed to IOHandler.  So reading from a stream, file, ByteBuffer,
+etc would be handled by the IOHandler.  It seem counter inturitive that a
+FileHandler would be needed to read/write a configuration to a Stream.
+
+Just thoughts.  Any comments?
+
+Claude
+
+On Sun, Nov 20, 2016 at 5:07 PM, Oliver Heger (JIRA) <jira@apache.org>
+
+
+
+
+-- 
+I like: Like Like - The likeliest place on the web
+<http://like-like.xenei.com>
+LinkedIn: http://www.linkedin.com/in/claudewarren
+","22/Nov/16 20:53;oheger;These are valid points. However, Commons policy does only allow breaking (i.e. binary incompatible) changes in major versions. So such changes could only go in a version 3.0, but not 2.2.
+
+The intended use case for Configuration 2.x is that configurations are created via builders. In this setup no problems occur.  Direct file operations on configuration objects should be done only in exceptional cases, e.g. when copying a configuration to another location. So I think, documenting the limitations of read() and write() would be acceptable.","01/Dec/16 21:00;oheger;The documentation of the {{FileBased}} interface has been improved to clearly state that these methods should not be called directly by client code.
+
+The exceptions caused by an invalid use of this mechanism now have better messages indicating the problem.","16/Mar/17 14:39;raffig;My question is: what is by the book code, that should be used for loading (and then perform reading) configuration from input stream?
+After some reading I came with something like this, what seems to be working well:
+
+{code}
+XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class).configure(new Parameters().xml()).getConfiguration();
+FileHandler fh = new FileHandler(cfg);
+{code}
+
+And then {{cfg}} should contain loaded configuration. Is this correct?
+","16/Mar/17 20:34;oheger;There seems to be a line missing in your code fragment which actually loads the data. Something like
+{code}
+fh.load(stream);
+{code}
+
+However, Jira is not a support forum, and this ticket has been closed. Please send questions to the user list. See 
+http://commons.apache.org/proper/commons-configuration/mail-lists.html","17/Mar/17 06:24;raffig;Oh, right, I forgot that line.
+Yes, I know that is not support forum, but loading those data from input stream is really confusing. Especially for users of version 1.x. The first thing I did was the same thing as a reporter, and looking at Stack Overflow it is not a rare occurance. Second thing was to find this issue :-) and I hoped to find some clues here. Because I didn't I thought that maybe my comment could be useful for others.
+Btw some clear example in User's Guide how to do this properly would be very helpful.
+
+Anyway, thank you for your answer.
+",18/Mar/17 15:00;oheger;The support for reading configuration data from streams via builders is probably not ideal. Do you want to open a new ticket to address this? We can then discuss there what could be done to improve the situation. (At least the documentation could be improved as you already pointed out.),"22/Mar/17 09:12;raffig;I've just opened CONFIGURATION-655. I wrote there some first suggestions, but I'm not sure if they are fine as I do not know this library's version good enough.",
+XMLConfiguration changes list format on saving,CONFIGURATION-649,13035995,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,oheger,oheger,1/18/2017 20:29,2/8/2017 19:27,6/19/2019 18:58,1/21/2017 20:25,2.1,,,2.1.1,Format,,0,,,"If the XML document loaded by the configuration contains a string property with multiple values (separated by the list delimiter character), on saving, this property is split into multiple nodes. So
+
+{noformat}
+<list>a,b,c</list>
+{noformat}
+
+becomes
+
+{noformat}
+<list>a</list>
+<list>b</list>
+<list>c</list>
+{noformat}
+
+This also happens if the property is not touched before saving. The reason for this behavior is that on loading new nodes are created for the single list items (which is required to have an internal model on which queries can be executed). On saving, these nodes are considered new nodes, and thus new XML elements are created for them.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Sat Jan 21 20:25:50 UTC 2017,,,,,,0|i38w8n:,9.22337E+18,,,,,,,,,"21/Jan/17 20:25;oheger;A fix has been implemented which improves the list handling of XMLConfiguration. In many constellations lists defined as single string with delimiter characters now retain their original format when the configuration is saved.
+
+The solution is not perfect, however. For instance, for list properties using a mixed format (multiple XML elements each of which defining multiple list items) the format is lost. Also if a list property is fully removed and later added again.",,,,,,,,,
+OSGi Import-Package declaration not complete regarding optional dependencies,CONFIGURATION-639,13003133,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,riconeubauer,riconeubauer,9/7/2016 7:07,2/8/2017 19:27,6/19/2019 18:58,10/16/2016 15:14,2.1,,,2.1.1,,,0,commons-configuration,osgi,"common-configuration2's pom.xml correctly defines optional dependencies like vfs2 or spring with <optional>.
+However, it does only declare a subset of those as optional OSGi-dependencies:
+{code:xml}
+    <!-- Explicitly declare optional dependencies for the OSGi manifest. -->
+    <commons.osgi.import>
+      org.apache.commons.beanutils.*;resolution:=optional,
+      org.apache.commons.codec.*;resolution:=optional,
+      org.apache.commons.jxpath.*;resolution:=optional,
+      org.apache.xml.resolver.*;resolution:=optional,
+      javax.servlet.*;resolution:=optional,
+      org.apache.commons.jexl2.*;resolution:=optional,
+      org.apache.commons.vfs2.*;resolution:=optional,
+      *
+    </commons.osgi.import>
+{code}
+See https://github.com/apache/commons-configuration/blob/trunk/pom.xml for both above.
+Due to the missing ""resolution:=optional, commons-configuration2 cannot be deployed in an OSGi-environment not providing the optional bundles.
+
+Example error on deploy:
+{code}
+Unable to resolve Module[org.apache.commons.configuration:2.1.0]: missing requirement [Module[org.apache.commons.configuration:2.1.0]] package; (package=org.springframework.beans.factory)
+{code}
+
+Please have a look if you agree and add the missing instructions for the remaining optional dependencies.
+
+Manually fixed Import-package statement looks like this (disregarding line-breaks):
+{code}
+Import-Package: javax.naming,javax.servlet;resolution:=optional,javax.sql,javax.xml.parsers,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.stream,org.apache.commons.beanutils;resolution:=optional,org.apache.commons.codec.binary;resolution:=optional,org.apache.commons.jexl2;resolution:=optional,org.apache.commons.jxpath;resolution:=optional,org.apache.commons.jxpath.ri;resolution:=optional,org.apache.commons.jxpath.ri.compiler;resolution:=optional,org.apache.commons.jxpath.ri.model;resolution:=optional,org.apache.commons.lang3;version=""[3.3,4)"",org.apache.commons.lang3.builder;version=""[3.3,4)"",org.apache.commons.lang3.concurrent;version=""[3.3,4)"",org.apache.commons.lang3.mutable;version=""[3.3,4)"",org.apache.commons.lang3.text;version=""[3.3,4)"",org.apache.commons.lang3.text.translate;version=""[3.3,4)"",org.apache.commons.logging;version=""[1.2,2)"",org.apache.commons.logging.impl;version=""[1.2,2)"",org.apache.commons.vfs2;resolution:=optional,org.apache.commons.vfs2.provider;resolution:=optional,org.apache.xml.resolver;resolution:=optional,org.apache.xml.resolver.helpers;resolution:=optional,org.apache.xml.resolver.readers;resolution:=optional,org.apache.xml.resolver.tools;resolution:=optional,org.springframework.beans.factory;resolution:=optional,org.springframework.core.env;resolution:=optional,org.springframework.core.io;resolution:=optional,org.springframework.util;resolution:=optional,org.w3c.dom,org.xml.sax,org.xml.sax.helpers
+{code}",OSGi-container,,,,,,,,,07/Sep/16 11:02;b.eckenfels;s1.txt;https://issues.apache.org/jira/secure/attachment/12827354/s1.txt,07/Sep/16 11:02;b.eckenfels;s2.txt;https://issues.apache.org/jira/secure/attachment/12827355/s2.txt,2,,,,,,,,,,,,,,,,,,,50:18.6,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Sun Oct 16 15:14:36 UTC 2016,,,,,,0|i33bhz:,9.22337E+18,,,,,,,,,"07/Sep/16 10:50;b.eckenfels;The bundle plugin can do that automatically. With one of the later commons-parent I have implemented an additional property which can overwrite a exclude statement (I dont know why it is needed, but if you overwrite it the import statements have the proper resolution added automatically. (We could even remove the manual resolution overwrites).
+
+{quote}
+<!-- make sure bundle plugin has dependency informations for 'optional' -->
+<commons.osgi.excludeDependencies />
+{quote}
+
+When doing this the optional shows up for spring then:
+
+{quote}
+org.springframework.beans.factory;resolution:=optional,
+org.springframework.core.env;resolution:=optional,
+org.springframework.core.io;resolution:=optional,
+org.springframework.util;resolution:=optional
+{quote}
+
+However for some packages it also adds version ranges:
+
+org.apache.commons.beanutils;resolution:=optional;version=""[1.9,2)"",
+org.apache.commons.codec.binary;resolution:=optional;version=""[1.10,2)""
+,,,
+
+Not sure if we want to keep this or turn versions off if not?
+
+",07/Sep/16 11:02;b.eckenfels;New and old version of the Manifest after the proposed change.,"07/Sep/16 20:05;oheger;In an older version of the bundle plugin the optional declarations from the pom were not taken into account, and all dependencies were listed as mandatory in the import-package directive. This was the reason for the explicit import declaration in the pom. If the plugin now handles optional dependencies correctly, we could drop this block.
+
+The versions, however, could be a problem. The dependencies (at least to other commons components) are typically set to the most recent versions, even if an older version would still work. Forcing users to always deploy the most recent version of a dependency could be too restrictive.","08/Sep/16 15:55;b.eckenfels;Well, it was my first feeling too, but on the other hand from experience I can say this is not an issue. The dependencies in such projects are mostly not up-to-date, so if somebody uses it they have a wide range of versions which are accepted (anything more current up to the next major). If a project is quick to update the dependencies then it is also seldomly a problem since the new version of that gets only dragged in by projects updating anyway. So while it might restrict some situations it typially is not an issue. Especially given that fact that only because there is no version restriction does not mean the unrestricted artifact in a odd version actually works.
+
+However this might be a bigger change than a bugfix. So I guess the plugin should be configured to not provide version ranges (but optionals) for the next minor release.","08/Sep/16 20:01;oheger;Agreed. Can you provide a patch for the plugin configuration? Or commit it immediately?
+Thanks!",07/Oct/16 20:02;oheger;[~b.eckenfels] Do you already have a working solution you can share?,"14/Oct/16 15:14;riconeubauer;Pull-request:
+https://github.com/apache/commons-configuration/pull/4",16/Oct/16 15:14;oheger;Patch applied in revision 1765165. This seems to be the easies and less invasive solution. Thanks again for the patch.,,
+wrong property key: PropertiesBuilderParametersImpl.PROP_IO_FACTORY,CONFIGURATION-648,13029424,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,vargattila,vargattila,12/20/2016 11:59,2/8/2017 19:27,6/19/2019 18:58,12/23/2016 20:10,2.1,,,2.1.1,,,0,,,"Example in user guide about using custom IOFactory doesn't work.
+
+Link:
+https://commons.apache.org/proper/commons-configuration/userguide/howto_properties.html#Custom_properties_readers_and_writers
+
+
+When you set an IOFactory like this:
+
+params.properties()
+        .setFileName(""myfile.properties"")
+        .setIOFactory(new WhitespaceIOFactory())
+
+this custom IOFactory won't be set in your PropertiesConfiguration because 
+the constant PropertiesBuilderParametersImpl.PROP_IO_FACTORY has the value:
+ ""iOFactory"".
+
+FileBasedConfigurationBuilder tries to set the property ""iOFactory"" of PropertiesConfiguration .
+The method setiOFactory() exists not.
+
+I have found a workaround, maybe this can explain better the problem:
+
+//New subclass:
+    public class PropertiesConfigurationOk extends PropertiesConfiguration {
+        public void setiOFactory(IOFactory ioFactory)
+        {
+            super.setIOFactory(ioFactory);
+        }
+    }
+
+
+//Usage of new subclass:
+FileBasedConfigurationBuilder<FileBasedConfiguration> builder = new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfigurationOk.class)                       .configure(propertiesBuilderParameters);
+
+PropertiesConfiguration config = builder.getConfiguration();
+
+",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,44:13.7,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Fri Dec 23 20:10:48 UTC 2016,,,,,,0|i37tiv:,9.22337E+18,,,,,,,,,"20/Dec/16 20:44;oheger;Thank you for spotting this.
+
+I assume the problem is connected to a change in the last recent version of Commons Beanutils which is used behind the scenes to set the properties. Here the way how properties starting with multiple capital letters are handled has changed. To verify this assumption, you could try with the previous version of Beanutils, which should be 1.9.2.
+
+Well that's annoying. This means that even if the problem is now fixed in Configuration, there are combinations of versions in the field which do not correctly work together.","23/Dec/16 20:10;oheger;The mentioned constant was fixed to the match the expectations of the new version of BeanUtils. A new test case was added demonstrating the problem. Some of the existing tests had to be adapted.
+
+Fixed in SVN in revision 1775895.",,,,,,,,
+Should throw Initialization error when no database table exists,CONFIGURATION-650,13038171,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Not A Problem,,alexjascott@gmail.com,alexjascott@gmail.com,1/26/2017 16:05,1/26/2017 17:22,6/19/2019 18:58,1/26/2017 17:22,2.1,,,,,,0,,,"I have created a unit test using the H2 database. If I try and simulate a new configuration when no database table has been created, I would expect a ConfigurationException to be thrown.
+
+But instead it seems to create the config fine.
+
+{code}
+    @Test
+    public void databaseNotPresent2() throws Exception {
+        EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.H2)
+                .build();
+
+        BasicConfigurationBuilder<DatabaseConfiguration> builder = new BasicConfigurationBuilder(DatabaseConfiguration.class);
+        Parameters params = new Parameters();
+        builder.configure(
+                params.database()
+                        .setDataSource(db)
+                        .setTable(""BADTABLE"")
+                        .setKeyColumn(""BADKEY"")
+                        .setValueColumn(""BADVALUE"")
+                //.setThrowExceptionOnMissing(true)
+        );
+
+        DatabaseConfiguration missingTableConfig = builder.getConfiguration();
+        String missing = missingTableConfig.getString(""MISSING_KEY"");
+        assertEquals(null, missing);
+        missingTableConfig.addProperty(""PRESENT_KEY"", ""some value"");
+        String present = missingTableConfig.getString(""PRESENT_KEY"");
+        assertEquals(null, present);
+    }
+{code}",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu Jan 26 17:21:54 UTC 2017,,,,,,0|i39947:,9.22337E+18,,,,,,,,,26/Jan/17 16:09;alexjascott@gmail.com;Assume this isn't just some weird H2/Spring EmbeddedDatabase quirk?,"26/Jan/17 16:33;alexjascott@gmail.com;You can even have a null datasource, with the same behaviour.","26/Jan/17 17:21;alexjascott@gmail.com;Looks like I need to add the following line to enable Exceptions;
+
+{code}
+ConfigurationUtils.enableRuntimeExceptions(missingTableConfig);
+{code}",,,,,,,
+INIConfiguration: comment lines are removed after saving changes,CONFIGURATION-645,13025047,Bug,Open,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Unresolved,,javix,javix,12/2/2016 10:32,12/4/2016 17:22,6/19/2019 18:59,,2.1,,,,,,0,,,"I have a very large ini file with multiple sections. I added some comment lines to my sections.
+Before closing my app some values will be changed. But afterwards the changed file does not contains my comments.
+
+Here is a example:
+{noformat}
+[SECTION]
+;comment for this section
+lastTimeStamp=(here some date)
+{noformat}
+
+After saving the file contains following content:
+{noformat}
+[SECTION]
+lastTimeStamp=(here some date)
+{noformat}
+
+I think it is a bug, because the comments are allowed and very useful content of a ini file and should not be removed.
+
+(sorry for my not perfect english)
+",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,22:55.2,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Sun Dec 04 17:22:55 UTC 2016,,,,,,0|i372if:,9.22337E+18,,,,,,,,,"04/Dec/16 17:22;oheger;Unfortunately, {{INIConfiguration}} never supported comments in the way this is done for instance by {{PropertiesConfiguration}} with its {{PropertiesConfigurationLayout}} class.
+
+It would be good to have generic support for comments or other layouting aspects for all kinds of configuration files, i.e. having a generic version of {{PropertiesConfigurationLayout}}. However, implementing this is probably not a trivial task. Everybody who wants to work on this feature is very welcome.",,,,,,,,,
+XMLConfiguration does not detect all prefix declarations,CONFIGURATION-642,13021988,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Not A Problem,,claudenw,claudenw,11/20/2016 11:01,11/20/2016 14:11,6/19/2019 18:59,11/20/2016 14:11,2.1,,,,,,0,,,"When reading an XML file where the xmlns is not on the first element, the XMLConfiguration does not always detect the declaration.
+
+Example code and xml provided",,,,,,,,,,20/Nov/16 11:02;claudenw;Test.java;https://issues.apache.org/jira/secure/attachment/12839716/Test.java,20/Nov/16 11:02;claudenw;Test.xml;https://issues.apache.org/jira/secure/attachment/12839717/Test.xml,2,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Sun Nov 20 14:11:46 UTC 2016,,,,,,0|i36jmn:,9.22337E+18,,,,,,,,,20/Nov/16 11:02;claudenw;Example code and xml file,20/Nov/16 14:11;claudenw;The example XML declares the namespace on one element but is used in a peer element resulting in a prefix not defined error as would be expected by standard.,,,,,,,,
+ConfigurationUtils.dump and other methods should use ImmutableConfiguration,CONFIGURATION-653,13047648,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,vmaurin_glispa,vmaurin_glispa,3/2/2017 11:00,10/12/2017 20:23,6/19/2019 18:59,3/7/2017 21:07,2.1,2.1.1,,2.2,,,0,,,"Since the read-only ImmutableConfiguration/ImmutableHierarchicalConfiguration has been introduced, several methods that uses Configuration in a read-only fashion should be adapted to use these ones instead of the read/write alternative.
+
+For example :
+ConfigurationUtils.dump
+ConfigurationUtils.toString
+ConfigurationUtils.copy (for the source)
+ConfigurationUtils.append (for the source)
+ConfigurationUtils.convertToHierarchical
+ConfigurationConverter.getProperties
+... and maybe others
+
+It should not break any existing code as Configuration implements ImmutableConfiguration and it could enable code that manipulates read only configurations to use these utilities",,,,,,,,,,07/Mar/17 08:17;vmaurin_glispa;two_versions.diff;https://issues.apache.org/jira/secure/attachment/12856454/two_versions.diff,03/Mar/17 08:01;vmaurin_glispa;use_immutable.diff;https://issues.apache.org/jira/secure/attachment/12855800/use_immutable.diff,2,,,,,,,,,,,,,,,,,,,15:04.2,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu Oct 12 20:23:42 UTC 2017,,,,,,0|i3auj3:,9.22337E+18,,,,,,,,,"02/Mar/17 20:15;oheger;Good point. Those methods have been missed when doing the rework of the API.
+
+Any chance that you can provide a patch?","03/Mar/17 08:02;vmaurin_glispa;Hi [~oliver.heger@t-online.de]
+
+I have tried to find and replace all the relevant usages in the project for the patch, but my knowledge of the API is limited. Hope it will help","04/Mar/17 14:59;oheger;I had a look at the patch and did some experiments; but unfortunately, it cannot be applied like this because it breaks binary compatibility. Client code would have to be recompiled, otherwise NoSuchMethodErrors would be thrown. This is not an option for a minor release in Commons.
+
+What we could do instead is leaving the existing methods in place and add overloaded variants that operate on {{ImmutableConfiguration}}. The older methods then just delegate to the new ones. This would add the desired functionality, but preserves compatibility. WDYT?","06/Mar/17 15:55;vmaurin_glispa;It could work, but the old ones will probably need to explicit cast the parameter to avoid self calling themselves, example :
+
+{code:java}
+    public static String toString(ImmutableConfiguration configuration)
+    {
+        StringWriter writer = new StringWriter();
+        dump(configuration, new PrintWriter(writer));
+        return writer.toString();
+    }
+
+    public static String toString(Configuration configuration)
+    {
+        return toString((ImmutableConfiguration) configuration);
+    }
+{code}
+
+Maybe an open question then is the Javadoc. Should we mark old ones as deprecated with a link to the new ones ? Or just having the same javadoc on both methods ?","06/Mar/17 17:17;oheger;Yes, the casts will be necessary. Regarding deprecation: This is a good question. My gut feeling is that it is not necessary to deprecate the old versions because client code does not actually have to do anything (the call does not need to be changed when the methods are dropped in a major release). Thus, the Javadoc could stay as is, but maybe a comment could be added that ""this version of the method exists only for reasons of backwards compatibility"" or something like this.","07/Mar/17 08:19;vmaurin_glispa;I have attached a new patch : 
+* a comment is added on the old method (expect for two that were already ""might be deprecated"")
+* I have reverted change on HierarchicalConfigurationConverter. It has a protected method and I don't see an easy way to preserve the compatibility here","07/Mar/17 21:07;oheger;Patch applied with minor changes in revision 1785888. Many thanks!
+
+If you want to be added to the contributors section in the pom, just post the data you want to have in there.","08/Mar/17 07:40;vmaurin_glispa;Thank you Oliver
+
+{code:xml}
+        <contributor>
+          <name>Vincent Maurin</name>
+          <email>vincent.maurin.fr@gmail.com</email>
+          <organization>glispa GmbH</organization>
+        </contributor>
+{code}",08/Mar/17 20:35;oheger;Added. Thanks again.,12/Oct/17 20:23;oheger;Closed after release 2.2 is out.
+Documentation inconsistencies,CONFIGURATION-643,13023012,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,gbtorrance,gbtorrance,11/23/2016 21:47,2/8/2017 19:27,6/19/2019 18:59,11/29/2016 21:14,2.1,,,2.1.1,Documentation,,0,,,"It appears at least some of the user guide documentation is out of sync with the latest 2.1 version. For example, the following:
+
+https://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Customizing_interpolation
+
+As I understand it, StrLookup is no longer used. Also, the page refers to the  static registerGlobalLookup() method of ConfigurationInterpolator. But this method does not exist.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,14:56.2,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Tue Nov 29 21:14:56 UTC 2016,,,,,,0|i36py7:,9.22337E+18,,,,,,,,,29/Nov/16 21:14;oheger;The user guide has been updated regarding interpolation. The site has been redeployed.,,,,,,,,,
+Header comment duplicated when saving,CONFIGURATION-644,13023970,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,ademaria,ademaria,11/29/2016 5:58,2/8/2017 19:27,6/19/2019 18:59,11/30/2016 20:53,2,2.1,2.1.1,2.1.1,File reloading,,0,,,"If I set the header comment for the properties layout, then load a configuration with a header comment already existing, then save, I end up with duplicate header comments.
+
+I have a patch to fix this issue, and will attach when JIRA decides to cooperate.",,,,,,,,,,29/Nov/16 06:00;ademaria;patch;https://issues.apache.org/jira/secure/attachment/12840811/patch,,1,,,,,,,,,,,,,,,,,,,53:43.2,,,FALSE,,,,,Patch,,,,,,,,9.22337E+18,,,Wed Nov 30 20:53:43 UTC 2016,,,,,,0|i36vv3:,9.22337E+18,,,,,,,,,"30/Nov/16 20:53;oheger;Patch applied in revision 1772115. Many thanks!
+
+If you want to be added to the contributors section of the pom, just post your data.",,,,,,,,,
+autoSave and manual save behave differently,CONFIGURATION-646,13028969,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,cmrudolph,cmrudolph,12/18/2016 14:37,2/8/2017 19:27,6/19/2019 18:59,12/22/2016 21:07,2.1,,,2.1.1,,,0,,,"Using {{builder.autoSave(true)}} behaves differently than {{builder.save()}} to the aspect that {{builder.autoSave(true)}} doesn't write newly added properties to the assigned config file.
+
+I've set up a minimal example using only two dependencies:
+commons-beanutils:commons-beanutils:1.9.3 (runtime)
+org.apache.commons:commons-configuration2:2.1.0 (compiletime)
+
+{code}
+public class Main {
+    public static void main(String... args) {
+        Parameters params = new Parameters();
+        File propertiesFile = new File(""conf.properties"");
+
+        FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
+                        .configure(params.fileBased().setFile(propertiesFile));
+        builder.setAutoSave(true);
+        try {
+            PropertiesConfiguration config = builder.getConfiguration();
+            config.setProperty(""foo"", ""bar"");
+            // builder.save();
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+}
+{code}
+
+This is mainly like the example from the documentation for filebased configurations.
+
+{{conf.properties}} exists and is empty. With the {{builder.save}} line commented out, the file remains empty. Uncommenting this line results in the expected behavior.
+
+I debugged a bit an saw that the property isn't added to the {{PropertiesConfigurationLayout}} in the first case.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,27:03.4,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu Dec 22 21:07:51 UTC 2016,,,,,,0|i37qpr:,9.22337E+18,,,,,,,,,19/Dec/16 17:27;oheger;Thanks for the report and the test case. I will have a look in a few days.,20/Dec/16 12:31;rcpaul;I've just done some digging myself. The {{AutoSaveListener}} is added when doing the {{setAutoSave(true)}} and the {{PropertiesConfigurationLayout}} when {{getConfiguration()}} is executed. These listeners are called when a property changes but in the order they are added. A workaround is to enable auto save after getting the configuration.,"22/Dec/16 21:07;oheger;Your analysis was correct: the event listener for the auto-save mechanism was triggered before the layout object, so data was saved that had not yet been updated.
+
+The layout is normally registered as first event listener at the configuration; this is done when the configuration is created. However, on a load operation the layout used to unregister itself temporarily; this moved the listener registration at the end of the list.
+
+The fix changed this behavior: The listener is not unregistered, but temporarily disabled during a load operation.
+
+Fixed in SVN in revision 1775740.",,,,,,,
+Colon in properties file value no longer unescaped in commons configuration 2,CONFIGURATION-640,13008563,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Minor,Fixed,,tom.byttebier,tom.byttebier,9/29/2016 15:03,11/28/2016 9:07,6/19/2019 18:59,10/7/2016 20:08,2.1,,,2.1.1,,,0,,,"A properties file create with java escape a colon in for example a path like 
+C:\test as {noformat}C\:\\test{noformat}
+
+When reading this property value in commons configuration the colon is unescaped, C:\test
+
+When reading the property value in commons configuration 2 the colon is no longer unescaped, C\:\test.
+
+Snipped of the code I used for reading the property
+
+{code}
+
+final ConfigurationBuilder<PropertiesConfiguration> builder =                            new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class).configure(new Parameters().properties().setFile(path.toFile());
+
+final PropertiesConfiguration propertiesConfiguration = builder.getConfiguration();
+Assert.assertEquals(""C:\\test"", propertiesConfiguration.getString(""test2""));
+
+{code}
+
+I've read this [section|http://commons.apache.org/proper/commons-configuration/userguide_v1.10/howto_properties.html#Special_Characters_and_Escaping] so I'm aware of the changes to escaping, but I'm not sure how the escaping of the colon fits into this and if there is a way around this.",,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,34:42.2,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Mon Nov 28 09:07:00 UTC 2016,,,,,,0|i348yn:,9.22337E+18,,,,,,,,,"29/Sep/16 19:34;oheger;Thanks for the report. There have been many changes in the escaping logic between version 1.x and 2.x, so it is well possible that a bug crept in or a feature got lost. I will have a look.","07/Oct/16 20:08;oheger;A fix has been applied in revision 1763821.
+
+In Configuration 1.x, unescaping was done for all characters except for the list delimiter character. This was changed for Configuration 2.x because here the list delimiter character is not known to the configuration, but is managed by the ListDelimiterHandler. As a side-effect, the unescaping got lost.
+
+The fix now adds a special handling for a number of characters that are listed in the Javadocs of the _Properties.store()_ method to be always escaped:
+http://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#store-java.io.Writer-java.lang.String-",28/Nov/16 09:07;tom.byttebier;Tested on 2.2-SNAPSHOT and it is fixed,,,,,,,

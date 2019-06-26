@@ -1,0 +1,94 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Due Date,Votes,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment
+JupIOFactory and trimming of newline & carriage return characters,CONFIGURATION-737,13213857,Bug,Open,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Unresolved,,chkch,chkch,2/5/2019 9:52,2/5/2019 9:53,6/19/2019 19:05,,2.4,,,Expression engine,,0,"I want to configure the line separator that should be used in my output via config file.
+
+E.g. using the property 
+
+L1=\n
+
+and JupIOFactory as following:
+{quote}{{ public static Configuration loadConfig(String fileName) throws ConfigurationException {}}
+{{Parameters params = new Parameters();}}
+
+{{PropertiesBuilderParameters properties = params.properties();}}
+
+{{properties.setFileName(fileName)}}
+{{.setThrowExceptionOnMissing(true)}}
+{{.setIOFactory(new PropertiesConfiguration.JupIOFactory())}}
+{{.setListDelimiterHandler(new DefaultListDelimiterHandler(','));}}
+
+{{FileBasedConfigurationBuilder<FileBasedConfiguration> builder =}}
+{{new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)}}
+{{.configure(properties}}
+{{);}}
+{{Configuration config = builder.getConfiguration();}}
+{{return config;}}
+{{}}}
+{quote}
+The value of the property gets trimmed. Java Properties (JDK 8) does not trim newline and carriage return characters.
+
+ 
+
+The problem seems to arise in the method at the following code part (where the string is trimmed):
+{quote}{{protected Collection<String> splitString(final String s, final boolean trim)}}
+
+...
+
+{{// Add last token}}
+{{String t = token.toString();}}
+{{if (trim)}}
+{{{}}
+{{t = t.trim();}}
+{{}}}
+{{list.add(t);}}
+{quote}",,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,52:22.0,,,,,,0|yi0nt4:,9.22337E+18,,,,,,,,,
+Attribute value cannot delimit to list,CONFIGURATION-733,13207957,Bug,Open,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Unresolved,,hchen00,hchen00,1/7/2019 7:21,1/7/2019 7:21,6/19/2019 19:05,,2.4,,,,,0,"Given the following configuration XML:
+
+<configuration>
+  <header>
+    <result throwExceptionOnMissing=""true"">
+      <listDelimiterHandler config-class=""org.apache.commons.configuration2.convert.DefaultListDelimiterHandler"">
+        <config-constrarg config-value="",""/>
+      </listDelimiterHandler>
+    </result>
+  </header>
+     <node type=""test"" types=""a,b,c""/>
+</configuration>
+
+With the following test code:
+
+            Parameters params = new Parameters();
+            ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder = new ReloadingFileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class);
+            builder.configure(params.xml().setFile(file).setListDelimiterHandler(new DefaultListDelimiterHandler(',')));
+            XMLConfiguration configuration = builder.getConfiguration();
+
+        List<String> types = configuration.getList(String.class, ""node[@types]"");
+        // result WRONG -- returns [""a,b,c""]
+        org.junit.Assert.assertEquals(types.size(), 3);
+
+I just couldn't find any way to get the attribute value as a comma-delimited list...
+
+In general, the default behavior change for list delimiter is a big headache while we are trying to upgrade to commons-configuration2...",,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,Important,,,,,,,,9.22337E+18,,,21:28.0,,,,,,0|u00kew:,9.22337E+18,,,,,,,,,
+Fix CI build break after upgraded from Java 7 to 8,CONFIGURATION-732,13198627,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,HCOONa,HCOONa,11/15/2018 13:22,11/15/2018 15:08,6/19/2019 19:05,11/15/2018 15:08,2.3,2.4,2.5,Build,,0,"The Travis CI build broken after upgrading from Java 7 to 8.
+
+ 
+{panel:title=Maven Error Message}
+
+
+The command ""eval mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V "" failed. Retrying, 2 of 3.
+ 
+Picked up _JAVA_OPTIONS: -Xmx2048m -Xms512m
+Apache Maven 3.5.2 (138edd61fd100ec658bfa2d307c43b76940a5d7d; 2017-10-18T07:58:13Z)
+Maven home: /usr/local/maven-3.5.2
+Java version: 1.7.0_151, vendor: Oracle Corporation
+Java home: /usr/lib/jvm/java-7-openjdk-amd64/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: ""linux"", version: ""4.14.12-041412-generic"", arch: ""amd64"", family: ""unix""
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Apache Commons Configuration 2.5-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:3.0.0-M2:enforce (enforce-maven-version) @ commons-configuration2 ---
+[WARNING] Rule 1: org.apache.maven.plugins.enforcer.RequireJavaVersion failed with message:
+Detected JDK Version: 1.7.0-151 is not in the allowed range 1.8.{panel}",,,,,,,,,,0,,,,,,,,,,,,,,,,,,,08:48.5,,,FALSE,,,,,,,,,,,,,9.22337E+18,,,Thu Nov 15 15:08:48 UTC 2018,,,,,,0|s00j74:,9.22337E+18,,,,,,,,,15/Nov/18 15:08;ggregory;Fixed in SVN trunk.

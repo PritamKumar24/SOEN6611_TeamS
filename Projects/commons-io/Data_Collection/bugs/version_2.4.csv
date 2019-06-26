@@ -1,0 +1,2432 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Component/s,Due Date,Votes,Labels,Labels,Description,Environment,Log Work,Log Work,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Outward issue link (Cloners),Outward issue link (Duplicate),Outward issue link (Reference),Attachment,Attachment,Attachment,Attachment,Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Flags),Custom field (Flags),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+Copying *.app corrupts the file,IO-491,12924228,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Blocker,Cannot Reproduce,,akshaybabloo,akshaybabloo,12/24/2015 22:02,2/16/2017 18:07,6/19/2019 21:00,2/16/2017 18:07,2.4,,,,,,,,,Streams/Writers,,,0,patch,,"Hi,
+
+When ever I try to copy a *.app to a folder, *.app corrupts completely. 
+
+Thanks.",Mac OS 10.11.2,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,13:58.4,,,FALSE,,,,,Important,Patch,,,,,,,,9.22337E+18,,,Mon Feb 01 07:42:02 UTC 2016,,,,,,0|i2qam7:,9.22337E+18,,,,,,,,,24/Dec/15 23:13;ggregory;Kinda hard to help you without a code example.,"25/Dec/15 03:17;akshaybabloo;Ok, So I created a JavaFX application and packed it natively for Mac OS X. This native app is called ""JCal.app"". It's basically a directory for Mac (as far as I know). When you open it's content (right click -> Show Contents) and go to ""JCal.app/MacOS/"" you will find a file called JCal (which is an Unix Executable file).
+
+Now lets say that this particular is in my downloads folder and I want to copy it to Applications folder, I would do the following 
+
+FileUtils.copyDirectoryToDirectory(FileUtils.getFile(System.getProperty(""user.home"") + ""/Downloads/JCal.app""), FileUtils.getFile(""/Applications/""));
+
+which should copy the complete directory (in this case JCal.app) to Applications folder. Now the directory is getting copied but which this is happening the Unix executable file gets corrupted and turned in a known text file with question marks and symbols. This should not happen.","01/Feb/16 07:42;kinow;Couldn't reproduce it with my current environment (below).
+
+{noformat}
+java version ""1.8.0_66""
+Java(TM) SE Runtime Environment (build 1.8.0_66-b17)
+Java HotSpot(TM) 64-Bit Server VM (build 25.66-b17, mixed mode)
+
+Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-11T05:41:47+13:00)
+Maven home: /home/kinow/Development/java/apache-maven-3.3.9
+Java version: 1.8.0_66, vendor: Oracle Corporation
+Java home: /home/kinow/Development/java/jdk1.8.0_66/jre
+Default locale: en_NZ, platform encoding: UTF-8
+OS name: ""linux"", version: ""3.19.0-47-generic"", arch: ""amd64"", family: ""unix""
+
+kinow@localhost:~$ uname -a
+Linux localhost 3.19.0-47-generic #53~14.04.1-Ubuntu SMP Mon Jan 18 16:09:14 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+kinow@localhost:~$ cat /etc/lsb-release 
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=14.04
+DISTRIB_CODENAME=trusty
+DISTRIB_DESCRIPTION=""Ubuntu 14.04.3 LTS""
+{noformat}
+
+Created a folder ~/DIR1.app, with some content in it.
+
+{noformat}
+kinow@localhost:~$ mkdir ~/DIR1.app
+kinow@localhost:~$ cd ~/DIR1.app
+kinow@localhost:~/DIR1$ touch date.txt
+kinow@localhost:~/DIR1$ date > date.txt
+kinow@localhost:~/DIR1$ cat date.txt 
+Mon Feb  1 20:23:11 NZDT 2016
+kinow@localhost:~/DIR1$ md5sum date.txt 
+3324a7961efd23aaa09dc3c6e79ee4c8  date.txt
+{noformat}
+
+And them copied it to another folder with the example provided, as follows.
+
+{code}
+    public static void main(String[] args) throws Exception {        FileUtils.copyDirectoryToDirectory(FileUtils.getFile(System.getProperty(""user.home"") + ""/DIR1.app""),
+                FileUtils.getFile(""/tmp/""));
+    }
+{code}
+
+And the folder and file created were both correctly copied, with no corruption.
+
+{noformat}
+kinow@localhost:~/DIR1.app$ ls /tmp/DIR1.app/
+date.txt
+kinow@localhost:~/DIR1.app$ cat /tmp/DIR1.app/
+kinow@localhost:~/DIR1.app$ cat /tmp/DIR1.app/date.txt 
+Mon Feb  1 20:23:11 NZDT 2016
+kinow@localhost:~/DIR1.app$ md5sum /tmp/DIR1.app/date.txt 
+3324a7961efd23aaa09dc3c6e79ee4c8  /tmp/DIR1.app/date.txt
+{noformat}
+
+The ~/DIR1.app folder was created using the default umask and had the permission to 0755. But even after changing the mode to 0777, and repeating it, the code worked as expected.
+
+Would be nice to have an attachment (.zip or .app maybe) and if someone with a Mac could test it too. It could be due to some other process using the file, or some other thing related to the reporter environment.
+
+Hope that helps.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Exceptions are suppressed incorrectly when copying files.,IO-502,12962251,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Critical,Fixed,ggregory,schulte77,schulte77,4/25/2016 14:20,5/3/2016 18:01,6/19/2019 21:00,4/27/2016 17:32,2.4,2.5,,,,,,,2.6,Utilities,,,0,,,"When copying files or directories, exceptions thrown on closing streams are suppressed incorrectly and need to be propagated to the caller.",,,,,,,,,,,,,,,27/Apr/16 16:02;schulte77;IO-502-OpenBSD.patch;https://issues.apache.org/jira/secure/attachment/12801054/IO-502-OpenBSD.patch,25/Apr/16 14:21;schulte77;IO-502.patch;https://issues.apache.org/jira/secure/attachment/12800526/IO-502.patch,,,,2,,,,,,,,,,,,,,,,,,,55:20.2,,,FALSE,,,,,Patch,,,,,,,,,9.22337E+18,,,Wed Apr 27 17:32:47 UTC 2016,,,,,,0|i2wowv:,9.22337E+18,,,,,,,,,"25/Apr/16 21:55;ggregory;In this part of the patch:
+
+{code:java}
+Index: src/main/java/org/apache/commons/io/FileUtils.java
+===================================================================
+--- src/main/java/org/apache/commons/io/FileUtils.java	(Revision 1740841)
++++ src/main/java/org/apache/commons/io/FileUtils.java	(Arbeitskopie)
+@@ -1154,6 +1154,18 @@
+                 }
+                 pos += bytesCopied;
+             }
++
++            output.close();
++            output = null;
++
++            fos.close();
++            fos = null;
++
++            input.close();
++            input = null;
++
++            fis.close();
++            fis = null;
+         } finally {
+             IOUtils.closeQuietly(output, fos, input, fis);
+         }
+{code}
+
+... some exceptions are still dropped on the floor. For example, output.close() works but fos.close() fails, then you do not ""see"" other failures. So what we really trying to do here, hide all except the 1st failure? But then, what is the proper order all the of close() calls. Should other errors then at least be printed on the console? Yikes. Sounds like a mess!
+
+A change like this could also trip up existing apps in the case where exceptions are now thrown. But it seems quite legitimate to me... I would not care that the input fails to close but I sure do care about the output. 
+
+Perhaps, always throwing an exception on closing the output and ignoring exceptions on closing the input would be best?
+
+Thoughts?","25/Apr/16 23:11;schulte77;Good questions. Closing the input silently shouldn't be an issue. Issue is the implementation of the output may make use of some kind of buffering internally and a 'close' may trigger some kind of flushing which may produce an exception which shouldn't be suppressed. So when the 'close' of the output throws an exception I would expect the operation to have failed and would want that exception to be propagated to the caller.
+","25/Apr/16 23:33;schulte77;The 'close' method of 'FileOutputStream' translates to a call to OpenJDK's native [fileClose|http://hg.openjdk.java.net/jdk7u/jdk7u/jdk/file/34c594b52b73/src/solaris/native/java/io/io_util_md.c#l88] method. That will call [JVM_Close|http://hg.openjdk.java.net/jdk7u/jdk7u-dev/hotspot/file/2cd3690f644c/src/share/vm/prims/jvm.cpp#l2642] leading to the operating system's C libraries 'close' function getting called. Definitely want any error that function returns to be propagated as an exception to the caller. It's completely operating system dependent. On my system the manpage of close states:
+
+{noformat}
+ERRORS
+     close() will fail if:
+
+     [EBADF]            d is not an active descriptor.
+     [EINTR]            An interrupt was received.
+     [EIO]              An I/O error occurred while writing to the file system.
+{noformat}
+
+Not suppressing any of these errors silently should do. I think closing a channel obtained from a stream will also close the stream internally. I do not know if that is specified behaviour or just an implementation detail of e.g. OpenJDK.
+","25/Apr/16 23:46;sebb;Seems to me that the suggested patch is fine.
+
+It closes the output objects first, so those take precedence over input.
+It also closes the channel before the stream.
+
+Is there really any point in trying to capture further close errors once the first error has occurred?
+Would that provide any useful information?","26/Apr/16 23:56;ggregory;[~schulte77],
+
+The patch causes NPE. Fixed is subsequent commit.
+
+Please verify and close.
+
+Thank you!
+
+Gary","27/Apr/16 16:02;schulte77;Getting
+
+{code}
+testGetFreeSpace_String(org.apache.commons.io.FileSystemUtilsTestCase)  Time elapsed: 0.277 sec  <<< ERROR!
+java.lang.IllegalStateException: Unsupported operating system
+        at org.apache.commons.io.FileSystemUtils.freeSpaceOS(FileSystemUtils.java:271)
+        at org.apache.commons.io.FileSystemUtils.freeSpace(FileSystemUtils.java:143)
+        at org.apache.commons.io.FileSystemUtilsTestCase.testGetFreeSpace_String(FileSystemUtilsTestCase.java:71)
+{code}
+
+os.name is ""OpenBSD"". Patch adding support for it.
+
+{code}
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+{code}",27/Apr/16 17:32;ggregory;Reopening to apply 2nd patch.,"27/Apr/16 17:32;ggregory;{noformat}
+commit -m ""[IO-502] Exceptions are suppressed incorrectly when copying files. 2nd patch."" -N E:/vcs/svn/apache/commons/trunks-proper/io/src/main/java/org/apache/commons/io/FileSystemUtils.java
+    Sending        E:/vcs/svn/apache/commons/trunks-proper/io/src/main/java/org/apache/commons/io/FileSystemUtils.java
+    Transmitting file data ...
+    Committed revision 1741296.
+{noformat}
+
+Please verify and fix.
+
+Thank you!",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+attributes are missing in MANIFEST.MF,IO-445,12715184,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Critical,Won't Fix,,yjfJeff,yjfJeff,5/19/2014 14:39,6/7/2014 16:24,6/19/2019 21:00,6/7/2014 16:24,2.4,,,,,,,,,,,,0,,,"We are encountering an issue using commons-io-2.4.jar inside an applet.
+Since the 7U45 of java, the MANIFEST of a jar used inside an applet must be complete.
+3 attributes are missing in the MANIFEST
+Trusted-Library : true
+Application-Name : <<as you want>>
+Permissions : all-permissions (or less if you want to be precise)
+Codebase : *
+see : http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/security/manifest.html
+
+Without these attributes, the JRE refuse to execute an applet containing commons-io-2.4.jar.
+Could you please fix that in order to make these two jars usable inside an applet ?
+
+Thanks",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,59:56.3,,,FALSE,,,,,,,,,,,,,,393470,,,Wed Jun 04 21:04:47 UTC 2014,,,,,,0|i1vr5z:,393632,,,,,,,,,"04/Jun/14 12:43;yjfJeff;Hi there,
+
+When can this issue be planed to get fixed?",04/Jun/14 12:59;ggregory;I wonder if this is something we could/should implement in commons-parent.,"04/Jun/14 17:15;sebb;We could of course add this to the parent pom, but won't this bypass any security checks in the browser?
+Is that something we want to do? Should we not perform some kind of security analysis first?
+
+The ""Application Name"" field looks safe enough to add (though it is optional anyway). I'm not sure about the rest.
+
+According to the linked article, Codebase cannot be ""*""
+{quote}
+An asterisk \(*) can be used as a wildcard only at the beginning of the domain name, and cannot be used with only a top-level domain, such as *.com. 
+{quote}
+
+So I don't see how we can possibly provide a Codebase that works for all users.
+
+I suspect these values need to be set up by the person who wants to use the jar.",04/Jun/14 21:04;joehni;See my comments at CODEC-186.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Tailer erroneously considers file as new,IO-279,12514326,Bug,Reopened,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,sbtourist,sbtourist,7/16/2011 14:37,4/11/2019 12:14,6/19/2019 21:00,,2.0.1,2.4,,,,,,,,,,,5,,,"Tailer sometimes erroneously considers the tailed file as new, forcing a repositioning at the start of the file: I'm still unable to reproduce this in a test case, because it only happens to me with huge log files during Apache Tomcat startup.
+
+This is the piece of code causing the problem:
+
+{code}
+// See if the file needs to be read again
+if (length > position) {
+
+    // The file has more content than it did last time
+    last = System.currentTimeMillis();
+    position = readLines(reader);
+
+} else if (FileUtils.isFileNewer(file, last)) {
+
+    /* This can happen if the file is truncated or overwritten
+        * with the exact same length of information. In cases like
+        * this, the file position needs to be reset
+        */
+    position = 0;
+    reader.seek(position); // cannot be null here
+
+    // Now we can read new lines
+    last = System.currentTimeMillis();
+    position = readLines(reader);
+}
+{code}
+
+What probably happens is that the new file content is about to be written on disk, the date is already updated but content is still not flushed, so actual length is untouched and there you go.
+
+In other words, I think there should be some better method to verify the condition above, rather than relying only on dates: keeping and comparing the hash code of the latest line may be a solution, but may hurt performances ... other ideas?",,"Misiu commented on issue #40: IO-279: Added ignoreNew parameter on instantiating Tailer.
+URL: https://github.com/apache/commons-io/pull/40#issuecomment-482084210
+ 
+ 
+   @garydgregory could You take a look at this PR?
+   We need this for openHAB - https://github.com/openhab/openhab2-addons/issues/5442
+ 
+----------------------------------------------------------------
+This is an automated message from the Apache Git Service.
+To respond to the message, please log on to GitHub and use the
+URL above to go to the specific comment.
+ 
+For queries about this service, please contact Infrastructure at:
+users@infra.apache.org
+;11/Apr/19 11:56;githubbot;600","garydgregory commented on issue #40: IO-279: Added ignoreNew parameter on instantiating Tailer.
+URL: https://github.com/apache/commons-io/pull/40#issuecomment-482089524
+ 
+ 
+   Hi @Misiu,
+   
+   Thanks for the ping.
+   I am -1 to this PR because:
+   - It breaks binary compatibility. You can tell since this build is broken. See the red ""All checks have failed"" note on this page and the associated Travis builds.
+   - It does not contain a unit test to test the new feature.
+   
+   Gary
+ 
+----------------------------------------------------------------
+This is an automated message from the Apache Git Service.
+To respond to the message, please log on to GitHub and use the
+URL above to go to the specific comment.
+ 
+For queries about this service, please contact Infrastructure at:
+users@infra.apache.org
+;11/Apr/19 12:14;githubbot;600",,0,1200,,,0,1200,,,,,08/Jun/12 02:05;niallp;IO-279.patch;https://issues.apache.org/jira/secure/attachment/12531358/IO-279.patch,01/Sep/13 09:50;kgr;disable_resetting.patch;https://issues.apache.org/jira/secure/attachment/12600974/disable_resetting.patch,25/Apr/13 14:43;meerlol;fix-tailer.patch;https://issues.apache.org/jira/secure/attachment/12580537/fix-tailer.patch,22/Apr/13 07:26;meerlol;modify-test-fixed.patch;https://issues.apache.org/jira/secure/attachment/12579793/modify-test-fixed.patch,18/Apr/13 08:54;meerlol;modify-test.patch;https://issues.apache.org/jira/secure/attachment/12579292/modify-test.patch,5,,,,,,,,,,,,,,,,,,,57:08.7,,,FALSE,,,,,,,,,,,,,,3157,,,Thu Jul 06 09:18:36 UTC 2017,,,,,,0|i0b0mv:,62215,,,,,,,,,"17/Nov/11 23:57;cmbaron;There are at least two additional causes that I've identified:
+
+(1) ""last"" time stamp does not include time spent reading or listener handling.
+
+last = System.currentTimeMillis();
+position = readLines(reader);
+
+readLines(...) continues to read and handle lines from the log until it reaches the EOF.
+
+An erroneous truncation can be detected ff (a) content is added to the file between the recording of the ""last"" timestamp and (b) before readLine encounters EOF and (c) no content is added during the delay time.
+
+The fix is to reverse the two lines such that the timestamp is recorded after the call to readLines(...).
+
+
+(2) On very highly loaded system content could be written between the point the file length is saved and the timestamp is compared.
+
+The fix is to compare the file date to the ""last"" timestamp prior to checking its length and to use that boolean result in the nested else if.
+
+
+","22/Dec/11 11:35;markltbaker;I see this bug as well, I am using this class to tail log files during a lengthly build process and occasionally the entire log file will be regurgitated :(
+","22/Dec/11 13:30;sbtourist;Mark, that should be fixed in my fork: https://github.com/sbtourist/tayler","07/Jun/12 23:44;sebb;There's a general problem here, in that it's not possible to obtain both the file position and the current timestamp (System or File) as part of a single transaction.
+
+However, the critical case is where the File timestamp is greater than the System timestamp, so it does not matter if the File timestamp is measured too early or the System timestamp is measured too late.","08/Jun/12 02:05;niallp;Firstly I don't know why System.currentTimeMillis() is used. What matters is if the files lastModified time compared to its previous lastModified value.
+
+I agree with Chris that the lastModified time should be stored after the file is read.","08/Jun/12 02:11;niallp;Ooo, my bad - this is already fixed. Still same as my patch except using file.lastModified() rather than System.currentTimeMillis()","08/Jun/12 08:40;sebb;bq. What matters is if the files lastModified time compared to its previous lastModified value.
+
+Yes, but if that is measured after calling readLines, this might trigger case (2) above.","27/Nov/12 14:31;molendag;I am tailing with the fixed Tailer (commons-io 2.4.0) a log4j log file and I still see the issue. Despite the fact that the log file was neither rotated nor new data was added, the position is being reset to 0, causing the Tailer re-reading the monitored file from the begining. 
+
+Since log4j's asynchronous logger is used to log into the monitored file, it might happen, that the modifiedDate is set before the content is actually flushed to the file. 
+
+I assume reseting position was added to cover the case, when the monitored file is overriden. I think it is imposiilble for the Tailer to determine this. The current implementation covers only the case, when the file length is equal to the last read position. If the file legth after being overriden is higher than the last read position, then the Tailer will assume data was normally appended and process the file from the last read position. 
+
+Assuming the data is only appended to the file, I'd just get rid of the reseting position feature from Tailer to resolve the issue finally.","27/Nov/12 16:08;sebb;It seems odd that the OS should update the file modification date before the file has actually been modified.
+I would expect the flush to write the data to the file and then update the date.
+
+But perhaps it does behave that way.
+
+Could you provide a patch that works with your use case?","10/Jan/13 11:41;richard_hawkes;Guys, I have downloaded 2.4 which (I think) you are saying has fixed it. However, I notice that the fileRotated is still getting called erroneously. I have done a fair bit of research into this, and it would seem that the file.length() method is not always 100% up to date, which leads to position occasionally being greater than file.length() !! Quite often it seems to be a few miliseconds behind the actual position. I suppose with that much data bouncing around the network.
+
+I have added a check after the readLines(reader) to see if position is greater than file.length() if it is, it waits a second. That seems to mop up this issue, although I know it's one ALMIGHTY hack!",16/Apr/13 11:54;meerlol;Just a mere 'touch <file>' triggers a complete reload of the file. I can not imagine that that is wanted behaviour.,"16/Apr/13 12:51;richard_hawkes;Herman, I don't think anyone's looking at this. I would say that the tailer is flawed and should not be used. It's no better than reading the file via standard Java methods. I had really hoped to leverage this, but such is the way with open source :-(","16/Apr/13 20:20;sebb;The issue has been marked resolved; if you have a patch please re-open and provide the patch, preferably with a test case that demonstrates the problem.","17/Apr/13 06:12;meerlol;Well, this is the world turned upside down. I can only reopen the issue if I have a patch for it. That doesn't make sense. The problem still exists and therefore the ticket should be reopened. I have patched it locally for myself but I doubt that my patch is ok for everyone because I completely removed the last else if statement. For me it makes no sense to check if the file is newer. The only use case would be that the file had been overwritten with exactly the same amount of data. Truncation is not an issue because that would mean that the length and position must have been 0 anyway. For me it is way more likely that the file's modified time has been updated than that the content has been overwritten with the same amount of bytes.","17/Apr/13 06:54;richard_hawkes;Strikes me that this should simply be re-opened. Issue is recreatable, but as yet no fix is known.","17/Apr/13 11:08;sebb;bq.  I can only reopen the issue if I have a patch for it.
+
+That's not what I meant. The issue had been marked resolved, so developers were unlikely to look at it.
+But without a proposed patch (even if incomplete) or a test case, there's not a lot developers can do.","18/Apr/13 08:54;meerlol;Hi, here is the requested test case patch. It tests both cases: only the lastmodified updated and content overwritten with exactly the same amount of bytes.","20/Apr/13 18:40;sebb;The test seems wrong to me.
+Only one line is written to the file, yet the check says:
+
+{code}
+assertEquals(""1 line count"", 2, lines.size());
+{code}
+
+Also, I'm not sure that changing the file modification date should be ignored.
+How can one tell the difference between a file that has been touched from one that has been re-written to the same length? 
+
+Potentially it may even be the same data - that would be an unusual use-case, but not impossible.
+For example, a rotating logger that records events but does not include a timestamp. The same event sequence could recur.
+
+A further problem with the test case in the patch is that it does not check the data, only the line count.","20/Apr/13 22:10;sebb;Having said that, if there is still a problem whereby the code does not follow the file properly, please provide full details.","22/Apr/13 07:25;meerlol;I'm sorry, I had the test correct but modified it before making the patch. I will correct it and upload it in a few minutes.
+
+Let's be clear, I'm not suggesting to ignore the file modification date as a solution. For me that would be the perfect solution and I think the most common use case as well. The likelihood of the file being touched seems way higher to me than the likelihood that the exact same sequence of bytes are written, especially when the files get larger. And as can be seen from other comments above there are more people reporting this problem. It is probably not an option to make Java 7 a requirement so we can use the WatchService?","22/Apr/13 07:26;meerlol;Fixed testcase, mea culpa.","22/Apr/13 09:41;sebb;My point was that discriminating between 'touch' and an updated file is tricky and not always possible.
+I don't consider it a fault that the a touched file is seen as new (cf. backup).
+
+We really need a test case that shows the exact same error.
+
+Also it would be helpful to know if the failures occurred on Unix or Windows, and whether reOpen is true or false.","22/Apr/13 09:53;meerlol;I totally agree, it is very hard to discriminate between the different use cases. It might only be possible with Java 7. What do you mean with (cf. backup) by the way?
+
+My case occurs on Linux (Debian) where I wrote a tool to tail GlassFish log files and out put them to Kafka. Every now and then it spits out the entire log file again, which makes the Tailer useless for me. I have a suspicion that the problem might be related to the fact that the 'last' is set to System.currentTimeMillis() instead of to file.lastModified(). Maybe there is a granularity difference between the two, where the FS rounds the last modified upwards? If I stat the file then it always has a 1 sec precision. That would explain it I guess. I will patch it here and run a test today.","22/Apr/13 10:26;sebb;OK thanks.
+
+bq. (cf. backup)
+
+I meant that backup treats touched files as new, so Tailer should too.
+
+","25/Apr/13 14:43;meerlol;Ok, I've tested the patch for a few days now. The problem has not reoccured anymore whereas before it used to happen multiple times per day. I have attached the patch.","26/Apr/13 07:14;sebb;Thanks. Can you confirm exactly what you changed? Did you replace all 3 instances of System.currentTimeMillis() or only some of them?
+
+Also the new test case testModifiedTime fails for me both with the current code and when the code is patched by replacing all 3 System.currentTimeMillis() with file.lastModifiedTime(). Is that what you expect? Or should the test succeed?","26/Apr/13 07:20;meerlol;Yes I replaced all 3 instances of System.currentTimeMillis()
+
+The test will indeed still fail, it doesn't solve the specific case of differentiating between the touch of a file and overwriting the contents of the file with the exact same amount of bytes. It solves this specific bug as the title says 'Tailer erroneously considers file as new'. So I guess it is better to create a new ticket and attach the testcase to that ticket, because that is a different bug (which is very hard to solve as has already been said by most of us).","26/Apr/13 07:52;sebb;OK, thanks, I'll apply the same fix to Tailer.","26/Apr/13 08:48;sebb;URL: http://svn.apache.org/r1476097
+Log:
+IO-279  Tailer erroneously considers file as new.
+        Fix to use file.lastModified() rather than System.currentTimeMillis()
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/input/Tailer.java","05/Jul/13 17:15;otis;bq. My case occurs on Linux (Debian) where I wrote a tool to tail GlassFish log files and out put them to Kafka. Every now and then it spits out the entire log file again, which makes the Tailer useless for me.
+
+What about tracking the current position/line in the file, at least approximately.
+Then, after detecting apparent new/rotated file one could check things like size of the file or some such and compare it with the offset to answer the question such as ""Does this apparently new file that I'm about to start tailing from its beginning actually already have the offset I was at before?  If so, maybe this is the same file and somebody just touched it.  In that case, let me just jump to that offset"".
+
+Doable?
+","05/Jul/13 17:44;sebb;Note that the particular problem you quoted has been solved.
+
+We already keep track of the location in the file within the code, and we compare file sizes and times.
+
+The problem is trying to distinguish a file that has been touched from a file that has been rewritten or truncated to exactly the same size.",05/Jul/13 20:27;otis;Thanks Sebb.  I see.  So things like logrotate can confuse the tailer if they truncate files instead of moving them?,"26/Jul/13 17:47;mqsquidy;Just wanted to confirm to anyone who cares, commons-io 2.4 tag with the April patch attached to this JIRA, still has the issue in the scenerio we are using it. We have a daemon network listener process written in C++ that opens a log file, appends new data, closes the file, repeatedly, for which we are trying to use the Tailer classes to pump the log through Kafka, similar to Herman in the above thread. Using commons-io 2.4 prebuilt jar we were getting the intermittent reatart on almost all hosts more than once a day. Using the patched jar it happened less, but still happens. I am trying the forked version in github published by Sergio. I will respond with my findings.",01/Sep/13 09:34;kgr;In many cases it can be assumed that a file can not be overwritten with the exact same length of data (always will be smaller after reset). In our project we are using a slightly patched version of commons-io library with a flag added to the Tailer class that enables/disables resetting file position when a file update is encountered but a file length is not changed. If we are sure that a file can not be overwritten with the exact size then we disable the flag to prevent this issue. I've attached the patch we are using ([^disable_resetting.patch]). It is based on the version 2.4. Maybe it would be worth to apply this patch to the trunk?,"05/Mar/14 10:47;unlogic;I stumbled across this issue while tailing a file on a remote server via Samba.
+
+The clock on the server was running a few seconds ahead of my local machine which caused the file to be seen as newer even though it wasn't.
+
+I solved this by simply replacing the line:
+
+last = System.currentTimeMillis();
+
+With:
+
+last = file.lastModified();
+
+That way it doesn't matter if the clocks are not in perfect sync.","05/Mar/14 15:46;sebb;bq. last = file.lastModified();
+
+That change has already been made in trunk and will be in 2.5","07/Mar/14 08:15;liuhongyan;I have downloaded from the trunk, but the question remains.Repeat output for three times, it seems that problems unresolved.","09/Jun/14 13:58;sleepy9090;Hi,
+I was curious if there has been any progress on this issue?
+
+Thanks","25/Feb/15 01:15;spullara;We are running into this bug on a terribly slow EBS volume. I think that the behavior should match what ""tail -f"" would do in this situation which appears to not reset the read position when the file is newer and the lengths are equal. Only if the length is less do they consider it a truncation.
+
+http://git.savannah.gnu.org/cgit/coreutils.git/tree/src/tail.c#n1205
+
+","25/Feb/15 01:29;spullara;Also, any plan to upgrade this to Java 7 so we can use the WatchService rather than this polling version?","13/May/15 09:10;kervin;This issue is still present in 2.5-SNAPSHOT and I think found why, at least for my application.
+
+The problem is on some OSes 'File.lastmodified()' is cached until an event e.g. File.close().  This at least happens on Windows in some circumstances.  I was monitoring a log4net file on a IIS application.
+
+*Reference* : http://blogs.technet.com/b/asiasupp/archive/2010/12/14/file-date-modified-property-are-not-updating-while-modifying-a-file-without-closing-it.aspx
+
+This means that the file will grow in reported size as it remains open, but the 'lastmodified()' result will remain constant until that other application closes the file.
+
+Tailer does something very puzzling.  It will call seek(0) in this case...
+{code:title=Tailer.java|borderStyle=solid}
+                    } else if (newer) {
+                        /*
+                         * This can happen if the file is truncated or overwritten with the exact same length of
+                         * information. In cases like this, the file position needs to be reset
+                         */
+                        position = 0;
+                        reader.seek(position); // cannot be null here
+
+                        // Now we can read new lines
+                        position = readLines(reader);
+                        last = file.lastModified();
+                    }
+{code}
+Shouldn't Tailer throw an exception in the worse case?  But I would argue that seeing the lastmodified update but not seeing the size update isn't really an exception condition.  The file could have been 'touched', lastmodified manually set other ways, etc.
+
+By the way, [~kgr] also proposed similar in September 2013.  [~spullara] also proposed this in February 2015.
+
+There can be a 'useFileTimestamps' flag which would allow users to ignore the lastmodified() related tests.  Using filesize as the only method of detecting change.",13/Aug/15 21:44;shawnhe;I am encountering the same issue with commons-io 2.4 and using the Tailer class. I assume we could manually build a commons-io class and use that in Java before an official release comes out with a patch suggested by the above two people.,"14/Apr/16 18:16;vanteo;I am also encountering this problem with 2.4. Using it on RHEL 5.11 (yes, very old). It seems that there is a window that gets hit a few times per day where the OS file system updates the file modification date slightly before the file size is updated, hence Tailer thinks it needs to re-read from the very beginning.
+
+To workaround, I have removed all checks to file modification time from the run method. In my case, detecting changes by file size alone is enough. It would be nice for this to be configurable.
+",08/Mar/17 21:41;vanteo;FYI. This issue is still present on commons.io 2.5 on RHEL 5.11 for me.,"06/Jul/17 09:18;githubbot;GitHub user myyron opened a pull request:
+
+    https://github.com/apache/commons-io/pull/40
+
+    IO-279: Added ignoreNew parameter on instantiating Tailer.
+
+    Encountered this bug today when we try to tail a file that is being modified even though there is no new content being added.
+
+You can merge this pull request into a Git repository by running:
+
+    $ git pull https://github.com/myyron/commons-io IO_279
+
+Alternatively you can review and apply these changes as the patch at:
+
+    https://github.com/apache/commons-io/pull/40.patch
+
+To close this pull request, make a commit to your master/trunk branch
+with (at least) the following in the commit message:
+
+    This closes #40
+    
+----
+commit 79dd3567811f0f155c43cb88f331489b85e6189c
+Author: mlatorilla <mlatorilla@sunpowercorp.com>
+Date:   2017-07-06T08:44:57Z
+
+    IO-279: Added ignoreNew parameter on instantiating Tailer.
+
+----
+"
+"listFiles(File directory, IOFileFilter fileFilter, IOFileFilter dirFilter) does not recurse into subdirectories",IO-602,13216082,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,steve@sjlt.co.uk,steve@sjlt.co.uk,2/15/2019 21:49,2/15/2019 22:50,6/19/2019 21:01,2/15/2019 22:50,2,2.0.1,2.1,2.2,2.3,2.4,2.5,2.6,,Utilities,,,0,,,"Calling FileUtils.listFiles (someDir, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE) will only return top level files.
+
+This contradicts the documentation that says the list should walk the file tree.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Feb 15 22:50:15 UTC 2019,,,,,,0|yi11hc:,9.22337E+18,,,,,,,,,15/Feb/19 22:50;steve@sjlt.co.uk;Brain fade - bad test case.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"FileUtils.copyFile methods throw an unnecessary ""Failed to copy full contents from"" exception ",IO-443,12714251,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,oerlybird,oerlybird,5/14/2014 19:20,12/11/2017 11:31,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"The private doCopyFile method of FileUtils does a comparison between the source and destination file sizes after the data has been copied. 
+
+If the destination file has been removed, renamed, or otherwise no more accessible (remote share no more available) between the finally block and the size comparison the destFile.length() returns zero. If the source file is not zero bytes in size an exception with the message ""Failed to copy full contents from '"" + srcFile + ""' to '"" + destFile "" will be thrown.
+
+Regards
+Sami",Win x86  32 bit,,,,,,,,,,,,,IO-544,,,,,,0,,,,,,,,,,,,,,,,,,,29:05.2,,,FALSE,,,,,,,,,,,,,,392564,,,Mon Dec 11 11:29:05 UTC 2017,,,,,,0|i1vlrz:,392747,,,,,,,,,"11/Dec/17 11:29;sebb;If the output size were checked before the file is closed but after it is flushed, that should catch actual copy errors (assuming the input does not change) regardless of subsequent changes to the destination.
+
+I think the question here is: what is the check really for?",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Unexpected behavior of FileNameUtils.normalize may lead to limited path traversal vulnerabilies,IO-556,13119433,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Duplicate,,Lukas Euler,Lukas Euler,11/18/2017 18:27,11/30/2017 20:34,6/19/2019 20:58,11/30/2017 20:34,2.2,2.3,2.4,2.5,2.6,,,,,Utilities,,,0,security,security-issue,"I sent this report in an Email to security@apache.org on 2017-10-16. I did not receive any kind of response yet (2017-11-18 as of writing). I am now posting it publicly, to open the issue up for discussion, and hopefully initiate a fix.
+
+This report is not about a vulnerability in {{commons-io}} per se, but an unexpected behavior that has a high chance of introducing a path traversal vulnerability when using {{FileNameUtils.normalize}} to sanitize user input. The traversal is limited to a single out-of-bounds-stepping ""/../"" segment.
+
+
+h5. Reproduction
+
+{Code}
+FileNameUtils.normalize(""//../foo"");        // returns ""//../foo"" or ""\\\\..\\foo"", based on java.io.File.separatorChar
+FileNameUtils.normalize(""\\\\..\\foo"");        // returns ""//../foo"" or ""\\\\..\\foo"", based on java.io.File.separatorChar
+{Code}
+
+h5. Possible impact (example)
+
+Consider a web-application that uses {{FileNameUtils.normalize}} to sanitize a user-supplied file name string, and then appends the sanitized value to a configured upload directory to store the uploaded content in:
+
+{Code}
+String fileName = ""//../foo"";            // actually user-supplied (e.g. from multipart-POST request)
+fileName = FileNameUtils.normalize(fileName);    // still holds the same value (""//../foo"")   
+           
+if (fileName != null) {
+    File newFile = new File(""/base/uploads"", fileName);    // java.io.File treats double forward slashes as singles
+                                // newFile now points to ""/base/uploads//../foo""
+    newFile = newFile.getCanonicalFile();            // newFile now points to ""/base/foo"", which should be inaccessible
+
+    // Write contents to newFile...
+} else {
+    // Assume malicious activity, handle error
+}
+{Code}
+
+
+h5. Relevant code locations
+
+* {{org.apache.commons.io.FilenameUtils#getPrefixLength}} : everything between a leading ""//"" and the next ""/"" is treated as a UNC server name, and ignored in all further validation logic of {{org.apache.commons.io.FilenameUtils#doNormalize}} .
+
+
+h5. Discussion
+
+One might argue that the given example is a misuse of the {{FileNameUtils.normalize}} method, and that everyone using it should expect absolute paths, full UNC paths, etc. to be returned by the method.
+Furthermore, the vulnerability can only occur due to the lax behavior of {{java.io.File}} .
+
+On the other hand, I believe that the JavaDoc of {{FileNameUtils.normalize}} suggests to most readers, that this method is exactly what is needed to sanitize file names:
+{noformat}
+//-----------------------------------------------------------------------
+    /**
+     * Normalizes a path, removing double and single dot path steps,
+     * and removing any final directory separator.
+     * <p>
+     * This method normalizes a path to a standard format.
+     * The input may contain separators in either Unix or Windows format.
+     * The output will contain separators in the format of the system.
+     * <p>
+     * A trailing slash will be removed.
+     * A double slash will be merged to a single slash (but UNC names are handled).
+     * A single dot path segment will be removed.
+     * A double dot will cause that path segment and the one before to be removed.
+     * If the double dot has no parent path segment to work with, {@code null}
+     * is returned.
+     * <p>
+     * The output will be the same on both Unix and Windows except
+     * for the separator character.
+     * <pre>
+     * /foo//               --&gt;   /foo
+     * /foo/./              --&gt;   /foo
+     * /foo/../bar          --&gt;   /bar
+     * /foo/../bar/         --&gt;   /bar
+     * /foo/../bar/../baz   --&gt;   /baz
+     * //foo//./bar         --&gt;   /foo/bar
+     * /../                 --&gt;   null
+     * ../foo               --&gt;   null
+     * foo/bar/..           --&gt;   foo
+     * foo/../../bar        --&gt;   null
+     * foo/../bar           --&gt;   bar
+     * //server/foo/../bar  --&gt;   //server/bar
+     * //server/../bar      --&gt;   null
+     * C:\foo\..\bar        --&gt;   C:\bar
+     * C:\..\bar            --&gt;   null
+     * ~/foo/../bar/        --&gt;   ~/bar
+     * ~/../bar             --&gt;   null
+     * </pre>
+     * (Note the file separator returned will be correct for Windows/Unix)
+     *
+     * @param filename  the filename to normalize, null returns null
+     * @return the normalized filename, or null if invalid. Null bytes inside string will be removed
+     */
+{noformat}
+
+I have done a quick survey of the usages of the method in public GitHub repositories. I have found numerous projects that suffer from the limited path traversal vulnerability that is described here because of this very issue. This includes Webservers, Web-Frameworks, Archive-Extraction-Software, and others.
+
+Preventing path traversal attacks is not trivial, and many people turn to libraries like {{commons-io}} to avoid making mistakes when implementing parsing logic on their own. They trust that {{FileNameUtils}} will provide them with the most complete, and suitable sanitation logic for file names.
+In addition, "".."" is not a valid UNC host name according to https://msdn.microsoft.com/de-de/library/gg465305.aspx , so prohibiting it shouldn't result in any major problems.",all,,,,,,,,,,,,IO-559,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,27:37.0,,,,,,0|i3myon:,9.22337E+18,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+DeferredFileOutputStream produces unhandled IOExceptions if the java.io.tmpdir is deleted,IO-497,12933229,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,nbyrd,nbyrd,1/22/2016 1:18,9/13/2017 18:42,6/19/2019 21:01,,2.4,,,,,,,,,Streams/Writers,,,0,,,"In the event that the Java temporary directory is deleted prior to the DeferredFileOutputStream trying to use it, the stream will throw one of two different IOExceptions (depending on how the Stream was constructed). 
+
+This may sound like an unrealistic use-case at first, but it is legitimate as one of my company's applications encountered it after the underlying operating system (CentOS) automatically purged the contents of its tmp directory. (The application uses Commons FileUpload, which invokes DeferredFileOutputStream and does not handle the error itself.) Our current work-around is to restart the server when this happens, but we feel that the underlying library should perhaps be intelligent enough to recover from such an error.
+
+Additionally, it seems an awkward experience that two different errors are produced based on how the stream was constructed. One approach produces a FileNotFoundException while the other produces a plain IOException. 
+
+A small maven project containing a single JUnit test that highlights the error will be attached (see [dfos-bug.tar.gz|https://issues.apache.org/jira/secure/attachment/12783728/dfos-bug.tar.gz]). ",unix-like operating systems where temporary disk storage is routinely purged; CentOS specifically,,,,,,,,,,,,,,22/Jan/16 20:05;nbyrd;dfos-bug-v2.tar.gz;https://issues.apache.org/jira/secure/attachment/12783898/dfos-bug-v2.tar.gz,22/Jan/16 01:22;nbyrd;dfos-bug.tar.gz;https://issues.apache.org/jira/secure/attachment/12783728/dfos-bug.tar.gz,22/Jan/16 20:05;nbyrd;example_stack.txt;https://issues.apache.org/jira/secure/attachment/12783899/example_stack.txt,,,3,,,,,,,,,,,,,,,,,,,09:21.5,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Wed Sep 13 18:42:45 UTC 2017,,,,,,0|i2rtpz:,9.22337E+18,,,,,,,,,"22/Jan/16 01:22;nbyrd;Attached you will find the small Maven project that highlights this bug. Please see the ""TestDeferredFileOutputStream.java"" file. The tarball contains a README file documenting how to run the tests from the command line.
+
+Alternatively, if you would like the file by itself, I will paste it here:
+{code:Java}
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.DeferredFileOutputStream;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.*;
+import java.util.Random;
+
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
+
+/**
+ * Tests the Commons IO {@link org.apache.commons.io.output.DeferredFileOutputStream}.
+ */
+public class TestDeferredFileOutputStream {
+    /**
+     * The threshold value that will be used to construct
+     * {@link org.apache.commons.io.output.DeferredFileOutputStream}s. 10KiB was chosen because
+     * this value is used in the Commons FileUpload library.
+     */
+    public static final int THRESHOLD = 10240;
+
+    /**
+     * Will hold a sizable chunk of data that the test can pass through streams.
+     */
+    private byte[] data;
+
+    /**
+     * Sets up the test fixture, creating some data to work with and ensuring that
+     * the tmpdir is usable.
+     */
+    @Before
+    public void setup() {
+        // Create a (fairly large) chunk of data for the test to work with.
+        // Must be larger than the stream's threshold, so that
+        // org.apache.commons.io.output.ThresholdingOutputStream.thresholdReached() is invoked.
+        data = new byte[2*THRESHOLD];
+        Random rng = new Random(System.currentTimeMillis());
+        rng.nextBytes(data);
+
+        // ensure that the java tmpdir exists between tests
+        File tmpDir = new File(System.getProperty(""java.io.tmpdir""));
+        if (!tmpDir.isDirectory()) {
+            assumeFalse(""tmpDir exists but is actually a file"", tmpDir.exists());
+            assumeTrue(""able to rebuild tmpdir"", tmpDir.mkdir());
+        }
+        assumeTrue(""can write to tmpDir"", tmpDir.canWrite());
+        assumeTrue(""can read from tmpDir"", tmpDir.canRead());
+    }
+
+    /**
+     * This is a basic test of the DeferredFileOutputStream. This is not expected to fail.
+     * @throws IOException in the event that something goes horribly wrong.
+     */
+    @Test
+    public void testStream() throws IOException {
+        File someFile = File.createTempFile(""something"", ""tmp"");
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            try (OutputStream dfos = new DeferredFileOutputStream(THRESHOLD, someFile)) {
+                IOUtils.copy(is, dfos);
+            }
+        }
+    }
+
+    // This test fails due to an uncaught FileNotFoundException that bubbles
+    // up from DeferredFileOutputStream.
+    /**
+     * Tests what happens if the tmpDir gets deleted before the DeferredFileOutputStream tries to use it.
+     */
+    @Test
+    public void testStreamWithDelete() throws IOException {
+        File someFile = File.createTempFile(""something2"", "".tmp"");
+        File tmpDir = new File(System.getProperty(""java.io.tmpdir""));
+        FileUtils.deleteDirectory(tmpDir);
+
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            try (OutputStream dfos = new DeferredFileOutputStream(THRESHOLD, someFile)) {
+                IOUtils.copy(is, dfos);
+            }
+        }
+    }
+
+    // This test fails due to an uncaught IOException bubbling up from DeferredFileOutputStream.
+
+    /**
+     * Tests what happens if the tmpDir is not usable due to being deleted. Uses
+     * the non-{@link java.io.File} constructor when creating the
+     * {@link org.apache.commons.io.output.DeferredFileOutputStream}.
+     */
+    @Test
+    public void testStreamWithDeleteAlternative() throws IOException {
+        File tmpDir = new File(System.getProperty(""java.io.tmpdir""));
+        FileUtils.deleteDirectory(tmpDir);
+
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            try (OutputStream dfos = new DeferredFileOutputStream(THRESHOLD, ""something3"", "".tmp"", tmpDir)) {
+                IOUtils.copy(is, dfos);
+            }
+        }
+    }
+}
+{code}","22/Jan/16 09:09;sebb;bq. One approach produces a FileNotFoundException while the other produces a plain IOException.
+
+These are both IOExceptions, so that does not seem unreasonable.
+
+As to the behaviour of CentOS - I understand why it might delete old files from the temporary directory, but it does not seem reasonable to delete the directory entirely.
+Surely that will cause problems for lots of applications, not just the IO class? What happens when the next app wants to create a temporary file?
+
+Note: assuming that CentOS does not delete the temporary directory if it contains any active files, a work-round for your case might be to have a background task which updates a dummy file in the temporary directory.","22/Jan/16 20:05;nbyrd;@Sebb, I think you bring up a good point. I don't have any reason to believe that the entire directory is being deleted, but it is definitely being cleared on a regular basis (deleting all files and sub directories). Attached, you will find a ""v2"" of the test package which more closely emulates this behavior. The exceptions still exist in these cases.
+
+Additionally, I am attaching an example stack trace from our production application where these issues started popping up. (Just for reference, the version of Spring-Web we're using is 3.1.2-RELEASE; however the file management is still all being performed by Commons-FileUpload and Commons-IO.)","22/Jan/16 22:21;sebb;It still does not make sense to purge the contents which are clearly still being used.
+
+Are you sure that this is not a faulty cron job?
+
+I'm not convinced that this is something that the IO library either should (or even could) handle.","22/Jan/16 23:59;nbyrd;Thanks for the input, [~sebb@apache.org]. I have forwarded your question (asking exactly how tmpfs is being managed) to my company's technical operations manager and will respond once I have the answer.",15/Aug/16 15:52;hauser@acm.org;see also IO-512,"13/Sep/17 18:42;nbyrd;Thanks for the update, [~ralfhauser]. I've retried the attached unit tests using the latest commons-io 2.6-SNAPSHOT build. The ""testStreamWithDelete"" test now passes, but the ""testStreamWithDeleteAlternative"" test still fails. So it would seem that IO-512 is potentially only a partial fix at this point. ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.openOutputStream doesn't create file if it doesn't exist,IO-472,12781878,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Incomplete,,dkarr,dkarr,3/13/2015 18:04,4/23/2017 18:48,6/19/2019 21:01,4/23/2017 18:48,2.4,,,,,,,,,Utilities,,,0,,,"The javadoc for this method has a pretty unambiguous statement: ""The file will be created if it does not exist.""  However, this isn't happening.  The code is pretty clear on this:
+{code:java}
+public static FileOutputStream openOutputStream(File file, boolean append) throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                throw new IOException(""File '"" + file + ""' exists but is a directory"");
+            }
+            if (file.canWrite() == false) {
+                throw new IOException(""File '"" + file + ""' cannot be written to"");
+            }
+        } else {
+            File parent = file.getParentFile();
+            if (parent != null) {
+                if (!parent.mkdirs() && !parent.isDirectory()) {
+                    throw new IOException(""Directory '"" + parent + ""' could not be created"");
+                }
+            }
+        }
+        return new FileOutputStream(file, append);
+    }
+{code}
+
+If it doesn't exist, it will just try to create a FileOutputStream, which throws a FileNotFoundException.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,40:03.5,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Sat Mar 14 01:40:03 UTC 2015,,,,,,0|i26r2f:,9.22337E+18,,,,,,,,,"13/Mar/15 18:28;dkarr;The situation might not be exactly as I described.  As I see in the FileOutputStream javadoc, it implies that it will create the file if it doesn't exist, so this should have worked.
+
+When I run this for my test case, I get the following exception:
+
+java.io.IOException: The system cannot find the path specified
+
+That's not quite a ""FileNotFoundException"".  When I google for this, it appears to refer to the supposed 260 character limit for file paths on Windows.  Curiously, although the path I'm creating is quite long, it's still short of 260 by 30 or more characters.
+
+I even added code before the call to ""openOutputStream"" that attempts to create the file if it doesn't exist, and that's failing with the same error, so I would conclude that this isn't a particular problem with FileUtils.",14/Mar/15 01:40;sebb;Please provide a test case that shows the issue,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+listener.fileRotated() will be invoked more than one time in a real rotate activity,IO-398,12667999,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Duplicate,,cltlfcjin,cltlfcjin,9/11/2013 7:36,4/23/2017 9:37,6/19/2019 21:01,4/23/2017 9:34,2.4,,,,,,,,,,,,0,,,"       When Tailer considers file rotation is occurred, listener.fileRotated() will be execute, and file will re-open by ""reader = new RandomAccessFile(file, RAF_MODE);"". However, the new file may not be created yet, FileNotFoundException would be caught and while loop would be executed again and again until the new file is actually created, which cause listener.fileRotated() triggered repeatedly. 
+This is the piece of code causing the problem:
+{noformat} 
+while (getRun()) {
+    final boolean newer = isFileNewer(file, last); // IO-279, must be done first
+    // Check the file length to see if it was rotated
+    final long length = file.length();
+    if (length < position) {
+        // File was rotated
+        listener.fileRotated();
+        // Reopen the reader after rotation
+        try {
+            // Ensure that the old file is closed iff we re-open it successfully
+            final RandomAccessFile save = reader;
+            reader = new RandomAccessFile(file, RAF_MODE);
+            /* some code */
+        } catch (final FileNotFoundException e) {
+            // in this case we continue to use the previous reader and position values
+            listener.fileNotFound();
+        }
+        continue;
+{noformat}
+      While condition checkes can be deployed in listener.fileRotated() to correct the sematic of fileRotate, it is better to prevent multiple invocation of listener.fileRotated() on this issue.",,,,,,,,,,,,,IO-528,,11/Sep/13 08:12;cltlfcjin;IO-398.patch;https://issues.apache.org/jira/secure/attachment/12602549/IO-398.patch,12/Sep/13 08:57;cltlfcjin;IO398_with_ut.patch;https://issues.apache.org/jira/secure/attachment/12602757/IO398_with_ut.patch,,,,2,,,,,,,,,,,,,,,,,,,58:21.4,,,FALSE,,,,,,,,,,,,,,347934,,,Sun Apr 23 09:37:44 UTC 2017,,,,,,0|i1nzuf:,348230,,,,,,,,,"11/Sep/13 08:05;cltlfcjin;The patch is uploaded to address the issue. I wrap the file re-open behavior with a while loop. If FileNotFoundException caught, block  and continue to re-open the file.","11/Sep/13 09:58;sebb;Thanks for the patch.
+Do you also have a test case we could use?","11/Sep/13 10:29;cltlfcjin;Well, the main purpose of this patch is to demonstrate the idea and the issue. 
+If you think it is OK, I will upload a patch with unit test soon afterwards.","12/Sep/13 08:57;cltlfcjin;It's a new patch with unit test. In function testIO398(), I simulate the rotate behavior which file can not be created immediately. ","12/Sep/13 15:27;sebb;Thanks!
+
+I've been trying the unit test, and on Windows it sometimes fails to delete the file.
+I assume that is because the tailer must have it open at the time.
+The test can be updated to retry the delete.
+
+This reveals an additional issue if the ""reopen"" option is true (as is required for Windows).
+If the logger deletes/renames the file, the Tailer can fail with FileNotFoundException if the logger has not replaced the file by the time the wait has expired. This needs to be fixed before the IO-398 test case is usable on Windows.","13/Sep/13 11:33;cltlfcjin;I basically know what you mean. But I am not quite understand the mechanism of file lock in Windows OS.
+For this patch, does it mean that it will be accepted after IO-399 has been fixed? Or, should I provide another unit test to avoid the case on Windows.","13/Sep/13 16:50;sebb;On Windows when the Tailer has the file open for read, it's not possible to delete the file. I've not tested (yet), but I don't think it's possible to rename the file either. The locking issue is why the reOpen option was added.
+
+Your unit test requires the file to be deleted/renamed. On Windows this can only be done whilst the Tailer is sleeping.
+When it wakes up, it throws FileNotFoundException and stops processing. So it's not possible to run the unit test on Windows.
+
+But it's not only on Windows that this behaviour will occur. If the Tailer is set to reOpen, the same can happen on Un*x.
+Try it and see (I assume you are not testing on Windows).
+
+So I think we need to fix the reOpen behaviour first, and then this bug can be addressed.",23/Apr/17 09:37;pascalschumacher;duplicates fixed issue [IO-528],,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+IOUtils.closeQuietly can throw NullPointerException,IO-480,12834233,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Won't Fix,,matthew.kusnierz@gmail.com,matthew.kusnierz@gmail.com,6/1/2015 13:07,2/16/2017 18:08,6/19/2019 21:01,2/16/2017 18:08,2.4,,,,,,,,,Utilities,,,0,,,"The IOUtils#closeQuietly method in its javadoc suggests that ANY exceptions will be ignored. This is not the case, as the code only catches IOExceptions. As this example stack trace shows, it is possible for some InputStreams to throw NullPointerExceptions during close:
+
+java.lang.NullPointerException: null
+	at java.io.FilterInputStream.close(FilterInputStream.java:155) ~[na:1.6.0_35]
+	at sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream.close(JarURLConnection.java:90) ~[na:1.6.0_35]
+	at org.apache.commons.io.IOUtils.closeQuietly(IOUtils.java:281) ~[commons-io-2.1.jar:2.1]
+	at org.apache.commons.io.IOUtils.closeQuietly(IOUtils.java:224) ~[commons-io-2.1.jar:2.1]
+
+Close quietly should do as advertised/suggested and catch all Exceptions.",,,,600,600,,0%,600,600,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,29:26.3,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Feb 16 18:08:09 UTC 2017,,,,,,0|i2fgfj:,9.22337E+18,,,,,,,,,"01/Jun/15 13:10;matthew.kusnierz@gmail.com;Also tried with v2.4
+
+java.lang.NullPointerException: null
+	at java.io.FilterInputStream.close(FilterInputStream.java:155) ~[na:1.6.0_35]
+	at sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream.close(JarURLConnection.java:90) ~[na:1.6.0_35]
+	at org.apache.commons.io.IOUtils.closeQuietly(IOUtils.java:303) ~[commons-io-2.4.jar:2.4]
+	at org.apache.commons.io.IOUtils.closeQuietly(IOUtils.java:246) ~[commons-io-2.4.jar:2.4]","04/Jun/15 23:29;sebb;That seems like a bug in the InputStream implementation.
+Does not seem right to catch Exceptions that are not supposed to be thrown by close(), so I suggest closing this as won't fix",08/Jun/15 10:32;matthew.kusnierz@gmail.com;I have tried to raise this with Oracle through my support companies support contract; and they appear to be reluctant to fix this in the FilterInputStream. The closeQuietly method says that it should silently swallow ANY / all exceptions; so I still think that it makes sense to fix this within IOUtils.,08/Jun/15 19:51;sebb;I think a better fix might be to correct the Javadoc.,09/Jun/15 08:35;matthew.kusnierz@gmail.com;If the intended use of this method is to perform a best efforts attempt to close the inputStream and not to worry about exceptions; doesn't it make sense to simply catch Exceptions instead of just IOExceptions. I agree that in this case the NullPointerException should not be thrown in the first place; so the core java FilterInputStream; and/or the JarURLConnectopm$JarUrlInputStream sub-class is at fault; but there could be any number of other poor inputStream implementations out there; and closing them quietly is still the goal of this utility method. Otherwise the user may be forced to re-wrap the call to closeQuietly with another try-catch; which makes closeQuietly redundant.,"16/Jul/16 09:29;githubbot;GitHub user rajivpjs opened a pull request:
+
+    https://github.com/apache/commons-io/pull/14
+
+    [IO-480] Removed the deprectaed method closeQuietly from the Java doc…
+
+    As the closeQuietly method has been deprecated, I thought I would use this ticket IO-480 to remove the Java documentation.
+
+You can merge this pull request into a Git repository by running:
+
+    $ git pull https://github.com/rajivpjs/commons-io IO-480
+
+Alternatively you can review and apply these changes as the patch at:
+
+    https://github.com/apache/commons-io/pull/14.patch
+
+To close this pull request, make a commit to your master/trunk branch
+with (at least) the following in the commit message:
+
+    This closes #14
+    
+----
+commit 2c801149cbb6fabcef569ac301e9933b169a5fac
+Author: Rajiv Jain <rajivpjs@gmail.com>
+Date:   2016-07-16T09:27:03Z
+
+    [IO-480] Removed the deprectaed method closeQuietly from the Java documentation
+
+----
+","22/Jul/16 21:43;githubbot;Github user rajivpjs closed the pull request at:
+
+    https://github.com/apache/commons-io/pull/14
+",16/Feb/17 18:08;sebb;Methods have been deprecated,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+getPrefixLength return -1 if unix file contains colon,IO-483,12851327,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,kinow,tril,tril,8/4/2015 7:35,12/2/2016 3:15,6/19/2019 21:01,12/2/2016 3:15,2.4,,,,,,,,,Utilities,,,0,,,"A simple
+
+{code:java}
+int prefixLength = FilenameUtils.getPrefixLength(""/:foo/bar"");
+{code}
+
+return {{-1}}, but {{0}} was expected. The path is absolutely valid for unix systems.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,40:17.6,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Dec 02 03:15:46 UTC 2016,,,,,,0|i2iayn:,9.22337E+18,,,,,,,,,"10/Aug/15 11:40;sebb;Or indeed ""/:/bar"".","10/Aug/15 11:47;sebb;However, in both cases I think the expected length should be 1, not 0, as the prefix will be ""/"", not """" (these are absolute pathnames)","01/Feb/16 08:05;kinow;Looks like FilenameUtils#getPrefixLength is finding the colon character in the second position, and then it gets the previous character (around line 660 and 666 r1727892) and checks the following:
+
+{code}
+ch0 = Character.toUpperCase(ch0);
+if (ch0 >= 'A' && ch0 <= 'Z') {
+    if (len == 2 || isSeparator(filename.charAt(2)) == false) {
+        return 2;
+    }
+    return 3;
+}
+return NOT_FOUND;
+{code}
+
+The ch0 >= 'A' && ch0 <= 'Z' is evaluated to false, since ch0 is '/'.
+
+Maybe this issue could be fixed by updating the Javadoc to state that one of the valid prefixes is a case insensitive character, from a to z, followed by a colon?
+","24/Sep/16 19:37;githubbot;GitHub user marko-vasic opened a pull request:
+
+    https://github.com/apache/commons-io/pull/19
+
+    [IO-483] FilenameUtils.getPrefixLength fix for unix files/folders starting with colon
+
+    FilenameUtils.getPrefixLength now works correctly for unix files/folder that are in the root folder and start with colons
+
+You can merge this pull request into a Git repository by running:
+
+    $ git pull https://github.com/marko-vasic/commons-io master
+
+Alternatively you can review and apply these changes as the patch at:
+
+    https://github.com/apache/commons-io/pull/19.patch
+
+To close this pull request, make a commit to your master/trunk branch
+with (at least) the following in the commit message:
+
+    This closes #19
+    
+----
+commit a7bd568249f9ec20b69b2a700da6a0648e93a842
+Author: Marko Vasic <marko.z.vasic@gmail.com>
+Date:   2016-09-24T19:32:50Z
+
+    [IO-483] FilenameUtils.getPrefixLength now works correctly for unix files/folder that are in the root folder and start with colons
+
+----
+","02/Dec/16 02:08;githubbot;Github user asfgit closed the pull request at:
+
+    https://github.com/apache/commons-io/pull/19
+",02/Dec/16 03:15;kinow;Pull request merged. changes.xml updated too.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Maven-Bundle-Plugin imports version 2.4 as 1.4,IO-350,12613100,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,adrian2k7,adrian2k7,10/23/2012 7:25,11/27/2016 9:43,6/19/2019 21:01,,2.4,2.5,,,,,,,,,,,1,,,"In 2.4 you added 
+{code}
+ <commons.osgi.export>
+        <!-- Explicit list of packages from IO 1.4 -->
+        org.apache.commons.io;
+        org.apache.commons.io.comparator;
+        org.apache.commons.io.filefilter;
+        org.apache.commons.io.input;
+        org.apache.commons.io.output;version=1.4.9999;-noimport:=true,
+        <!-- Same list plus * for new packages -->
+        org.apache.commons.io;
+        org.apache.commons.io.comparator;
+        org.apache.commons.io.filefilter;
+        org.apache.commons.io.input;
+        org.apache.commons.io.output;
+        org.apache.commons.io.*;version=${project.version};-noimport:=true
+    </commons.osgi.export>
+{code}
+
+This creates an entry in the MANIFEST.MF like
+{code}
+Import-Package: org.apache.commons.io;version=""[1.4,2)""
+{code}
+
+Which leads to our bundles not working with 2.4, as we are exporting 2.4 and not 1.4 in our application.
+
+I think the solution is, that if somebody want's to use it as 1.4 he should export the packages as 1.4 by themselves.
+
+I added an example project.",,,,,,,,,,,,,,,23/Oct/12 07:27;adrian2k7;commons-io-osgi-bug.zip;https://issues.apache.org/jira/secure/attachment/12550418/commons-io-osgi-bug.zip,,,,,1,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,250502,,,25:47.0,,,,,,0|i0ayyn:,61937,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils#copyDirectory cannot copy directory structure,IO-517,13018938,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Not A Bug,,tofuatjava,tofuatjava,11/7/2016 18:38,11/20/2016 16:42,6/19/2019 21:01,11/20/2016 16:42,2.4,,,,,,,,,Utilities,,,1,,,"Have a directory structure like ..\users/domain\username and would copy the folder users with all subfolders and files. the problem now is that domain\username is a folder which is generated by ldap connecting the domain and the username with a backslash.
+
+{code}
+java.io.IOException: Destination '/var/lib/jenkins_backup_mnt/FULL-2016-11-07_11-00/users/domain\username' directory cannot be created
+at org.apache.commons.io.FileUtils.doCopyDirectory(FileUtils.java:1416)
+at org.apache.commons.io.FileUtils.doCopyDirectory(FileUtils.java:1426)
+at org.apache.commons.io.FileUtils.copyDirectory(FileUtils.java:1389)
+at org.apache.commons.io.FileUtils.copyDirectory(FileUtils.java:1310)
+{code}
+
+https://issues.jenkins-ci.org/browse/JENKINS-39546",Linux OS,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,01:14.4,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Wed Nov 09 02:01:14 UTC 2016,,,,,,0|i360sv:,9.22337E+18,,,,,,,,,"09/Nov/16 02:01;yairzaslavsky;I wrote the following test:
+
+    @Test
+    public void testFoo() {
+
+        File f = new File(""/tmp/yair\\directory"");
+        f.mkdirs();
+
+    }
+
+And it manage to create me a directory called yair\directory under tmp.
+If you look at the source code of  doCopyDirectory you will see that this is the method being used.
+I also saw that the original reporter of the bug you stated at Jenkins thinks it might be an issue of Windows mount.
+I think it's wort verifying.
+
+
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Exception throwns for  IOUtils.closeQuietly,IO-344,12607230,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Invalid,,sirfak,sirfak,9/12/2012 12:27,11/8/2016 18:04,6/19/2019 21:01,9/13/2012 20:55,2.4,,,,,,,,,Utilities,,,0,,,"Hi I am using apache commons tailer utilities as follows
+ TailerListener listener = new VFTailerListerner();
+ tailer = new Tailer(new File(myfile.txt), listener, 1000L,true);
+ Thread thread = new Thread(tailer);
+ thread.setDaemon(true);
+ thread.start();
+
+But on calling tailer.stop 
+
+I am getting this error message 
+
+""Exception in thread ""Thread-0"" java.lang.NoSuchMethodError: org.apache.commons.io.IOUtils.closeQuietly(Ljava/io/Closeable;)V
+        at org.apache.commons.io.input.Tailer.run(Tailer.java:430)
+        at java.lang.Thread.run(Thread.java:662)""
+
+Thanks
+sirfak
+
+	",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,30:33.3,,,FALSE,,,,,,,,,,,,,,255285,,,Thu Sep 13 20:55:48 UTC 2012,,,,,,0|i0eqp3:,84087,,,,,,,,,12/Sep/12 12:30;ggregory;What version of Java are you using? Commons IO 2.4 requires Java 6. The {{java.io.Closeable}} interface was added to Java in version 1.5.,"12/Sep/12 12:34;sirfak;Hi Gary.
+I am using jdk 1.6.0_32
+
+Thanks","12/Sep/12 12:41;ggregory;This is odd. Which Java vendor?
+What happens if add the following at the start:
+{code:java}
+System.out.println(""java.version="" + System.getProperty(""java.version""));
+System.out.println(""java.vendor="" + System.getProperty(""java.vendor""));
+{code}","12/Sep/12 12:57;julien.ayme@gmail.com;Do you have multiple commons-io.jar in your classpath? If not, could you check the version of commons-io you are using when launching your program?","12/Sep/12 13:50;sirfak;Gary,
+I tried your option and below is the output
+java.version=1.6.0_32
+java.vendor=Sun Microsystems Inc
+
+","12/Sep/12 13:52;sirfak;Julien,
+
+I am using maven. and it has multiple version of commons-io in the repository
+I can check by deleting the other version from repo.
+","12/Sep/12 13:57;sirfak;Hi Julien,
+
+even after deleting other versions from maven local repository, its still throwing the same exception","12/Sep/12 14:12;ggregory;What matter is what is on your classpath, not so much what is in your local repo cache.","12/Sep/12 14:50;joehni;Actually, if org.apache.commons.io.IOUtils.closeQuietly(java.io.Closeable) is missing, it simply means that you are definitely *not* using commons-io-2.4 at runtime.
+
+So, what is your runtime environment? Are you running in an app or web server?","13/Sep/12 08:39;sirfak;Hi Joerg,
+
+I am using jbehave 3.6.6 version in linux box. using SUN jdk1.6.32.
+I tried to print my runtime classpaths in use.. Here is the result. I can see commons-io-2.4.jar in the classpath.
+
+
+/opt/cce/AUTOMATION/eAMS/.m2/repository/org/jbehave/jbehave-core/3.6.6/jbehave-core-3.6.6.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/junit/junit-dep/4.8.2/junit-dep-4.8.2.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/org/hamcrest/hamcrest-library/1.1/hamcrest-library-1.1.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/org/hamcrest/hamcrest-integration/1.1/hamcrest-integration-1.1.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/commons-lang/commons-lang/2.5/commons-lang-2.5.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/org/codehaus/plexus/plexus-utils/2.0.5/plexus-utils-2.0.5.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/org/freemarker/freemarker/2.3.16/freemarker-2.3.16.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/com/thoughtworks/paranamer/paranamer/2.4/paranamer-2.4.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/com/thoughtworks/xstream/xstream/1.3.1/xstream-1.3.1.jar
+/opt/cce/AUTOMATION/eAMS/.m2/repository/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c.jar
+","13/Sep/12 09:49;sebb;Try adding the following code to the method that starts the tailer:
+
+{code}
+(java.io.Closeable dummy = null;
+IOUtils.closeQuietly(dummy);
+{code}
+
+Ditto just before calling tailer.stop().
+
+Do these work OK?",13/Sep/12 10:40;joehni;And how do you run jbehave?,"13/Sep/12 10:47;sirfak;Hi Sebb,
+I got the same exception (java.lang.NoSuchMethodError: org.apache.commons.io.IOUtils.closeQuietly(Ljava/io/Closeable;)V)
+But I am now assured that this is an runtime issue. As I run the same code in standalone java class by adding commons-io-2.4 jar, I dont see the issue.
+
+I think at run time, its loading older version of commons-io jar hence the issue",13/Sep/12 20:55;sebb;This is now clearly not an issue with Commons IO.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Veracode static  scan still shows 1 very high OS Command injection in commons-io-2.4.jar,IO-508,12965927,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Won't Fix,joehni,i-min.mau,i-min.mau,5/8/2016 22:17,11/8/2016 18:04,6/19/2019 21:01,5/9/2016 7:19,2.4,,,,,,,,,,,,0,,,"I cloned IO-474 because we specifically upgraded the commons-io jar in our application recently to 2.4 jar and still sees, in the Veracode static scan result this one instance:  17561 189 - commons-io-2.4.jar org/.../io/FileSystemUtils.java 535 4/23/16
+
+Since this is going to be visible on our security reports including to potential customers, please help us at least remediate or otherwise fix in a higher version.  Thanks!  ",Windows,,,,,,,,,,,IO-474,,,,,,,,0,,,,,,,,,,,,,,,,,,,29:17.3,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Mon May 09 07:19:12 UTC 2016,,,,,,0|i2xbk7:,9.22337E+18,,,,,,,,,08/May/16 23:29;ggregory;We just released version 2.5. Can you check there please?,"09/May/16 07:19;joehni;There is nothing to fix. This is a utility function and, yes, if an application uses it incorrectly it might be used for a malfunction, but it is in the responsibility of the application to guard the call.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FilenameUtils.directoryContains assumes separator at end of parent path,IO-423,12692402,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Invalid,,vinithra,vinithra,1/30/2014 22:57,11/8/2016 18:04,6/19/2019 21:01,7/16/2014 21:35,2.4,,,,,,,,,Utilities,,,0,,,"FilenameUtils.directoryContains(""/abc"", ""/abcd"") returns true, while FilenameUtils.directoryContains(""/abc/"", ""/abcd"") returns false.
+
+The implementation does a simple checkStartsWith() without taking the separator into consideration.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,35:26.3,,,FALSE,,,,,,,,,,,,,,370997,,,Tue Dec 16 20:12:21 UTC 2014,,,,,,0|i1rxuf:,371302,,,,,,,,,"16/Jul/14 21:35;tn;The javadoc of the method states that the input needs to be normalized, i.e. the canonical path of the respective file resource. A canonical path does not have a '/' at the end.","16/Dec/14 20:12;rnavarette;Unfortunately though this same issue surfaces when calling FileUtils.directoryContains(File parent, File child).
+
+Also, I'm not certain what the above comment implies.  The docs do in fact mention the paths needing to be normalized, but even using the FilenameUtils.normalize(String path) method on the initial example here would show the same wrong behavior.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+EmptyFileFilter doesn't work on directories using FileUtils.listFilesAndDirs,IO-489,12917665,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Invalid,,Giorgy,Giorgy,12/2/2015 18:11,11/8/2016 18:04,6/19/2019 21:01,12/3/2015 13:13,2.4,,,,,,,,,Filters,,,0,,,"My directory tree:
+{code}
+~/ioutils> ls -lhR
+.:
+total 20K
+drwxrwxr-x 2 jorge jorge 4.0K Dec  2 14:54 empty/
+drwxrwxr-x 2 jorge jorge 4.0K Dec  2 14:54 not-empty/
+-rw-rw-r-- 1 jorge jorge    5 Dec  2 15:02 text.txt
+
+./empty:
+total 0
+
+./not-empty:
+total 12K
+-rw-rw-r-- 1 jorge jorge 5 Dec  2 14:54 text.txt
+{code}
+When I execute:
+{code}
+File baseDir = new File(""/home/jorge/ioutils"");
+IOFileFilter emptyDirectoriesFilter = FileFilterUtils.and(
+  DirectoryFileFilter.DIRECTORY, 
+  EmptyFileFilter.EMPTY
+);
+FileUtils.listFilesAndDirs(baseDir, emptyDirectoriesFilter, TrueFileFilter.TRUE);
+{code}
+I obtain:
+{code}
+[/home/jorge/ioutils, /home/jorge/ioutils/not-empty, /home/jorge/ioutils/empty]
+{code}
+Issue:  {{/home/jorge/ioutils/not-empty}} directory is included in the result.
+
+But If I execute
+{code}
+baseDir.list(emptyDirectoriesFilter);
+{code}
+the correct result includes {{/home/jorge/empty}} directory.
+","Distributor ID:	Ubuntu
+Description:	Ubuntu 12.04.5 LTS
+Release:	12.04
+Codename:	precise
+",,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,13:23.3,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Dec 03 13:13:23 UTC 2015,,,,,,0|i2p6r3:,9.22337E+18,,,,,,,,,"03/Dec/15 13:13;sebb;The Javadoc for FileUtils.listFilesAndDirs says [1]
+
+{quote}
+Parameters:
+    directory - the directory to search in
+    fileFilter - filter to apply when finding files.
+    dirFilter - optional filter to apply when finding subdirectories. If this parameter is null, subdirectories will not be included in the search. Use TrueFileFilter.INSTANCE to match all directories. 
+{quote}
+
+If you want to match only some sub-directories you have to provide the appropriate filter.
+
+[1] http://commons.apache.org/proper/commons-io/javadocs/api-2.4/org/apache/commons/io/FileUtils.html#listFilesAndDirs%28java.io.File,%20org.apache.commons.io.filefilter.IOFileFilter,%20org.apache.commons.io.filefilter.IOFileFilter%29",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"The Tailer keeps closing and re-opening file, leads to logs lost while file rotation.",IO-351,12613128,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Incomplete,,wallyqiao,wallyqiao,10/23/2012 12:53,11/8/2016 18:04,6/19/2019 21:01,4/16/2013 20:31,2.4,,,,,,,,,Utilities,,,0,,,"If reOpen is true, log texts reading lost while file rotation.",Linux/Win,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,26:53.0,,,FALSE,,,,,,,,,,,,,,250556,,,Tue Apr 16 20:31:41 UTC 2013,,,,,,0|i0az9j:,61991,,,,,,,,,24/Oct/12 13:26;ggregory;Would you care to provide a patch?,16/Apr/13 20:31;sebb;No further response in nearly 6 months,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+IOUtils copyLarge() and skip() methods are performance hogs,IO-355,12614198,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,apache.k.ulib@recursor.net,apache.k.ulib@recursor.net,10/31/2012 16:25,11/8/2016 17:59,6/19/2019 21:01,4/16/2013 20:51,2.3,2.4,,,,,,,2.5,Utilities,,,0,,,"IOUtils.skip(InputStream, long) and IOUtils.skip(Reader, long) have the worst possible performance as they always use read() on the input instead of using skip(). In many cases, using skip() from a subclass of InputStream is much faster than read(), as the skip() can be implemented via a disk seek.
+
+The IOUtils.skip() methods are also used in the copyLarge() methods that involve a skip.
+
+Case in point: I have observed this performance degradation with Java 7 on Windows 7. A series of consecutive copyLarge() invocations on a large file on disk that involved skips changed my performance from 30 secs as my baseline to 10 minutes after starting to use IOUtils.copyLarge().",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,26:52.7,,,FALSE,,,,,,,,,,,,,,253429,,,Tue Apr 16 20:51:05 UTC 2013,,,,,,0|i0dngf:,77729,,,,,,,,,31/Oct/12 17:26;ggregory;Can you provide a patch?,"31/Oct/12 17:45;apache.k.ulib@recursor.net;Can't provide one currently, sorry.","31/Oct/12 19:44;sebb;See IO-203 where the skip() methods were added.
+
+The problem is that some implementations of skip() - e.g. FileInputStream - allow skipping past EOF.
+That is why we use our own implementation using read() rather than delegating to the implementation class.
+
+Also, in the case of InputStream#skip(), the Javadoc says it throws:
+
+bq. IOException - if the stream does not support seek or ...
+
+An unconditional change to using skip from the implementation class could break some applications.","31/Oct/12 20:06;apache.k.ulib@recursor.net;Yes, the API contract is a little different than the original skip. The problem is that it causes skips and reads with skips to be needlessly slow in many cases. Anyone using these general-purpose APIs suddenly has a millstone on their foot without noticing.","31/Oct/12 20:25;sebb;The API change is deliberate.
+
+I've added Javadoc to note that the performance may not be as good as using skip.
+
+I'm not sure that it is possible to fix the code without breaking the API and existing applications that depend on the guaranteed skip behaviour that the methods provide.","31/Oct/12 20:37;apache.k.ulib@recursor.net;Make sure to change the javadoc for all the read and readFully methods as well, as a typical user like myself expects reasonable performance from these methods.
+
+Seems to set a bad precedent for usability of Apache Commons.
+
+","31/Oct/12 20:46;sebb;bq. Make sure to change the javadoc for all the read and readFully methods as well
+
+Did you mean skip and skipFully?
+The read and readFully methods use the implementation provided, so I don't see how they can be less performant.
+
+bq. Seems to set a bad precedent for usability of Apache Commons.
+
+The point of the IOUtils#skip() methods is to guarantee that the correct number of bytes/chars is skipped.
+This does not not appear to be possible using the subclass skip() implementations for the reasons already given.","31/Oct/12 21:31;apache.k.ulib@recursor.net;Was referring to the wrong methods. I meant the copyLarge() methods that call IOUtils.skip() - Javadoc should say that the skip will not do a seek and may be slower than they expect.
+
+Preferably I hope you will consider changing the methods to have them call the InputStream.skip() or Reader.skip() directly - I bet that 99.99% of the users of these methods are not interested in the redefined skip() contract, but want convenient methods to copy things from an input to an output while skipping some data. They are most likely not interested in getting a bad deal on performance.
+
+Or add copyLargeFast() methods or something similar.
+
+","16/Apr/13 20:51;sebb;The Javadoc has been updated to mention the possible slowness of the skip methods.
+
+If the user wants to use the faster (but possibly inaccurate) skip method, they can do so before calling copyLarge.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.sizeOfDirectoryAsBigInteger can overflow,IO-390,12657041,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,sebb,sebb,7/10/2013 9:44,11/8/2016 17:59,6/19/2019 21:01,7/10/2013 11:49,2.4,,,,,,,,2.5,,,,0,,,"FileUtils.sizeOfDirectoryAsBigInteger can overflow.
+
+This is because it calls FileUtils.sizeOf(file) which calls sizeOfDirectory() for processing subdirectories.
+
+As it stands, the method only works properly at the top level.
+
+A possible solution would be to create private ""Big"" versions of the called methods; these would not need all the checks so should be faster.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,337264,,,Wed Jul 10 11:49:38 UTC 2013,,,,,,0|i1m69j:,337587,,,,,,,,,"10/Jul/13 11:49;sebb;URL: http://svn.apache.org/r1501735
+Log:
+IO-390
+FileUtils.sizeOfDirectoryAsBigInteger can overflow.
+Ensure that recursive calls all use BigInteger
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/FileUtilsTestCase.java",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+CharSequenceInputStream#reset() behaves incorrectly in case when buffer size is not dividable by data size,IO-356,12614986,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,dma_k,dma_k,11/6/2012 16:28,11/8/2016 17:59,6/19/2019 21:01,4/24/2013 0:17,2.4,,,,,,,,2.5,Streams/Writers,,,0,,,"The size effect happens when buffer size of input stream is not dividable by requested data size. The bug is hidden in {{CharSequenceInputStream#reset()}} method which should also call (I think) {{bbuf.limit(0)}} otherwise next call to {{CharSequenceInputStream#read()}} will return the remaining tail which {{bbuf}} has accumulated.
+
+In the attached test case the test fails, if {{dataSize = 13}} (not dividable by 10) and runs OK if {{dataSize = 20}} (dividable by 10).",,,,,,,,,,,,,,,06/Nov/12 16:29;dma_k;CharSequenceInputStreamTest.java;https://issues.apache.org/jira/secure/attachment/12552305/CharSequenceInputStreamTest.java,,,,,1,,,,,,,,,,,,,,,,,,,10:58.8,,,FALSE,,,,,,,,,,,,,,255505,,,Wed Apr 24 00:17:31 UTC 2013,,,,,,0|i0ese7:,84364,,,,,,,,,"06/Nov/12 17:10;sebb;Thanks for the report; added the test case:
+
+URL: http://svn.apache.org/viewvc?rev=1406222&view=rev
+Log:
+IO-356 CharSequenceInputStream#reset() behaves incorrectly in case when buffer size is not dividable by data size
+Add test case showing the issue
+
+Modified:
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/input/CharSequenceInputStreamTest.java
+
+If the code ""bbuf.limit(0);"" is added to the reset() method the tests run OK.
+
+However I'm not 100% sure that's the full solution; perhaps others can comment?","30/Nov/12 16:53;ggregory;I've added tests with @Ignore but the problem seems deeper. The fix above does not work with the tests I added (unless the tests have bugs ;)
+
+It's not clear why we are not simply doing:
+
+{code:java}
+    /**
+     * {@inheritDoc}
+     * @param readlimit max read limit (ignored)
+     */
+    @Override
+    public synchronized void mark(@SuppressWarnings(""unused"") int readlimit) {
+        //this.mark = this.cbuf.position();
+        this.cbuf.mark();
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+//        if (this.mark != NO_MARK) {
+//            this.cbuf.position(this.mark);
+//            this.mark = NO_MARK;
+//        }
+        this.cbuf.reset();
+    }
+{code}
+
+This does not fix anything but it does not break anything else.
+
+If we need a mark, then we need tests to show why the solution above does not suffice.
+
+Help wanted.
+
+Gary","24/Feb/13 15:23;tn;In the reset method we have to modify also the bbuf variable, as it actually contains the data to be read.
+If you take a look at the fillBuffer method, it actually fills bbuf with as many data from cbuf as bbuf can hold.
+
+A simple scenario, input string is (AAAAABBBBB), bbuf has a buffer size of 10:
+
+{noformat}
+  is.mark();
+  byte[] data = new byte[5];
+  is.read(data);
+{noformat}
+
+data will contain ""AAAAA"", but bbuf will contain the full input string (AAAAABBBBB).
+When we now call:
+
+{noformat}
+  is.reset();
+  is.read(data);
+{noformat}
+
+we just reposition cbuf, but we continue to read from bbuf, thus the result will be ""BBBBB"".
+I think calling bbuf.limit(0) is correct and simple, although it might be possible to improve it.
+
+Regarding the other failing unit tests:
+
+We do call the encode method with the endOfInput flag always set to true. This means we have to reset the coder the next time we use it (calling also flush is advised according to javadoc of CharsetEncoder):
+
+{noformat}
+    private void fillBuffer() throws CharacterCodingException {
+        this.bbuf.compact();
+        this.encoder.reset();
+        final CoderResult result = this.encoder.encode(this.cbuf, this.bbuf, true);
+        this.encoder.flush(bbuf);
+        if (result.isError()) {
+            result.throwException();
+        }
+        this.bbuf.flip();
+    }
+{noformat}
+
+This was probably introduced as the CharsetEncoder always precedes the data with with the byte-order mark when using UTF-16 charset.
+In that way, the BOM is only output the first time the encoder is called, but it also means that mark/reset will not work with such charsets, as subsequent calls will not generate the BOM again.
+
+I do not know how to fix this in a clean way atm, but I would consider the CharSequenceInputStream for UTF-16 charset as broken and document it.","24/Feb/13 15:47;tn;Additional info:
+
+the infinite loop of testIO_356_Loop_UTF16 is due to the fact that the buffer size is set to 1, while for UTF-16 encoding, each input character requires at least 2 bytes. Thus the input buffer is never consumed as the encoding of the input to the output buffer in fillBuffer never succeeds, leading to the infinite loop.
+
+We should check the buffer size in the constructor and fail if it is too small for the selected charset.","25/Feb/13 20:07;dma_k;So, is there any counter-example for {{bbuf.limit(0)}} solution? If no then why not to start with it?","21/Apr/13 22:20;sebb;testBufferedRead_RequiredCharset enters an infinite loop if encoder.reset() is called before encoder.encode().
+
+However, adding it to the reset() method seems to help.
+
+The testSkip(String) method is broken, as it assumes that each input char produces a single output byte.
+No wonder it works for ASCII and UTF-8 and fails for UTF-16.",21/Apr/13 22:32;sebb;Same applies to testMarkReset(String); it also assumes one byte per char.,"21/Apr/13 23:16;sebb;testIO_356 is also broken if readFirst > 0.
+That's because the initial read fills the byte buffer.
+The mark therefore saves the position after the first n chars have been read from the input.
+data1 gets the initial buffer load; data2 gets the next n chars.
+
+[later]
+I now think the test does make sense.
+Even though the individual bytes may be part of a multi-byte character, if the class is to support mark, it ought to do so as if it held plain bytes. If the mark is placed mid-character encoding, the returned bytes might not make much sense, but that's a problem for the application.
+
+For some cases, it would be possible to support mark/reset purely by adjusting the byte buffer pointers.
+However, if the byte buffer has been refilled, that won't work, and it becomes necessary to regenerate the byte buffer contents afresh.
+One way to do this would be to keep track of the of where the char buffer was just before the byte buffer was filled, as well as keeping track of the position in the byte buffer. In theory reset can then just re-encode the char buffer and update the byte buffer pointer.
+There may need to be some special processing at the start of the encoding.","22/Apr/13 19:19;dma_k;Sebb, fixing that for majority of cases is not bad, keeping in mind that now simply does not work at all. Putting/resetting to a mark on the byte in the middle of a character should not be a problem: you can define a contract yourself and describe this very corner case in JavaDoc.","24/Apr/13 00:17;sebb;URL: http://svn.apache.org/r1471209
+Log:
+IO-356 CharSequenceInputStream#reset() behaves incorrectly in case when buffer size is not dividable by data size.
+       Fix code so skip relates to the encoded bytes; reset now re-encodes the data up to the point of the mark
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/input/CharSequenceInputStream.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/input/CharSequenceInputStreamTest.java
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"IOUtils.contentEquals* methods returns false if input1 == input2, should return true",IO-362,12625597,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,mmadson,mmadson,1/1/2013 1:05,11/8/2016 17:59,6/19/2019 21:01,1/4/2013 15:57,2.4,,,,,,,,2.5,Utilities,,,0,,,"The fix should be relatively simple, just add an identity check to the beginning of the method:
+
+if(is1 == is2) {
+  return true;
+}
+
+The methods affected are:
+
+- org.apache.commons.io.IOUtils.contentEquals(InputStream, InputStream)
+- org.apache.commons.io.IOUtils.contentEquals(Reader, Reader)
+- org.apache.commons.io.IOUtils.contentEqualsIgnoreEOL(Reader, Reader)
+",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,57:58.7,,,FALSE,,,,,,,,,,,,,,302143,,,Fri Jan 04 15:57:58 UTC 2013,,,,,,0|i16yxr:,248795,,,,,,,,,"04/Jan/13 15:57;ggregory;Fix implemented for the method in the original report and two other IOUtil methods.
+
+{noformat}
+commit -m ""[IO-362] IOUtils.contentEquals* methods returns false if input1 == input2, should return true."" C:/svn/org/apache/commons/trunks-proper/io/src/test/java/org/apache/commons/io/IOUtilsTestCase.java C:/svn/org/apache/commons/trunks-proper/io/src/changes/changes.xml C:/svn/org/apache/commons/trunks-proper/io/src/main/java/org/apache/commons/io/IOUtils.java
+    Sending        C:/svn/org/apache/commons/trunks-proper/io/src/changes/changes.xml
+    Sending        C:/svn/org/apache/commons/trunks-proper/io/src/main/java/org/apache/commons/io/IOUtils.java
+    Sending        C:/svn/org/apache/commons/trunks-proper/io/src/test/java/org/apache/commons/io/IOUtilsTestCase.java
+    Transmitting file data ...
+    Committed revision 1428941.
+{noformat}
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+[Tailer] InterruptedException while the thead is sleeping is silently ignored,IO-357,12617027,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,mortenh,mortenh,11/20/2012 23:46,11/8/2016 17:59,6/19/2019 21:01,11/22/2012 0:36,2.4,,,,,,,,2.5,Streams/Writers,,,0,,,"The implementation of org.apache.commons.io.input.Tailer silently ignores interruptions while sleeping (in two places).
+
+Source snippet:
+{code}
+360	                    try {
+361	                        Thread.sleep(delayMillis);
+362	                    } catch (InterruptedException e) {
+363	                    }
+...
+425	                try {
+426	                    Thread.sleep(delayMillis);
+427	                } catch (InterruptedException e) {
+428	                }
+{code}
+
+This is an inappropriate behavior, since it prevents controlled shutdown by a container.
+
+This may be rectified in one of these ways:
+
+# Declare the method as ""throws InterruptedException"" and re-throw the InterruptedException, after possibly performing come cleanup, or removing the catch clause entirely. This will ensure that a thread interruption (possibly caused by the forced shutdown by a container) will cause processing to stop, and shutdown to proceed. Problem: Requires backwards incompatible change to method signature.
+# Treat an interrupt as an alternate way of signalling the Tailer to stop, by calling {{stop()}} in the catch clause.
+# Reassert the interrupted state of the thread by calling {{Thread.currentThread.interrupt()}} to be able to detect the interruption at a later stage.
+
+For reference, please refer to these resources about handling thread interruption:
+* http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+* Java Concurrency in Practice http://www.javaconcurrencyinpractice.com/",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,24:20.4,,,FALSE,,,,,,,,,,,,,,258952,,,Thu Nov 22 00:36:35 UTC 2012,,,,,,0|i0l62n:,121634,,,,,,,,,"21/Nov/12 01:24;ggregory;Well, (2) sounds pretty good.
+
+Any other thoughts?
+
+{noformat}
+Index: src/main/java/org/apache/commons/io/input/Tailer.java
+===================================================================
+--- src/main/java/org/apache/commons/io/input/Tailer.java	(revision 1402268)
++++ src/main/java/org/apache/commons/io/input/Tailer.java	(working copy)
+@@ -360,6 +360,7 @@
+                     try {
+                         Thread.sleep(delayMillis);
+                     } catch (InterruptedException e) {
++                        stop();
+                     }
+                 } else {
+                     // The current position in the file
+@@ -425,6 +426,7 @@
+                 try {
+                     Thread.sleep(delayMillis);
+                 } catch (InterruptedException e) {
++                    stop();
+                 }
+                 if (getRun() && reOpen) {
+                     reader = new RandomAccessFile(file, RAF_MODE);
+{noformat}","21/Nov/12 01:35;mortenh;That would definitely do the job.
+
+The only minor issue would be that the calling thread would have no way of knowing that the Tailer was  stopped by interruption, but I honestly don't see any situation where that would cause a major issue at all.
+
+It should be considered to also call {{listener.handle(e)}} prior to calling {{stop()}}, which would at least  give the listener a chance to discover the interruption, and possibly perform some logging etc.
+","21/Nov/12 01:48;mortenh;Having had another look at the code, you might also consider simply removing the two {{InterruptedException}} catch blocks, letting the surrounding catch block handle the {{InterruptException}}. That would exit the {{while}} loop, not requiring a call to {{stop()}}, and notifying the listener about the interruption:
+
+{code}
+435	        } catch (Exception e) {
+436	            // Handles InterruptedException, too
+437	            listener.handle(e);
+438	
+439	        } finally {
+440	            IOUtils.closeQuietly(reader);
+441	        }
+{code}
+
+As always, the code is complete, when there is no more code to be removed ;)
+ ","21/Nov/12 01:58;chonton;To allow calling Threads to know Tailer was stopped by interruption, use both options 2 and 3 from above:
+
+@@ -360,6 +360,7 @@
+                     try {
+                         Thread.sleep(delayMillis);
+                     } catch (InterruptedException e) {
++                        stop();
++                        Thread.currentThread().interrupt();
+                     }
+                 } else {
+                     // The current position in the file
+@@ -425,6 +426,7 @@
+                 try {
+                     Thread.sleep(delayMillis);
+                 } catch (InterruptedException e) {
++                    stop();
++                    Thread.currentThread().interrupt();
+                 }
+","21/Nov/12 03:35;ggregory;Hm, I like the simplicity of handing the IE at the higher level like this (and also letting a user be able to find out about the IE):
+
+{noformat}
+Index: src/main/java/org/apache/commons/io/input/Tailer.java
+===================================================================
+--- src/main/java/org/apache/commons/io/input/Tailer.java	(revision 1411980)
++++ src/main/java/org/apache/commons/io/input/Tailer.java	(working copy)
+@@ -356,10 +356,7 @@
+                     listener.fileNotFound();
+                 }
+                 if (reader == null) {
+-                    try {
+-                        Thread.sleep(delayMillis);
+-                    } catch (InterruptedException e) {
+-                    }
++                    Thread.sleep(delayMillis);
+                 } else {
+                     // The current position in the file
+                     position = end ? file.length() : 0;
+@@ -410,17 +407,19 @@
+                 if (reOpen) {
+                     IOUtils.closeQuietly(reader);
+                 }
+-                try {
+-                    Thread.sleep(delayMillis);
+-                } catch (InterruptedException e) {
+-                }
++                Thread.sleep(delayMillis);
+                 if (getRun() && reOpen) {
+                     reader = new RandomAccessFile(file, RAF_MODE);
+                     reader.seek(position);
+                 }
+             }
+-        } catch (Exception e) {
++        } catch (InterruptedException e) {            
+             listener.handle(e);
++            stop();
++            Thread.currentThread().interrupt();
++        } catch (Exception e) {            
++            listener.handle(e);
++            stop();
+         } finally {
+             IOUtils.closeQuietly(reader);
+         }
+{noformat}
+
+This based on the latest from trunk.",21/Nov/12 06:31;mortenh;Looks good to me!,"21/Nov/12 14:46;sebb;AFAICT there's no point calling stop outside the run loop, because the flag won't be checked.
+
+Also InterruptedException is an instance of Exception; no point in having a separate catch unless the code is different.
+
+So in fact the only change required would be to remove the catch blocks after Thread.sleep().","21/Nov/12 15:11;ggregory;""AFAICT there's no point calling stop outside the run loop, because the flag won't be checked.""
+
+I added a call to stop() to play nice with [IO-345]: Supply a hook method allowing Tailer actively determining stop condition.
+
+This lets a Tailer subclass (as requested in IO-345) access the run value.
+
+
+""Also InterruptedException is an instance of Exception; no point in having a separate catch unless the code is different.""
+
+The code in the two catche clauses _is_ different. For InterruptedException, interrupt() is called.
+
+It is more obvious like this: 
+
+{noformat}
+Index: src/main/java/org/apache/commons/io/input/Tailer.java
+===================================================================
+--- src/main/java/org/apache/commons/io/input/Tailer.java	(revision 1411980)
++++ src/main/java/org/apache/commons/io/input/Tailer.java	(working copy)
+@@ -356,10 +356,7 @@
+                     listener.fileNotFound();
+                 }
+                 if (reader == null) {
+-                    try {
+-                        Thread.sleep(delayMillis);
+-                    } catch (InterruptedException e) {
+-                    }
++                    Thread.sleep(delayMillis);
+                 } else {
+                     // The current position in the file
+                     position = end ? file.length() : 0;
+@@ -410,22 +407,27 @@
+                 if (reOpen) {
+                     IOUtils.closeQuietly(reader);
+                 }
+-                try {
+-                    Thread.sleep(delayMillis);
+-                } catch (InterruptedException e) {
+-                }
++                Thread.sleep(delayMillis);
+                 if (getRun() && reOpen) {
+                     reader = new RandomAccessFile(file, RAF_MODE);
+                     reader.seek(position);
+                 }
+             }
+-        } catch (Exception e) {
+-            listener.handle(e);
++        } catch (InterruptedException e) {            
++            stop(e);
++            Thread.currentThread().interrupt();
++        } catch (Exception e) {            
++            stop(e);
+         } finally {
+             IOUtils.closeQuietly(reader);
+         }
+     }
+ 
++    private void stop(Exception e) {
++        listener.handle(e);
++        stop();
++    }
++
+     /**
+      * Allows the tailer to complete its current loop and return.
+      */
+{noformat}","21/Nov/12 15:11;ggregory;""AFAICT there's no point calling stop outside the run loop, because the flag won't be checked.""
+
+I added a call to stop() to play nice with [IO-345]: Supply a hook method allowing Tailer actively determining stop condition.
+
+This lets a Tailer subclass (as requested in IO-345) access the run value.
+
+
+""Also InterruptedException is an instance of Exception; no point in having a separate catch unless the code is different.""
+
+The code in the two catche clauses _is_ different. For InterruptedException, interrupt() is called.
+
+It is more obvious like this: 
+
+{noformat}
+Index: src/main/java/org/apache/commons/io/input/Tailer.java
+===================================================================
+--- src/main/java/org/apache/commons/io/input/Tailer.java	(revision 1411980)
++++ src/main/java/org/apache/commons/io/input/Tailer.java	(working copy)
+@@ -356,10 +356,7 @@
+                     listener.fileNotFound();
+                 }
+                 if (reader == null) {
+-                    try {
+-                        Thread.sleep(delayMillis);
+-                    } catch (InterruptedException e) {
+-                    }
++                    Thread.sleep(delayMillis);
+                 } else {
+                     // The current position in the file
+                     position = end ? file.length() : 0;
+@@ -410,22 +407,27 @@
+                 if (reOpen) {
+                     IOUtils.closeQuietly(reader);
+                 }
+-                try {
+-                    Thread.sleep(delayMillis);
+-                } catch (InterruptedException e) {
+-                }
++                Thread.sleep(delayMillis);
+                 if (getRun() && reOpen) {
+                     reader = new RandomAccessFile(file, RAF_MODE);
+                     reader.seek(position);
+                 }
+             }
+-        } catch (Exception e) {
+-            listener.handle(e);
++        } catch (InterruptedException e) {            
++            stop(e);
++            Thread.currentThread().interrupt();
++        } catch (Exception e) {            
++            stop(e);
+         } finally {
+             IOUtils.closeQuietly(reader);
+         }
+     }
+ 
++    private void stop(Exception e) {
++        listener.handle(e);
++        stop();
++    }
++
+     /**
+      * Allows the tailer to complete its current loop and return.
+      */
+{noformat}","21/Nov/12 15:17;chonton;InterruptedException should reset the interrupt condition before calling listener.handle(e).
+
+{code}
+-        } catch (Exception e) {
++        } catch (InterruptedException e) {            
++            Thread.currentThread().interrupt();
+             listener.handle(e);
++        } catch (Exception e) {            
++            listener.handle(e);
+         } finally {
+             IOUtils.closeQuietly(reader);
+         }
+{code}
+
+or
+
+{code}
+         } catch (Exception e) {
++            if(e instanceof InterruptedException) {            
++                Thread.currentThread().interrupt();
++            }
+             listener.handle(e);
+         } finally {
+             IOUtils.closeQuietly(reader);
+         }
+{code}","21/Nov/12 15:55;ggregory;Or like this:
+{code:java}
+Index: src/main/java/org/apache/commons/io/input/Tailer.java
+===================================================================
+--- src/main/java/org/apache/commons/io/input/Tailer.java	(revision 1411980)
++++ src/main/java/org/apache/commons/io/input/Tailer.java	(working copy)
+@@ -356,10 +356,7 @@
+                     listener.fileNotFound();
+                 }
+                 if (reader == null) {
+-                    try {
+-                        Thread.sleep(delayMillis);
+-                    } catch (InterruptedException e) {
+-                    }
++                    Thread.sleep(delayMillis);
+                 } else {
+                     // The current position in the file
+                     position = end ? file.length() : 0;
+@@ -410,22 +407,27 @@
+                 if (reOpen) {
+                     IOUtils.closeQuietly(reader);
+                 }
+-                try {
+-                    Thread.sleep(delayMillis);
+-                } catch (InterruptedException e) {
+-                }
++                Thread.sleep(delayMillis);
+                 if (getRun() && reOpen) {
+                     reader = new RandomAccessFile(file, RAF_MODE);
+                     reader.seek(position);
+                 }
+             }
+-        } catch (Exception e) {
+-            listener.handle(e);
++        } catch (InterruptedException e) {            
++            Thread.currentThread().interrupt();
++            stop(e);
++        } catch (Exception e) {            
++            stop(e);
+         } finally {
+             IOUtils.closeQuietly(reader);
+         }
+     }
+ 
++    private void stop(Exception e) {
++        listener.handle(e);
++        stop();
++    }
++
+     /**
+      * Allows the tailer to complete its current loop and return.
+      */
+{code}","22/Nov/12 00:36;ggregory;{noformat}
+commit -m ""[IO-358][Tailer] InterruptedException while the thread is sleeping is silently ignored."" C:/svn/org/apache/commons/trunks-proper/io/src/test/java/org/apache/commons/io/input/TailerTest.java C:/svn/org/apache/commons/trunks-proper/io/src/main/java/org/apache/commons/io/input/Tailer.java C:/svn/org/apache/commons/trunks-proper/io/src/changes/changes.xml
+    Sending        C:/svn/org/apache/commons/trunks-proper/io/src/changes/changes.xml
+    Sending        C:/svn/org/apache/commons/trunks-proper/io/src/main/java/org/apache/commons/io/input/Tailer.java
+    Sending        C:/svn/org/apache/commons/trunks-proper/io/src/test/java/org/apache/commons/io/input/TailerTest.java
+    Transmitting file data ...
+    Committed revision 1412391.
+{noformat}",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Regression in FileUtils.readFileToString from 2.0.1,IO-453,12728035,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,,schristou88,schristou88,7/17/2014 20:43,11/8/2016 17:59,6/19/2019 21:01,7/30/2014 23:21,2.1,2.2,2.3,2.4,,,,,2.5,Utilities,,,1,,,"FileUtils.readFileToString has changed it's behavior to make a call from {{IOUtils.toByteArray(in)}} to {{IOUtils.toByteArray(in, file.length())}} in {{FileUtils.readFileToString}}. This is a regression because if the file.length = 0, then it will return 0. According to the javadocs for [File#length|http://docs.oracle.com/javase/6/docs/api/java/io/File.html#length()], it is possible to return 0 if it is a System dependent entities, so even though the File.length might return 0, the stream is still open and  
+
+Steps to reproduce (Ubuntu):
+1. Execute {{nohup sleep 10000 &}} in a terminal, and get the process id of the sleep command ({{ps -ef | grep sleep}}).
+2. Call {{FileUtils.readFileToString(new File(""/proc/$PID/environ""));}} where $PID is the process ID from step 1.
+
+You will notice that in 2.0.1 it returns several elements, however in 2.1 it will return nothing.
+
+See [~ndeloof]'s comment in https://github.com/apache/commons-io/commit/53a40a6d9dcaaa616b404255406edc30fe2d524c.",,,,,,,,,,,,,,,19/Jul/14 09:19;schristou88;IO-453.diff;https://issues.apache.org/jira/secure/attachment/12656718/IO-453.diff,,,,,1,,,,,,,,,,,,,,,,,,,20:18.9,,,FALSE,,,,,,,,,,,,,,406140,,,Mon Nov 09 15:07:38 UTC 2015,,,,,,0|i1xw33:,406160,,,,,,,,,19/Jul/14 09:19;schristou88;I am attaching a diff of the code changes.,"30/Jul/14 23:20;sebb;Agreed - it was a mistake to try to use the file length.
+","30/Jul/14 23:21;sebb;URL: http://svn.apache.org/r1614791
+Log:
+NET-453 - Regression in FileUtils.readFileToString from 2.0.1
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+",09/Nov/15 15:07;sebb;The log comment above should refer to IO-453,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"Correct exception message in FileUtils.getFile(File, String...)",IO-479,12832077,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,britter,britter,britter,5/22/2015 7:15,11/8/2016 17:58,6/19/2019 21:01,5/22/2015 7:56,2.4,,,,,,,,2.5,Utilities,,,0,github,,Placeholder issue for https://github.com/apache/commons-io/pull/3,,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,3,https://github.com/apache/commons-io/pull/3,,,,,,,,,,9.22337E+18,,,Fri May 22 07:58:09 UTC 2015,,,,,,0|i2f3cf:,9.22337E+18,,,,,,,,,22/May/15 07:56;britter;Has already been resolved in rev. 1652148.,22/May/15 07:58;britter;I've added attribution for Zhouce Chen to changes.xml for this fix.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ veracode scan points cross site scripting vulnerability at org/.../commons/io/FileUtils.java 2095. ,IO-474,12787681,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Invalid,,dananth1,dananth1,4/2/2015 13:45,5/8/2016 22:17,6/19/2019 21:01,4/3/2015 16:35,2.4,,,,,,,,,,,,0,,,We use commons-io-2.4.jar. Recently our veracode scan points cross site scripting vulnerability at org/.../commons/io/FileUtils.java 2095. Do we have a recent version that addresses this issue,Linux,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,30:23.3,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Apr 03 16:35:04 UTC 2015,,,,,,0|i27pbr:,9.22337E+18,,,,,,,,,03/Apr/15 10:30;britter;Please provide some more information. What exactly is the problem? How can an attacker exploit Commons IO for an attack. Can you provide a test showing the problem?,"03/Apr/15 16:35;b.eckenfels;This is a FileUtility which allows to write bytes to a file. This can certainly be used wrongly in some conditions, but there is no inheritent security issue in this place. Especially not related to XSS (as you would not use it for web pages anyway).
+
+Besides that, it would be good to do some research before dumping all those veracode false positives into the apache bug tracker :-/ (and 2.4 is recent)",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+org.apache.commons.io.output.LockableFileWriter#append() overwrites rather than appends when two instance invoke this method to a same file.,IO-485,12857143,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Invalid,,PixyOnly,PixyOnly,8/19/2015 7:59,8/19/2015 9:17,6/19/2019 21:01,8/19/2015 8:28,2.4,,,,,,,,,Streams/Writers,,,0,easyfix,,"LockableFileWriter fw0 = new LockableFileWriter(""/tmp/push_failure.log"");
+        fw0.append(""hello,\n"");
+        fw0.flush();
+        fw0.close();
+
+LockableFileWriter fw1 = new LockableFileWriter(""/tmp/push_failure.log"");
+        fw1.append(""world."");
+        fw1.flush();
+        fw1.close();
+
+then the file's content is ""world.""","Mac OSX, jdk1.8",,,259200,259200,,0%,259200,259200,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,28:48.0,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Wed Aug 19 08:28:47 UTC 2015,,,,,,0|i2j3br:,9.22337E+18,,,,,,,,,"19/Aug/15 08:28;sebb;That's because the LockableFileWriter by default overwrites the file.
+
+Please review the Javadoc:
+
+http://commons.apache.org/proper/commons-io/javadocs/api-release/org/apache/commons/io/output/LockableFileWriter.html",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FilenameUtils should handle embedded null bytes,IO-484,12852553,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,krosenvold,krosenvold,krosenvold,8/6/2015 11:15,8/6/2015 12:23,6/19/2019 21:01,8/6/2015 11:48,2.4,,,,,,,,2.5,Utilities,,,0,,,embedding nulls in filenames exposes injection vectors if the application passes unsanitized data to some functions in FileNameUtils,,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Aug 06 12:23:59 UTC 2015,,,,,,0|i2iezj:,9.22337E+18,,,,,,,,,06/Aug/15 11:48;krosenvold;Fixed in r1694464,06/Aug/15 12:23;krosenvold;Additional fix in r1694480,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+org.apache.commons.io.FileUtils#waitFor waits too long,IO-481,12839199,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,krosenvold,krosenvold,krosenvold,6/19/2015 18:19,6/23/2015 17:42,6/19/2019 21:01,6/23/2015 17:42,2.4,,,,,,,,2.5,,,,0,,,"The timing algorithm is basically broken, since Thread.sleep is imprecise. There is also a counter error in the looping code. 
+
+The following testcase will never run in less than 4 seconds on my machine
+
+  public void testRealWallTime() {
+        long start = System.currentTimeMillis();
+        FileUtils.waitFor(new File(""""), 2);
+        System.out.println(""elapsed = "" + (System.currentTimeMillis() - start));
+    }",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Tue Jun 23 17:42:48 UTC 2015,,,,,,0|i2g9zj:,9.22337E+18,,,,,,,,,23/Jun/15 17:42;krosenvold;Fixed in r1687108,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.directoryContains returns wrong response due to startsWith comparison,IO-466,12765219,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Duplicate,krosenvold,rnavarette,rnavarette,1/6/2015 21:35,6/23/2015 6:02,6/19/2019 21:01,6/23/2015 6:02,2.4,,,,,,,,,Utilities,,,0,,,"Consider the following:
+{code:java}
+File fooDir = new File(""/temp/foo"");
+File fooFile = new File(""/temp/foo.txt"");
+FileUtils.directoryContains(fooDir, fooFile); // returns true, should return false
+{code}
+
+fooFile is a sibling of fooDir.  fooDir does not contain fooFile.
+
+This is due to the way FilenameUtils.directoryContains is implemented in that this method uses a simple 'startsWith' comparison.  A related bug is filed for the FilenameUtils method that I believe should be fixed as well.",,,,,,,,,,,,,IO-423,,,,,,,0,,,,,,,,,,,,,,,,,,,32:23.0,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Jun 19 17:32:22 UTC 2015,,,,,,0|i2409j:,9.22337E+18,,,,,,,,,19/Jun/15 17:32;krosenvold;Added testcase in r1686461 that shows IO-423 fixed this too,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+AbstractFileComparator class is not declared 'public',IO-467,12770931,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Invalid,,lutzreder,lutzreder,1/29/2015 8:00,1/29/2015 13:30,6/19/2019 21:01,1/29/2015 13:29,2.4,,,,,,,,,Utilities,,,0,,,"The AbstractFileComparator class in Commons IO 2.4 is not declared 'public', so the sort method is not visible outside its package .",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,38:45.9,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Jan 29 13:29:03 UTC 2015,,,,,,0|i24xvz:,9.22337E+18,,,,,,,,,"29/Jan/15 09:38;britter;When using subclasses of AbstractFileComparator, I can see the  sort method. Can you give a code example that doesn't work for you?","29/Jan/15 13:18;lutzreder;{code}
+package myfiles.rename;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.DirectoryWalker;
+import org.apache.commons.io.comparator.NameFileComparator;
+
+public class FileRenamer extends DirectoryWalker<String> {
+
+    @Override
+    protected File[] filterDirectoryContents(File directory, int depth, File[] files) throws IOException {
+        NameFileComparator.NAME_COMPARATOR.sort(files);
+        return files;
+    }
+}
+
+{code}
+
+The error message is ""The method sort(File[]) is undefined for the type Comparator<File>"". ","29/Jan/15 13:29;britter;The problem is that {{NAME_COMPARATOR}} is defined as follows:
+
+{code:java}
+public static final Comparator<File> NAME_COMPARATOR = new NameFileComparator();
+{code}
+
+So you're trying to call sort on a Comparator instance and the Comparator interface does not define the sort method. To make your example work, change your code to:
+
+{code:java}
+package myfiles.rename;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.DirectoryWalker;
+import org.apache.commons.io.comparator.NameFileComparator;
+
+public class FileRenamer extends DirectoryWalker<String> {
+
+    private static final NameFileComparator COMPARATOR = new NameFileComparator();
+
+    @Override
+    protected File[] filterDirectoryContents(File directory, int depth, File[] files) throws IOException {
+        COMPARATOR.sort(files);
+        return files;
+    }
+}
+{code}",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Tailer should not seek to the last line in case if file was just created,IO-460,12754093,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,zerkms,zerkms,11/10/2014 9:22,11/10/2014 9:22,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"If Tailer did could not open file on its first attempt - it means the file did not exist yet hence when the file finally appears it must not be seeked to the end even if the `end` argument is set.
+
+Otherwise the lines that are added withing waiting timeout are not captured by Tailer.
+
+I find this behaviour wrong, since if a file did not exist on a moment of running Tailer thread - then it must capture every line from the beginning.
+
+Thoughts?",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,22:49.0,,,,,,0|i2268v:,9.22337E+18,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Detection of deleted directories fails if the directory does not exist when the observer is created.,IO-420,12687883,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,joepacde,joepacde,1/8/2014 15:46,1/8/2014 15:48,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"If a directory is observed, that doesn't exist when the observer is created, no deletion event will be created, when this directory is deleted again.
+Use case: mounting/unmounting of usb devices",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,366890,,,Wed Jan 08 15:48:29 UTC 2014,,,,,,0|i1r8pr:,367201,,,,,,,,,"08/Jan/14 15:48;joepacde;Issue is solved when changing FileAlterationOberserver.checkAndNotify to:
+
+		if (rootFile.exists()) {
+			rootEntry.setExists(true);
+			checkAndNotify(rootEntry, rootEntry.getChildren(),
+					listFiles(rootFile));
+		} else if (rootEntry.isExists()) {
+			rootEntry.setExists(false);
+			checkAndNotify(rootEntry, rootEntry.getChildren(),
+					FileUtils.EMPTY_FILE_ARRAY);
+		} else {
+			// Didn't exist and still doesn't
+		}
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+IOUtils.writeLines is not correct with a charset with BOM,IO-414,12683335,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,florent.brosse,florent.brosse,12/8/2013 16:36,12/8/2013 16:43,6/19/2019 20:56,,2.4,2.5,,,,,,,,Streams/Writers,Utilities,,0,,,"When a charset has a BOM (like UTF-16), the method IOUtils.writeLines put 2 BOM on each line.
+
+",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,362587,,,Sun Dec 08 16:40:24 UTC 2013,,,,,,0|i1qi1b:,362881,,,,,,,,,"08/Dec/13 16:40;florent.brosse;I suggest that code to correct that bug:
+
+    public static void writeLines(final Collection<?> lines, String lineEnding, final OutputStream output, final Charset encoding)
+            throws IOException {
+        if (lines == null) {
+            return;
+        }
+        if (lineEnding == null) {
+            lineEnding = LINE_SEPARATOR;
+        }
+        final Charset cs = Charsets.toCharset(encoding);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (final Object line : lines) {
+            if (line != null) {
+            	stringBuilder.append(line.toString());
+            }
+            stringBuilder.append(lineEnding);
+        }
+        output.write(stringBuilder.toString().getBytes(cs));
+    }
+
+ public static void writeLines(final Collection<?> lines, String lineEnding,
+            final Writer writer) throws IOException {
+        if (lines == null) {
+            return;
+        }
+        if (lineEnding == null) {
+            lineEnding = LINE_SEPARATOR;
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (final Object line : lines) {
+            if (line != null) {
+            	stringBuilder.append(line.toString());
+            }
+            stringBuilder.append(lineEnding);
+        }
+        writer.write(stringBuilder.toString());
+    }
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.writeStringToFile() with append flag set does not work properly.,IO-396,12664891,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Cannot Reproduce,,n8n8baby,n8n8baby,8/21/2013 18:04,8/21/2013 18:45,6/19/2019 21:01,8/21/2013 18:45,2.4,,,,,,,,,Utilities,,,0,,,"When attempting to do multiple rapid append operations on a file, not all operations are applied properly. This may indicate a handle leak. 
+
+I would be happy to take a look and fix it, but I have not contributed before and need to take some time to learn how.",Windows 8 64-bit,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,30:49.4,,,FALSE,,,,,,,,,,,,,,344834,,,Wed Aug 21 18:45:58 UTC 2013,,,,,,0|i1ngrz:,345134,,,,,,,,,21/Aug/13 18:30;sebb;Can you provide a test case that shows the bug?,"21/Aug/13 18:45;n8n8baby;Hmmmm. I tried to create a simple test case, but everything works in that. It must be something else, even though I thought I had eliminated other possibilities. I am going to close this issue. Sorry for the false alarm.",21/Aug/13 18:45;n8n8baby;I was not able to recreate this in an isolated test case. I must have overlooked some other change I made when changing to another serialization strategy.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ClassLoaderInputStream - should this delegate to the parent class loader?,IO-378,12642933,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Unresolved,,sebb,sebb,4/17/2013 14:12,4/20/2013 23:27,6/19/2019 21:01,,2.4,,,,,,,,,,,,0,,,"ClassLoaderInputStream currently delegates to its superclass if it cannot resolve the class itself.
+
+This means it may resolve classes that are not in the specified class loader.
+
+Consider whether to change this, or add an option to suppress the delegation.
+
+This would affect the resolveClass and resolveProxyClass methods.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,323343,,,Sat Apr 20 23:27:11 UTC 2013,,,,,,0|i1jscf:,323688,,,,,,,,,"20/Apr/13 23:27;sebb;Note: it would still need to create primitive classes, either by delegation or by creating them directly.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Links are broken on User Guide....,IO-370,12635354,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,olamy,bradleej,bradleej,3/5/2013 15:26,3/5/2013 15:59,6/19/2019 21:01,3/5/2013 15:59,2.4,,,,,,,,,Utilities,,,0,,,When navigating the main page links most are broken.,,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,59:16.0,,,FALSE,,,,,,,,,,,,,,315847,,,Tue Mar 05 15:59:16 UTC 2013,,,,,,0|i1ii33:,316190,,,,,,,,,"05/Mar/13 15:59;olamy;fixed.
+thanks for report.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Apache Commons - standard links for documents are failing,IO-369,12634802,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Major,Fixed,olamy,eepgwde,eepgwde,3/1/2013 12:41,3/1/2013 17:24,6/19/2019 21:01,3/1/2013 17:24,2.4,,,,,,,,2.4,Streams/Writers,,,0,documentation,,"Not Found
+
+The requested URL /proper/commons-io/api-release/index.html was not found on this server.
+
+Apache/2.4.4 (Unix) OpenSSL/1.0.0g Server at commons.apache.org Port 80",Windows browsers. Linux browsers.,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,15:51.1,,,FALSE,,,,,,,,,,,,,,315295,,,Fri Mar 01 14:15:51 UTC 2013,,,,,,0|i1ieov:,315639,,,,,,,,,01/Mar/13 14:15;olamy;links from home fixed,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FilenameUtils.getFullPath incorrectly parses file names that begin with a tilde,IO-545,13086967,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,tfjpg,tfjpg,7/13/2017 18:12,8/2/2017 17:16,6/19/2019 20:56,,2.4,2.5,,,,,,,,Utilities,,,0,,,"For any file with a name that begins with a tilde, which is a valid file name in BSD and Windows, if you call FilenameUtils.getFullPath and pass the file name, it returns the file name followed by a path separator. It should return an empty string. It seems to be parsing it as a unix user directory because it starts with the tilde.","OpenJDK Runtime Environment (build 1.8.0_92-b14)
+FreeBSD 10.0-RELEASE-p11
+",,,,,,,,,,,,,MNG-6267,,,,,,0,,,,,,,,,,,,,,,,,,,57:45.6,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Mon Jul 17 13:41:50 UTC 2017,,,,,,0|i3hhrr:,9.22337E+18,,,,,,,,,15/Jul/17 21:57;michael-o;Why are you still on 10.0? It is out of support. Can you create an sample code for me? I can try on 10.3 and 11.0. I highly doubt the issue because there is no tilde expansion here.,"17/Jul/17 13:41;tfjpg;The OS is irrelevant because getFullPath just does parsing, it doesn't hit the file system. To be totally sure, I tested on Ubuntu 16.04.2 and got the same result. 
+
+FilenameUtils.getFullPath(""~tildefilename.txt"") returns:
+ ~tildefilename.txt/
+
+It should return an empty string.
+
+I went through the code for getFullPath and see where the issue is. It eventually calls getPrefixLength which has this block:
+{code:java}
+if (ch0 == '~') {
+    int posUnix = filename.indexOf(UNIX_SEPARATOR, 1);
+    int posWin = filename.indexOf(WINDOWS_SEPARATOR, 1);
+    if (posUnix == -1 && posWin == -1) {
+        return len + 1;  // return a length greater than the input
+    }
+    posUnix = posUnix == -1 ? posWin : posUnix;
+    posWin = posWin == -1 ? posUnix : posWin;
+    return Math.min(posUnix, posWin) + 1;
+}
+{code}
+
+So if you pass getFullPath just a file name, with no path part, and that file name starts with a '~', the if (posUnix == -1 && posWin == -1) condition will be true. It is interpreting it as a ""named user"". It's actually in the javadoc for the method:
+ * ~user/a/b/c.txt     --> ""~user/""    --> named user
+ * ~user               --> ""~user/""    --> named user (slash added)
+
+However, since you can have a file named something like ""~tildefilename.txt"", this is a problem. Either the method needs to be altered to account for this (although I am not sure it is possible to figure out if it is a file or a named user without hitting the file system), or at the very least the javadoc needs to be updated to note that the method will fail in these cases.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+moveFile throws Exception prematurely?,IO-411,12681132,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Invalid,,nearwood,nearwood,11/25/2013 21:18,4/23/2017 18:23,6/19/2019 21:01,4/23/2017 18:23,2.4,,,,,,,,,Utilities,,,0,,,"This may not be an issue, but I noticed that the moveFile command throws an exception after trying and ignoring the return value of deleteQuietly. Look at line 2969 below.
+
+Taken from SVN head:
+{code}
+2965         final boolean rename = srcFile.renameTo(destFile);
+2966	        if (!rename) {
+2967	            copyFile( srcFile, destFile );
+2968	            if (!srcFile.delete()) {
+2969	                FileUtils.deleteQuietly(destFile);
+2970	                throw new IOException(""Failed to delete original file '"" srcFile + ""' after copy to '"" + destFile + ""'"");
+2972	            }
+2973	        }
+{code}
+
+deleteQuietly will just end up trying File.delete() again which will likely fail at that point, but still, shouldn't there be another if statement there?
+
+Note: Haven't actually had issues with this.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,23:45.7,,,FALSE,,,,,,,,,,,,,,360397,,,Sun Apr 23 18:23:45 UTC 2017,,,,,,0|i1q4l3:,360696,,,,,,,,,"23/Apr/17 18:23;pascalschumacher;Hi Nick,
+
+thanks for reporting.
+
+The implementation is correct. FilesUtils.deleteQuietly is called with the destination file (not the source file).",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"FilenameUtils.directoryContains(String, String) gives false positive when two directories exist with equal prefixes",IO-499,12939560,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,fedechicco,fedechicco,2/16/2016 17:27,4/23/2017 15:12,6/19/2019 21:01,,2.4,,,,,,,,,,,,0,,,"In a folder layout as such:
+
+{code}
+/foo/a.txt
+/foo2/b.txt
+{code}
+
+The result of invoking directoryContains is wrong:
+{code}
+FilenameUtils.directoryContains(""/foo"", ""/foo2/b.txt""); // returns true
+{code}
+
+even if ""/foo"" and ""/foo2/b.txt"" are the canonical paths, they start with the same characters, and the current implementation of the method fails.
+
+As workaround we are currently appending a path separator '/' to the first argument.
+It is noteworthy that the current implementation of FileUtils.directoryContains() reveals this issue because it uses the File.getCanonicalPath() to obtain the String paths of ""/foo"" and ""/foo2/b.txt"".",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,24:49.9,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Sun Apr 23 15:12:45 UTC 2017,,,,,,0|i2swgn:,9.22337E+18,,,,,,,,,"24/Sep/16 22:24;githubbot;GitHub user cagdasyelen opened a pull request:
+
+    https://github.com/apache/commons-io/pull/20
+
+    [IO-499] FilenameUtils.directoryContains false positive issue 
+
+    IO-499 bug has been fixed. 
+    
+    The old version was looking at if the child canonical path string starts with the parent's. 
+    However, it fails in the case of:
+    
+    .../top/foo
+    .../top/foo2/b.txt
+    
+    since the directory path of b.txt starts with the same directory path with the one above even though the second one is a different directory(foo2). This issue is resolved by comparing the path strings of foo and foo2. 
+
+You can merge this pull request into a Git repository by running:
+
+    $ git pull https://github.com/cagdasyelen/commons-io io499-fix
+
+Alternatively you can review and apply these changes as the patch at:
+
+    https://github.com/apache/commons-io/pull/20.patch
+
+To close this pull request, make a commit to your master/trunk branch
+with (at least) the following in the commit message:
+
+    This closes #20
+    
+----
+commit fd95ccde6310bfee7314744d879c597882cb3381
+Author: Cagdas Yelen <cagdas@utexas.edu>
+Date:   2016-09-24T22:21:37Z
+
+    [IO-499] FilenameUtils.directoryContains false positive issue is resolved
+
+----
+",07/Oct/16 14:08;fedechicco;@cagdasyelen I'm afraid this patch doesn't consider the case when the file path is composed using '\' separators (aka Windows case). We should adapt it to that case before pulling the patch.,"23/Apr/17 15:12;githubbot;Github user asfgit closed the pull request at:
+
+    https://github.com/apache/commons-io/pull/20
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Documentation Bug of Tailer - it opens thread within,IO-524,13029707,Bug,Resolved,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Not A Problem,,sharik79,sharik79,12/21/2016 11:08,2/16/2017 17:58,6/19/2019 20:56,2/16/2017 17:58,2.4,2.5,,,,,,,,Utilities,,,0,,,"Documentation of
+org.apache.commons.io.input.Tailer
+describes how to handle threading, while it seems that thread being openened within, and seamlessly to user.
+
+need to update the doc.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,58:50.9,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Feb 16 17:58:50 UTC 2017,,,,,,0|i37v9j:,9.22337E+18,,,,,,,,,"21/Dec/16 13:38;sharik79;just to make sure. the documentation I see is here:
+http://commons.apache.org/proper/commons-io/javadocs/api-2.5/org/apache/commons/io/input/Tailer.html
+","16/Feb/17 17:58;sebb;Threads are only created within the create() methods.
+
+Otherwise the user has to start the thread or use an Executor as per the Javadoc",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+commons-io-2.4-src.zip and 2.5 fails test cases,IO-501,12960843,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Cannot Reproduce,,marcpawl@gmail.com,marcpawl@gmail.com,4/21/2016 17:18,12/1/2016 20:55,6/19/2019 21:01,12/1/2016 20:55,2.4,,,,,,,,,Filters,,,0,,,"Failed tests:   testCanRead(org.apache.commons.io.filefilter.FileFilterTestCase): Filter(File) org.apache.commons.io.filefilter.AndFileFilter not true for /commons-io-2.4-src/test/io/read-only-file1.txt expected:<true> but was:<false>
+  testCanWrite(org.apache.commons.io.filefilter.FileFilterTestCase): Filter(File) org.apache.commons.io.filefilter.CanWriteFileFilter not false for /commons-io-2.4-src/test/io/read-only-file2.txt expected:<false> but was:<true>
+  testThrowsOnNullList(org.apache.commons.io.FileUtilsCleanDirectoryTestCase): expected IOException
+  testThrowsOnCannotDeleteFile(org.apache.commons.io.FileUtilsCleanDirectoryTestCase): expected IOException
+
+Tests run: 966, Failures: 4, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 01:32 min
+[INFO] Finished at: 2016-04-21T12:56:24-04:00
+[INFO] Final Memory: 17M/178M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:2.12:test (default-test) on project commons-io: There are test failures.
+[ERROR] 
+[ERROR] Please refer to /commons-io-2.4-src/target/surefire-reports for the individual test results.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+The command '/bin/sh -c cd commons-io-2.4-src && mvn install' returned a non-zero code: 1
+
+Dockerfile
+
+FROM fedora:21
+RUN yum update -y
+RUN yum install -y java-1.8.0-openjdk unzip
+RUN yum install -y maven
+COPY commons-io-2.4-src.zip commons-io-2.4-src.zip
+RUN unzip commons-io-2.4-src.zip
+RUN cd commons-io-2.4-src && mvn initialize
+RUN cd commons-io-2.4-src && mvn test-compile
+RUN cd commons-io-2.4-src && mvn install
+RUN chmod -R 755 /root
+CMD /bin/bash
+
+==
+Did a second run with commons-io.2,5
+
+Failed tests: 
+  FileUtilsCleanDirectoryTestCase.testThrowsOnNullList:109 expected IOException
+  FileUtilsCleanDirectoryTestCase.testThrowsOnCannotDeleteFile:129 expected IOException
+  FileFilterTestCase.testCanRead:984->assertFiltering:64 Filter(File) org.apache.commons.io.filefilter.AndFileFilter not true for /root/commons-io-2.5-src/test/io/read-only-file1.txt expected:<true> but was:<false>
+  FileFilterTestCase.testCanWrite:1005->assertFiltering:64 Filter(File) org.apache.commons.io.filefilter.CanWriteFileFilter not false for /root/commons-io-2.5-src/test/io/read-only-file2.txt expected:<false> but was:<true>
+
+Tests run: 1157, Failures: 4, Errors: 0, Skipped: 4
+
+Dockerfile contents
+FROM fedora:21
+RUN yum update -y
+RUN yum install -y java-1.8.0-openjdk unzip
+RUN yum install -y maven
+RUN yum install -y wget
+RUN cd /root && wget http://apache.parentingamerica.com//commons/io/source/commons-io-2.5-src.zip
+RUN cd /root && unzip commons-io-2.5-src.zip
+RUN cd /root && cd commons-io-2.5-src && mvn initialize
+RUN cd /root && cd commons-io-2.5-src && mvn test-compile
+RUN cd /root && cd commons-io-2.5-src && mvn install
+RUN chmod -R 755 /root
+CMD /bin/bash
+
+command: $docker build .
+
+==
+Debian Jessie, JDK 7 also fails with code coming from trunk
+
+Failed tests: 
+  FileUtilsCleanDirectoryTestCase.testThrowsOnNullList:109 expected IOException
+  FileUtilsCleanDirectoryTestCase.testThrowsOnCannotDeleteFile:129 expected IOException
+  FileFilterTestCase.testCanRead:984->assertFiltering:64 Filter(File) org.apache.commons.io.filefilter.AndFileFilter not true for /root/commons-io/test/io/read-only-file1.txt expected:<true> but was:<false>
+  FileFilterTestCase.testCanWrite:1005->assertFiltering:64 Filter(File) org.apache.commons.io.filefilter.CanWriteFileFilter not false for /root/commons-io/test/io/read-only-file2.txt expected:<false> but was:<true>
+FROM debian:8.4
+CMD /bin/bash
+RUN apt-get update -y
+RUN apt-get install -y openjdk-7-jdk openjdk-7-jre unzip maven wget subversion
+RUN cd /root && svn checkout -r 1740549 http://svn.apache.org/repos/asf/commons/proper/io/trunk /root/commons-io
+RUN cd /root/commons-io && mvn initialize
+RUN cd /root/commons-io && mvn test-compile
+RUN cd /root/commons-io && mvn install
+RUN chmod -R 755 /root
+======================
+All the above are where the users home directory is NFS mounted.
+I retried 2.5-src on a machine where the home directory for the users was local and it made no difference.
+Using Fedora23 in VirtualBox on Windows 7.
+
+
+",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,29:32.8,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Dec 01 20:55:17 UTC 2016,,,,,,0|i2wgrz:,9.22337E+18,,,,,,,,,"21/Apr/16 17:29;ggregory;[~marcpawl@gmail.com],
+
+Are these failures consistent from one run to the next?
+
+Can you reproduce this with the latest from trunk?
+
+Thank you,
+Gary","21/Apr/16 20:39;joehni;Works for me. Downloaded commons-io-2.4-src.zip from Apache. Unzipped archive and started Maven from archive root with
+
+{noformat}
+$ unzip commons-io-2.4-src.zip
+$ cd commons-io-2.4-src
+$ mvn -version
+Apache Maven 3.3.9 (bb52d8502b132ec0a5a3f4c09453c07478323dc5; 2015-11-10T17:41:47+01:00)
+Maven home: /usr/share/maven-bin-3.3
+Java version: 1.8.0_77, vendor: Oracle Corporation
+Java home: /opt/icedtea-bin-3.0.0/jre
+Default locale: en_US, platform encoding: UTF-8
+OS name: ""linux"", version: ""4.1.15-gentoo-r1"", arch: ""amd64"", family: ""unix""
+$ mvn package
+[...]
+Results :
+
+Tests run: 966, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ commons-io ---
+[INFO] Building jar: /home/joehni/tmp/download/commons-io-2.4-src/target/commons-io-2.4.jar
+[INFO] 
+[INFO] --- maven-site-plugin:3.0:attach-descriptor (attach-descriptor) @ commons-io ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 01:50 min
+[INFO] Finished at: 2016-04-21T22:28:35+02:00
+[INFO] Final Memory: 31M/234M
+[INFO] ------------------------------------------------------------------------
+{noformat}
+
+So, it is not OpenJDK 8, it's not Linux in general nor is it the original zipped archive.
+
+Actually I tested commons-io 2.4 befor voting for the release. I used the tarball of the sources and built it with each JDK of my zoo. This includes the Oracle versions 6-9, IBM 6+7, and OpenJDK 6+7 (8 is new). All tests passed for every JDK (except IBM 6 with known UTF-16 problems):
+http://article.gmane.org/gmane.comp.jakarta.commons.devel/130600
+
+Which version of Maven are you actually using? And - out of curiosity - why do you call Maven 3 times? The last call includes the previous calls anyway.","01/Dec/16 20:55;pascalschumacher;I'm closing this as ""Cannot Reproduce"" after reading Joerg Schaibles comment. Please reopen if you can supply additional information. Thanks!",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Tailer uses default charset to read the file,IO-377,12642839,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Won't Fix,,sebb,sebb,4/17/2013 1:03,11/8/2016 18:04,6/19/2019 21:01,5/16/2013 11:46,2.4,,,,,,,,,,,,0,,,"The Tailer class reads bytes from a file and presents them to the TailerListener as Strings. The conversion from byte[] to String currently uses the default charset, which may not always be appropriate.",,,,,,,,,,,,,,IO-354,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,323253,,,Thu May 16 11:46:12 UTC 2013,,,,,,0|i1jrsf:,323598,,,,,,,,,16/May/13 11:46;sebb;Wrong approach; need to deal with this as part of IO-354,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"FileUtils.readFileToString((new File(""myFile""), null)  produces the following compilation error ",IO-363,12625704,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Not A Problem,,peterwarde@rulearchitect.com,peterwarde@rulearchitect.com,1/2/2013 17:04,11/8/2016 18:04,6/19/2019 21:01,4/16/2013 20:27,2.4,,,,,,,,,,,,0,,,"org.apache.commons.io.FileUtils.readFileToString(new File(""myFile""), null) in 2.4 produces the following compilation error ""The method readFileToString(File, Charset) is ambiguous for the type FileUtils"", even though the javadoc says ""encoding - the encoding to use, null means platform default"".
+
+This is due to FileUtils having 2 readFileToString methods -  readFileToString(File file, Charset encoding) and readFileToString(File file,
+String encoding)",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,28:28.4,,,FALSE,,,,,,,,,,,,,,302252,,,Tue Apr 16 20:27:01 UTC 2013,,,,,,0|i16zpb:,248919,,,,,,,,,"02/Jan/13 23:28;ggregory;If you really want to pass in null, then you can say:
+
+{code:java}
+FileUtils.readFileToString(new File(""myFile""), (String)null)
+{code}
+
+This is better IMO:
+
+{code:java}
+FileUtils.readFileToString(new File(""myFile""), Charset.defaultCharset())
+{code}
+",16/Apr/13 20:27;sebb;This is not really a problem; null is still accepted.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+org.apache.commons.io.comparator Javadoc is inconsistent with real code,IO-343,12604335,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,,igorlash,igorlash,8/22/2012 7:20,11/8/2016 17:59,6/19/2019 21:01,4/17/2013 23:54,2.4,,,,,,,,2.5,,,,0,,,"Package org.apache.commons.io.comparator has a lot of inconsistent JavaDocs. 
+For example this class org.apache.commons.io.comparator.NameFileComparator
+http://svn.apache.org/viewvc/commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/NameFileComparator.java?view=markup
+has JavaDocs
+ List&lt;File&gt; list = ...
+ NameFileComparator.NAME_COMPARATOR.sort(list); ....
+
+ File[] array = ...
+ NameFileComparator.NAME_INSENSITIVE_REVERSE.sort(array);
+
+but this will not work because all static members of NameFileComparator declared as Comparator<File> for example 
+ public static final Comparator<File> NAME_REVERSE = new ReverseComparator(NAME_COMPARATOR);
+public static final Comparator<File> NAME_INSENSITIVE_REVERSE = new ReverseComparator(NAME_INSENSITIVE_COMPARATOR);
+
+and Comparator class doesn't have the sort() method.
+",,,,,,,,,,,,,,,27/Aug/12 05:55;igorlash;patch.txt;https://issues.apache.org/jira/secure/attachment/12542579/patch.txt,,,,,1,,,,,,,,,,,,,,,,,,,24:42.3,,,FALSE,,,,,,,,,,,,,,250744,,,Wed Apr 17 23:54:48 UTC 2013,,,,,,0|i0b0l3:,62207,,,,,,,,,22/Aug/12 14:24;ggregory;Feel free to provide a patch based on trunk code :),"27/Aug/12 05:54;igorlash;I really like the way of usage of file comparators as described in JavaDoc, so I have changed code. Patch is attached.",27/Aug/12 05:55;igorlash;Fixing inconsistency between code and JavaDocs.,"28/Aug/12 16:30;ggregory;This patch breaks compatibility so it could only be considered for a major release. I am not sure we want that now.
+
+Fixing the Javadoc to match the code is OK to do in trunk now but this patch does not do that.
+
+What needs to be decided as usual is if it is the code or the docs that should be fixed.","29/Aug/12 06:04;igorlash;This patch will not break backward compatibility. There will be unnecessary cast if someone used comparator in the way 
+
+
+((NameFileComparator)NameFileComparator.NAME_COMPARATOR).sort(list)
+
+","29/Aug/12 13:20;ggregory;Hm, OK, so the Clirr errors are false positives because the class {{AbstractFileComparator}} implements {{Comparator<File>}}.
+
+Source compatibility is clearly OK (unless you count compiler warnings for the type casting case above).
+
+Binary compatibility should be OK too.",29/Aug/12 13:29;ggregory;Committed revision 1378539. Applied patch and fixed compiler warnings in tests.,"17/Apr/13 23:16;sebb;The change is *not binary compatible*.
+
+I just compiled the following code against IO 2.4:
+
+{code}
+public class CompTest {
+    public static void main(String[] a) {
+        Comparator<File> comparator = DefaultFileComparator.DEFAULT_COMPARATOR;
+    }
+}
+{code}
+
+This runs fine against IO-2.4, but when run with 2.5-SNAPSHOT it fails with:
+
+{code}
+Exception in thread ""main"" java.lang.NoSuchFieldError: DEFAULT_COMPARATOR
+        at CompTest.main(CompTest.java:8)
+{code}
+
+I think this is because the loader looks for the exact field type when trying to find a field. This is similar to the binary incompatibility that results from changing a method return type from void to int or long.
+
+The code is source-compatible.","17/Apr/13 23:34;sebb;Reverted changes:
+
+URL: http://svn.apache.org/r1469102
+Log:
+[IO-343] org.apache.commons.io.comparator Javadoc is inconsistent with real code.
+Revert r1378539 as it broke binary compatibility
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/DefaultFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/DirectoryFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/ExtensionFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/LastModifiedFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/NameFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/PathFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/SizeFileComparator.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/ComparatorAbstractTestCase.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/CompositeFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/DefaultFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/DirectoryFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/ExtensionFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/LastModifiedFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/NameFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/PathFileComparatorTest.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/comparator/SizeFileComparatorTest.java","17/Apr/13 23:46;sebb;URL: http://svn.apache.org/r1469107
+Log:
+[IO-343] org.apache.commons.io.comparator Javadoc is inconsistent with real code.
+Fix Javadoc to agree with code
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/CompositeFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/DefaultFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/DirectoryFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/ExtensionFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/LastModifiedFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/NameFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/PathFileComparator.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/comparator/SizeFileComparator.java
+",17/Apr/13 23:54;sebb;Javadoc now agrees with code without breaking compat.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+WildcardFileFilter ctors should not use null to mean IOCase.SENSITIVE when delegating to other ctors,IO-374,12641281,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,,sebb,sebb,4/7/2013 21:46,11/8/2016 17:59,6/19/2019 21:01,4/7/2013 22:09,2.4,,,,,,,,2.5,,,,0,,,"WildcardFileFilter ctors should not use null to mean IOCase.SENSITIVE when delegating to other ctors.
+
+Just because null happens to mean case-sensitive, does not mean that internal calls to ctors should use that feature. It makes the code harder to read.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,321697,,,Sun Apr 07 22:09:08 UTC 2013,,,,,,0|i1ji6v:,322042,,,,,,,,,"07/Apr/13 22:09;sebb;URL: http://svn.apache.org/r1465476
+Log:
+IO-374 WildcardFileFilter ctors should not use null to mean IOCase.SENSITIVE when delegating to other ctors
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/filefilter/WildcardFileFilter.java",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+IOExceptionWithCause no longer needed,IO-462,12759160,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,,sebb,sebb,12/3/2014 12:48,11/8/2016 17:59,6/19/2019 21:01,12/9/2014 13:49,2.4,,,,,,,,2.5,,,,0,,,"The class IOExceptionWithCause is no longer needed in Java 6, because IOException now includes a constructor that takes a Throwable.
+
+The class should be deprecated and internal usage can revert to using IOException directly.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,53:17.2,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Tue Dec 09 13:47:12 UTC 2014,,,,,,0|i230ev:,9.22337E+18,,,,,,,,,"03/Dec/14 12:49;sebb;URL: http://svn.apache.org/r1642763
+Log:
+No longer needed in Java 6+
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/IOExceptionWithCause.java
+
+URL: http://svn.apache.org/r1642799
+Log:
+No longer needed in Java 6+
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileSystemUtils.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/TaggedIOException.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/IOExceptionWithCauseTestCase.java
+","03/Dec/14 12:53;ggregory;(0) Good call to deprecate.
+
+(1) Do we need to worry about breaking the behavior of apps that catch {{IOExceptionWithCause}} in a non-major release? 
+
+(2) It might not even be worth reimplementing {{IOExceptionWithCause}} as a ""clean"" {{IOException}}.","03/Dec/14 12:59;sebb;(1) The class was never intended to be caught. If apps raise IOEWC themselves they will still work; it is only internal use of IOEWC that is affected.
+
+(2) had not thought of that, but it would be tidier. I may fix this, as it's trivial.","03/Dec/14 13:01;sebb;In retrospect, it might have been better if the class had been designed as a wrapper rather than a subclass.","09/Dec/14 13:41;sebb;URL: http://svn.apache.org/r1643107
+Log:
+
+IO-462 IOExceptionWithCause no longer needed
+Simplify code
+
+Modified:
+    /commons/proper/io/trunk/src/main/java/org/apache/commons/io/IOExceptionWithCause.java
+
+URL: http://svn.apache.org/r1643106
+Log:
+
+IO-462 IOExceptionWithCause no longer needed
+
+Modified:
+    /commons/proper/io/trunk/src/changes/changes.xml
+","09/Dec/14 13:47;sebb;URL: http://svn.apache.org/r1642763
+Log:
+No longer needed in Java 6+
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/IOExceptionWithCause.java
+
+URL: http://svn.apache.org/r1642799
+Log:
+No longer needed in Java 6+
+
+Modified:
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileSystemUtils.java
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/TaggedIOException.java
+    commons/proper/io/trunk/src/test/java/org/apache/commons/io/IOExceptionWithCauseTestCase.java
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"FileUtils.directoryContains(File, File) returns wrong results when the file name contains unreadable characters",IO-498,12938802,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,fedechicco,fedechicco,2/12/2016 13:11,2/12/2016 17:39,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"When testing for FileUtils.directoryContains(File, File) on a file which is in fact contained in the given directory but has odd characters in the name, the method returns wrong results.
+
+This file:
+{code:title=File name}
+bof@testcorso2015:~/tmp/test$ ls col* | xxd
+0000000: 636f 6c74 e00a                           colt..
+{code}
+
+fails to be recognized as belonging to the current directory in this simple snippet of code:
+
+{code:title=Snippet|borderStyle=solid}
+File[] files = new File(""."").listFiles();
+for(File f : files){
+     System.out.println(""contains "" + f + "" = "" + FileUtils.directoryContains(new File("".""), f));
+}
+{code}
+",linux,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,31:40.1,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Feb 12 17:39:21 UTC 2016,,,,,,0|i2srtb:,9.22337E+18,,,,,,,,,"12/Feb/16 16:27;fedechicco;Is it worth noticing that in this case the method fails because of what I think being a JVM bug.
+
+The snippet
+{code}
+File[] files = new File(""."").listFiles();
+for(File f : files){
+     System.out.println(""exists: "" + f.exists());
+}
+{code}
+
+shows that with an ill formed name as the one I'm using the File class is not able to work properly.
+The same file object returned by listFiles() is said to be unexistant.","12/Feb/16 17:31;b.eckenfels;Is this on a UTF8 system? I think with an ISO88591 native name encoding it should be binary transparent.
+But in any case nothing Commons IO can do about. I propose to close it.
+http://jonisalonen.com/2012/java-and-file-names-with-invalid-characters/","12/Feb/16 17:39;fedechicco;Yes it is on a UTF8 system.
+
+I'm afraid you are right, this is nothing we can solve in the Commons IO.
+
+I wish this was fixable, but I agree to close it.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"Typo: In an IOUtils.java comment it says ""focussed"" instead of ""focused""",IO-492,12924673,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,ggregory,bryant1410,bryant1410,12/29/2015 12:12,12/29/2015 17:42,6/19/2019 20:56,12/29/2015 15:40,2.4,2.5,2.6,3.x,,,,,2.5,Utilities,,,0,documentation,easyfix,See here: https://github.com/apache/commons-io/blob/trunk/src/main/java/org/apache/commons/io/IOUtils.java#L101,,,,60,60,,0%,60,60,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,40:37.2,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Tue Dec 29 15:40:37 UTC 2015,,,,,,0|i2qdd3:,9.22337E+18,,,,,,,,,29/Dec/15 15:40;ggregory;Fixed in trunk. Please verify and close.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+File doesn't end with blank line and cann't get the last line using Tailer!,IO-450,12725431,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,davidchiu,davidchiu,7/4/2014 7:56,11/22/2015 7:44,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"I use Tailer to read file, I can't get the last line if the file doesn't end with a blank line!
+
+My file like as following:
+
+AAAAAAAAAAAA
+BBBBBBBBBBBB
+
+And Not end with a blank line, ""BBBBBBBBBBBB"" is the last line, When I use io.input.Tailer to tail the file, I cann't get the last line ""BBBBBBBBBBBB""!
+
+All  versions(2.3/2.4/2.5) of Commons-IO have the same problem! ",linux and windows 7,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,50:26.9,,,FALSE,,,,,,,,,,,,,,403591,,,Fri May 22 11:53:09 UTC 2015,,,,,,0|i1xgmv:,403635,,,,,,,,,"28/Jul/14 09:50;sebb;Sounds like the file does not have a trailing EOL.
+Since Tailer reads complete lines, it won't see the last (incomplete) line.
+
+I'm not sure there is any way around this without breaking existing functionality.
+How can Tailer know when the last line is complete if it does not have an EOL?","19/May/15 20:37;britter;The documentation says 
+
+bq. Simple implementation of the unix ""tail -f"" functionality.
+
+How does {{tail -f}} behave in the case of a missing EOL in the last line? Tailer should behave the same way IMHO.","22/May/15 11:53;britter;The problem is, that tail is stream based but Tailer is line based. So the comparison doesn't work out completely. If I have a file with the following content:
+
+{code}
+AAAAAAA\n
+BBBBBBB
+{code}
+
+And I do a {{tail -f}} on the file, I'll get the following output:
+
+{code}
+$: tail -f file.txt
+AAAAAAA
+BBBBBBB
+{code}
+
+It simply waits for new input on the last line. That could be an EOL or it could be EOF. Tailer OTOH currently detects lines based on the EOL character. I agree that lines without EOF at EOF should also be handled. A simple solution would be to call {{listener.handle(new String(lineBuf.toByteArray(), cset))}} after the while-loop in {{readLines(final RandomAccessFile reader)}} if the {{lineBuf}} stil has content.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+BOMInputStream.hasBOM(ByteOrderMark) do not read the BOM header,IO-482,12844674,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,hoppermann,hoppermann,7/13/2015 15:30,7/13/2015 15:32,6/19/2019 21:01,,2.4,,,,,,,,,Streams/Writers,,,0,,,The method hasBOM(ByteOrderMark) in BOMInputStream do not read a BOM prefix.,,,,,,,,,,,,,,,13/Jul/15 15:32;hoppermann;add_fix_for_IO-482.patch;https://issues.apache.org/jira/secure/attachment/12745055/add_fix_for_IO-482.patch,13/Jul/15 15:32;hoppermann;add_unit_test_testHasBOMFirstThenRead.patch;https://issues.apache.org/jira/secure/attachment/12745054/add_unit_test_testHasBOMFirstThenRead.patch,,,,2,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Mon Jul 13 15:32:40 UTC 2015,,,,,,0|i2h6on:,9.22337E+18,,,,,,,,,13/Jul/15 15:32;hoppermann;unit test,13/Jul/15 15:32;hoppermann;patch with bugfix,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.waitFor(...) swallows thread interrupted status,IO-448,12721240,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Fixed,krosenvold,OydvO,OydvO,6/14/2014 8:37,6/23/2015 5:58,6/19/2019 21:01,6/23/2015 5:58,2.4,,,,,,,,2.5,Utilities,,,0,,,"The method waits for a file to appear for a given amount of time. To do so it calls Thread.sleep several times. If the thread is interrupted, the interrupt will be ignored by catching the ThreadInterrupted exception and waiting further.
+
+Catching the ThreadInterrupted exception automatically clears the thread's interrupted flag. Consequently the calling method has no chance to detect whether the thread was interrupted. A possible solution is to restore the interrupted status before returning - something like this:
+{code}
+    public static boolean waitFor(File file, int seconds) {
+        int timeout = 0;
+        int tick = 0;
+        boolean wasInterrupted = false;
+        try {
+            while (!file.exists()) {
+                // ...
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignore) {
+                    wasInterrupted = true;
+                } catch (Exception ex) {
+                    break;
+                }
+            }
+            return true;
+        } finally {
+            if (wasInterrupted) {
+                   Thread.currentThread.interrupt();
+            }
+        }
+    }
+{code}
+",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,24:34.3,,,FALSE,,,,,,,,,,,,,,399436,,,Fri Jun 19 18:24:34 UTC 2015,,,,,,0|i1wrgn:,399545,,,,,,,,,"19/Jun/15 18:24;krosenvold;Fixed in r1686477, thanks for the patch !",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash,IO-475,12819096,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,shoof,shoof,4/7/2015 22:06,4/7/2015 23:04,6/19/2019 21:01,,1.4,2,2.0.1,2.1,2.2,2.3,2.4,,,,,,0,,,"FilenameUtils#normalizeNoEndSeparator returns null for UNC prefix without trailing backslash.
+
+The observed behavior is that normalizeNoEndSeparator returns a non-null value for the following unc-path-prefix:
+\\{serverName-or-IP}\
+
+{backSlash}{backSlash}{serverName-or-IP}{backSlash} 
+but returns null for the following unc-path-prefix:
+\\{serverName-or-IP}
+
+{backSlash}{backSlash}{serverName-or-IP}
+
+The markdown seems to eat my backslashes prepended to the serverName-or-IP.
+
+There is nothing in the Microsoft API documentation which would suggest that the second unc-path-prefix would be invalid.
+
+Therefore the expectation is that they should be treated as equivalent by FilenameUtils#normalizeNoEndSeparator.
+
+The handling of unc-path-prefix is inconsistent with how FilenameUtils#normalizeNoEndSeparator handles drive relative and drive absolute path prefixes, where each notation is accepted and returns a non-null --> ( C: and C:\ ).",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,Important,Patch,,,,,,,,9.22337E+18,,,06:00.0,,,,,,0|i2cxq7:,9.22337E+18,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.copyDirectory and copyFile fail on AIX hosts over CIFS mounted directory,IO-371,12635685,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Unresolved,,jonnybot,jonnybot,3/6/2013 23:25,3/14/2014 12:12,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"In a groovy script that imports org.apache.commons.io.FileUtils, I'm trying to copy a directory from one location to another. Both locations are accessed through a mounted CIFS directory. When I try, I get this exception:
+{code}
+java.io.IOException: A system call received a parameter that is not valid.
+	at sun.nio.ch.FileChannelImpl.map0(Native Method)
+	at sun.nio.ch.FileChannelImpl.map(FileChannelImpl.java:768)
+	at sun.nio.ch.FileChannelImpl.transferFromFileChannel(FileChannelImpl.java:552)
+	at sun.nio.ch.FileChannelImpl.transferFrom(FileChannelImpl.java:615)
+	at org.apache.commons.io.FileUtils.doCopyFile(FileUtils.java:1147)
+	at org.apache.commons.io.FileUtils.doCopyDirectory(FileUtils.java:1428)
+	at org.apache.commons.io.FileUtils.copyDirectory(FileUtils.java:1389)
+	at org.apache.commons.io.FileUtils.copyDirectory(FileUtils.java:1261)
+	at org.apache.commons.io.FileUtils.copyDirectory(FileUtils.java:1230)
+	at org.apache.commons.io.FileUtils$copyDirectory.call(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCall(CallSiteArray.java:45)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:108)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.call(AbstractCallSite.java:120)
+	at plutarch.archiveOldFilesOnSabrina(plutarch.groovy:111)
+	at plutarch$archiveOldFilesOnSabrina.callCurrent(Unknown Source)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallCurrent(CallSiteArray.java:49)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:133)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callCurrent(AbstractCallSite.java:149)
+	at plutarch.run(plutarch.groovy:47)
+	at groovy.lang.GroovyShell.runScriptOrMainOrTestOrRunnable(GroovyShell.java:257)
+	at groovy.lang.GroovyShell.run(GroovyShell.java:220)
+	at groovy.lang.GroovyShell.run(GroovyShell.java:150)
+	at groovy.ui.GroovyMain.processOnce(GroovyMain.java:588)
+	at groovy.ui.GroovyMain.run(GroovyMain.java:375)
+	at groovy.ui.GroovyMain.process(GroovyMain.java:361)
+	at groovy.ui.GroovyMain.processArgs(GroovyMain.java:120)
+	at groovy.ui.GroovyMain.main(GroovyMain.java:100)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:60)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:37)
+	at java.lang.reflect.Method.invoke(Method.java:611)
+	at org.codehaus.groovy.tools.GroovyStarter.rootLoader(GroovyStarter.java:106)
+	at org.codehaus.groovy.tools.GroovyStarter.main(GroovyStarter.java:128)
+{code}
+
+This executes normally on Windows using the same version of Java (1.6). Another user has a similar experience that makes me think this is an issue specific to AIX: http://stackoverflow.com/questions/15092855/howto-copy-a-folder-and-all-its-content-in-java-recursively-including-symbolic
+
+Given the stack trace, this is probably something that Java 1.7 addressed, but it may be worthwhile for the copyDirectory and copyFile methods to provide a switch to handle symbolic links.","Java 1.6, AIX, FileUtils, Groovy 2.1.1, cifs",,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,12:21.8,,,FALSE,,,,,,,,,,,,,,316178,,,Fri Mar 14 12:12:21 UTC 2014,,,,,,0|i1ik4n:,316521,,,,,,,,,"14/Mar/14 12:12;ukslim;map() does not work on AIX CIFS mounts. You can demonstrate it with a short program:
+
+{code:java}
+		File file = new File(path);
+		FileInputStream stream = new FileInputStream(file);
+		FileChannel channel = stream.getChannel();
+		MappedByteBuffer buffer = 
+				channel.map(MapMode.READ_ONLY, 0, channel.size());
+{/code}
+
+Throws: java.io.IOException: A system call received a parameter that is not valid 
+
+... on AIX CIFS mounts.
+
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+[IO] copyFileToDirectory - Over-Write File,IO-401,12675593,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Minor,Invalid,,belugabehr,belugabehr,10/24/2013 23:53,10/25/2013 0:00,6/19/2019 21:01,10/25/2013 0:00,2.4,,,,,,,,2.5,Utilities,,,0,,,"I came across a small annoyance at work today.  I have code that takes a file and copies it to a mounted directory on a remote server.  I am using FileUtils.copyFileToDirectory() to do the move, but it does not have an overwrite flag.  If something goes wrong with the file transfer over the network, and only part of the file is transferred, all subsequent attempts are blocked by the fact that the file ""already exists.""  I would like to see another overloaded copyFileToDirectory() method with a flag to overwrite the file if it already exists.  The current behavior is to throw an IoException.
+
+Thanks!",,,,,,,,,,,,,IO-403,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,355170,,,53:40.0,,,,,,0|i1p8bb:,355458,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Javadoc contradictory for FileFilterUtils.ageFileFilter(cutoff) and the filter it constructs: AgeFileFilter(cutoff),IO-442,12711957,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Fixed,pascalschumacher,roninsos,roninsos,5/2/2014 14:49,10/20/2017 6:49,6/19/2019 21:01,4/23/2017 18:46,2.4,,,,,,,,2.6,Filters,,,0,,,"Documentation states that it returns true if the file is *after* cutoff... but the code does opposite!
+{code}
+    /**
+     * Returns a filter that returns true if the file was last modified after
+     * the specified cutoff time.
+     */
+{code}
+
+BUT..the code constructs the following:
+{code}
+    public static IOFileFilter ageFileFilter(long cutoff) {
+        return new AgeFileFilter(cutoff);
+    }
+{code}
+
+And the Javadoc for this AgeFileFilter says...OLDER i.e. before
+{code}
+    /**
+     * Constructs a new age file filter for files equal to or older than
+     * a certain cutoff
+     *
+     * @param cutoff  the threshold age of the files
+     */
+{code}
+Which is it?!",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,46:27.0,,,FALSE,,,,,,,,,,,,,,390276,,,Sun Apr 23 18:46:26 UTC 2017,,,,,,0|i1v81z:,390513,,,,,,,,,23/Apr/17 18:46;pascalschumacher;The javadoc of AgeFileFilter is correct. I have just fixed the FileFilterUtils javadoc. Thanks for reporting!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+javadoc of copyDirectory misleading,IO-496,12929028,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Cannot Reproduce,,weberjn,weberjn,1/10/2016 19:32,11/8/2016 18:04,6/19/2019 21:01,1/11/2016 16:52,2.4,,,,,,,,,Utilities,,,0,,,"javadoc of copyDirectory states:
+
+This method copies the specified directory and all its child directories and files to the specified destination. 
+
+In fact it only copies the children of the directory (contrary to copyDirectoryToDirectory).
+
+
+
+",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,52:22.1,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Mon Jan 11 16:52:22 UTC 2016,,,,,,0|i2r3tj:,9.22337E+18,,,,,,,,,"11/Jan/16 16:52;sebb;Works fine for me.
+
+Note that copyDirectorytoDirectory actually calls copyDirectory.
+
+If you are still having a problem, please provide a sample test case.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileUtils.doCopyFile caches the file size; needs to be documented,IO-383,12650502,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Fixed,,sebb,sebb,6/2/2013 11:53,11/8/2016 17:59,6/19/2019 21:01,6/2/2013 13:18,2.4,,,,,,,,2.5,,,,0,,,"FileUtils.doCopyFile saves the input file size before starting the copy.
+
+The copy is considered complete when the original file size is reached.
+
+The method then checks the new input file size against the destination size.
+This will fail if the file has changed in size since the copy started.
+
+This behaviour should be documented; also it would help if the two sizes were shown in the exception message.",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,330829,,,Sun Jun 02 13:18:10 UTC 2013,,,,,,0|i1l2pb:,331162,,,,,,,,,"02/Jun/13 13:18;sebb;URL: http://svn.apache.org/r1488708
+Log:
+IO-383 FileUtils.doCopyFile caches the file size; needs to be documented
+
+Modified:
+    commons/proper/io/trunk/src/changes/changes.xml
+    commons/proper/io/trunk/src/main/java/org/apache/commons/io/FileUtils.java
+",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Mismatch return type in api docs of class DirectoryWalker.,IO-494,12928059,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Fixed,niallp,Hunterhjy,Hunterhjy,1/6/2016 16:40,11/8/2016 17:58,6/19/2019 21:01,1/7/2016 21:18,2.4,,,,,,,,2.5,Filters,,,0,documentation,,"In the api docs of class org.apache.commons.io.DirectoryWalker<T>, topic of 3.1 External / Multi-threaded.Method handleIsCancelled in demo code returns boolean but with a void return type.",,,,1200,1200,,0%,1200,1200,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,18:17.1,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Thu Jan 07 21:18:17 UTC 2016,,,,,,0|i2qxun:,9.22337E+18,,,,,,,,,"07/Jan/16 21:18;niallp;Thanks, I've fixed this",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Improper JavaDoc comment for FilenameUtils.indexOfExtension,IO-436,12707694,Bug,Closed,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Fixed,ggregory,christoph.schneegans,christoph.schneegans,4/10/2014 12:34,11/8/2016 17:58,6/19/2019 21:01,4/10/2014 14:08,2.4,,,,,,,,2.5,Utilities,,,0,documentation,,"The method FilenameUtils.indexOfExtension contains this JavaDoc comment:
+
+  \* @param filename  the filename to find the last path separator in, null returns -1
+  \* @return the index of the last separator character, or -1 if there
+  \* is no such character
+
+This comment was obviously copied from the FilenameUtils.indexOfLastSeparator method, where it makes perfect sense.
+
+The JavaDoc comment for FilenameUtils.indexOfExtension should rather read e.g. as follows:
+
+  \* @param filename  the filename to find the last extension separator in, null returns -1
+  \* @return the index of the last extension separator character, or -1 if there
+  \* is no such character",,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,08:41.0,,,FALSE,,,,,,,,,,,,,,386017,,,Thu Apr 10 14:08:40 UTC 2014,,,,,,0|i1uhzr:,386281,,,,,,,,,10/Apr/14 14:08;ggregory;Thank you for the report!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"""Self-suppression not permitted"" while using BrokenOutput and BrokenInput streams with try-with-resource. ",IO-469,12777178,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Unresolved,,gfadeev,gfadeev,2/24/2015 13:42,6/19/2015 17:28,6/19/2019 21:01,,2.4,,,,,,,,,Streams/Writers,,,0,,,"Hi,
+First of all thanks a lot for great library :)
+ 
+I faced with ""Self-suppression not permitted"" issue while using BrokenInputStream & BrokenOutputStream classes with try-with-resources. 
+
+Root cause of this issue is that these classes always throws same exception instance for all methods.
+That's how it looks like when javac unfolds try-with-resources: 
+{code:java}
+        InputStream is = new BrokenInputStream();
+        Throwable localThrowable2 = null;
+        try {
+            is.read();
+        } catch (Throwable localThrowable1) {
+            localThrowable2 = localThrowable1;
+            throw localThrowable1;
+        } finally {
+            if (is != null) {
+                if (localThrowable2 != null) {
+                    try {
+                        is.close();
+                    } catch (Throwable x2) {
+                        localThrowable2.addSuppressed(x2);
+                    }
+                } else {
+                    is.close();
+                }
+            }
+        }
+{code}
+So as you can see when close method is invoked resulting exception will be added to itself (first time thrown during read method), this leads to IllegalArgumentException ""Self-suppression not permitted"".
+
+It can be easily fixed by omitting throwing of same exception instance for close method. 
+If you don't mind I would attach patch which will fix this issue.  ",Oracle JVM 1.8_25 (but should be reproducible starting from Java 7).,,,,,,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,04:20.5,,,FALSE,,,,,,,,,,,,,,9.22337E+18,,,Fri Jun 19 17:28:52 UTC 2015,,,,,,0|i25z3j:,9.22337E+18,,,,,,,,,19/Jun/15 17:04;krosenvold;Fixed in r1686456,19/Jun/15 17:28;krosenvold;And reverted again in r1686460 due to slight compatibility break,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+FileAlterationObserver should check whether inputFile is a directory,IO-439,12710314,Bug,Open,IO,Commons IO,software,issues@commons.apache.org,Commons IO is a library of utilities to assist with developing IO functionality. ,http://commons.apache.org/io/,Trivial,Unresolved,,beniamin.kalinowski,beniamin.kalinowski,4/24/2014 13:54,4/24/2014 13:54,6/19/2019 21:01,,2.4,,,,,,,,,Utilities,,,0,,,"A FileAlterationObserver class receives a String/File object indicating directory and checks whether this file has changed. It doesn't work if file isn't a directory but no warnings/errors are being thrown.
+I think there should be a check if a given input is a directory.","Unix, Ubuntu 64",,,3600,3600,,0%,3600,3600,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,,,,FALSE,,,,,,,,,,,,,,388636,,,54:01.0,,,,,,0|i1uy1r:,388887,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

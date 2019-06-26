@@ -1,0 +1,445 @@
+Summary,Issue key,Issue id,Issue Type,Status,Project key,Project name,Project type,Project lead,Project description,Project url,Priority,Resolution,Assignee,Reporter,Creator,Created,Updated,Last Viewed,Resolved,Affects Version/s,Affects Version/s,Fix Version/s,Component/s,Component/s,Due Date,Votes,Labels,Labels,Description,Environment,Original Estimate,Remaining Estimate,Time Spent,Work Ratio,Σ Original Estimate,Σ Remaining Estimate,Σ Time Spent,Security Level,Attachment,Attachment,Attachment,Attachment,Custom field (Attachment count),Custom field (Blog - New Blog Administrators),Custom field (Blog - New Blog PMC),Custom field (Blog - Write access),Custom field (Blog Administrator?),Custom field (Blogs - Admin for blog),Custom field (Blogs - Email Address),Custom field (Blogs - Existing Blog Access Level),Custom field (Blogs - Existing Blog Name),Custom field (Blogs - New Blog Write Access),Custom field (Blogs - Username),Custom field (Bug Category),Custom field (Bugzilla - Email Notification Address),Custom field (Bugzilla - List of usernames),Custom field (Bugzilla - PMC Name),Custom field (Bugzilla - Project Name),Custom field (Bugzilla Id),Custom field (Change Category),Custom field (Complexity),Custom field (Date of First Response),Custom field (Discovered By),Custom field (Docs Text),Custom field (Enable Automatic Patch Review),Custom field (Epic Link),Custom field (Existing GitBox Approval),Custom field (External issue ID),Custom field (External issue URL),Custom field (Git Notification Mailing List),Custom field (Git Repository Import Path),Custom field (Git Repository Name),Custom field (Git Repository Type),Custom field (GitHub Options),Custom field (Github Integration),Custom field (Github Integrations - Other),Custom field (Global Rank),Custom field (INFRA - Subversion Repository Path),Custom field (Initial Confluence Contributors),Custom field (Last public comment date),Custom field (Machine Readable Info),Custom field (New-TLP-TLPName),Custom field (Priority),Custom field (Project),Custom field (Protected Branch),Custom field (Rank),Custom field (Rank (Obsolete)),Custom field (Severity),Custom field (Severity),Custom field (Source Control Link),Custom field (Space Description),Custom field (Space Key),Custom field (Space Name),Custom field (Test and Documentation Plan),Custom field (Testcase included),Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment,Comment
+JSONConfiguration doesn't support array of objects,CONFIGURATION-686,13127384,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,vmaurin_glispa,vmaurin_glispa,12/27/2017 16:48,8/8/2018 20:28,6/19/2019 18:57,1/2/2018 20:01,2.2,,2.3,,,,0,,,"Hello,
+
+I have noticed that the array type is not properly handled by the JSONConfiguration (or AbstractYAMLBasedConfiguration)
+
+If we take the example from json.org
+
+{noformat}
+{
+  ""menu"": {
+    ""id"": ""file"",
+    ""value"": ""File"",
+    ""popup"": {
+      ""menuitem"": [
+        {
+          ""value"": ""New"",
+          ""onclick"": ""CreateNewDoc()""
+        },
+        {
+          ""value"": ""Open"",
+          ""onclick"": ""OpenDoc()""
+        },
+        {
+          ""value"": ""Close"",
+          ""onclick"": ""CloseDoc()""
+        }
+      ]
+    }
+  }
+}
+{noformat}
+
+I would have expect the following call to return ""New"" 
+
+{code:java}
+configuration.getString(""menu.popup.menuitem(0).value"")
+{code}
+
+The issue, I guess, is that only the Map type is handled by AbstractYAMLBasedConfiguration in a recursive way and not the list type.
+
+I had a custom JSONConfiguration implementation before supporting this use case, sorry for the code, it could be a bit messy and old, but it is maybe clearer to understand my issue
+
+{code:java}
+@Override
+    @SuppressWarnings(""unchecked"")
+    public void read(Reader in) throws ConfigurationException {
+        try {
+            Object jsonRoot = MAPPER.readValue(in, Object.class);
+            List<ImmutableNode.Builder> roots = createHierarchy(jsonRoot);
+            if (roots.size() != 1) {
+                throw new ConfigurationException(""The configuration only support a single root"");
+            }
+            getSubConfigurationParentModel().mergeRoot(roots.get(0).create(), null, null, null, null);
+        } catch (IOException ex) {
+            throw new ConfigurationException(""Invalid JsonConfiguration"", ex);
+        }
+    }
+ 
+    @SuppressWarnings(""unchecked"")
+    private static List<ImmutableNode.Builder> createHierarchy(Object value) {
+        if (value instanceof Map) {
+            ImmutableNode.Builder result = new ImmutableNode.Builder();
+            Map<String, ?> map = (Map<String, ?>) value;
+            for (Map.Entry<String, ?> entry : map.entrySet()) {
+                List<ImmutableNode.Builder> children = createHierarchy(entry.getValue());
+                for (ImmutableNode.Builder child : children) {
+                    child.name(entry.getKey());
+                    result.addChild(child.create());
+                }
+            }
+            return Collections.singletonList(result);
+        } else if (value instanceof List) {
+            List list = (List) value;
+            List<ImmutableNode.Builder> result = new ArrayList<>(list.size());
+            for (Object item : list) {
+                List<ImmutableNode.Builder> children = createHierarchy(item);
+                for (ImmutableNode.Builder child : children) {
+                    result.add(child);
+                }
+            }
+            return result;
+        }
+        ImmutableNode.Builder result = new ImmutableNode.Builder();
+        result.value(value);
+        return Collections.singletonList(result);
+    }
+{code}
+ 
+",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,24:05.4,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Thu Jan 04 20:53:06 UTC 2018,,,,,,0|i3obi7:,9.22337E+18,,,,,,,,,29/Dec/17 12:24;oheger;Thank you for the report and the solution proposal. I will have a look (probably in a couple of days).,"02/Jan/18 20:01;oheger;Fixed in SVN in revision 1819881.
+
+Support for lists with complex elements has been added. I also extended the test class to verify the new behavior. Can you please double-check if everything works as expected?
+
+Thanks.","04/Jan/18 08:59;vmaurin_glispa;Thank you for the quick patch [~oliver.heger@t-online.de].
+
+My tests are working now with the revision 1819881 so I confirm it is working as expected.",04/Jan/18 20:53;oheger;Thanks for the confirmation.,,,,,,,,,,,,,,,,,
+Memory leak and related issues with CombinedConfigurationBuilder,CONFIGURATION-687,13143664,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,wlhamaty,wlhamaty,3/8/2018 19:54,8/8/2018 20:28,6/19/2019 18:57,5/10/2018 17:29,2.2,,2.3,File reloading,,,0,,,"In CombinedConfigurationBuilder, each call to resetResult() adds new builders to the list of child builders. Likewise, and likely for the same reason, for ReloadingCombinedConfigurationBuilder, the resetResult() call adds to the list of subcontrollers.
+
+When resetResult() is called because of an reload update, the next _n_ calls to getReloadingController().checkForReloading() will also initiate reloading,  causing a reset and increasing the number of subcontrollers. So the first change causes 1 reload, the second change causes 2 reloads, and it doubles each time, so the 7th touch leads to 128 reloads!
+
+Functionally, there are no apparent symptoms until memory exhaustion and/or thrashing occur.
+
+This seems to be happen because CombinedConfigurationBuilder.initResultInstance rebuilds from the parameters without clearing all of the existing state, particularly _sourceData_, so SourceData ends up adding the reconstructed builders on top of the existing ones. Correcting this could be as simple as cleaning up and clearing sourceData to force creation of new SourceData.
+
+Code in attached zip (maven project) demonstrates the issue.
+
+ ",,,,,,,,,,08/Mar/18 19:50;wlhamaty;ReloadCombinedBug.zip;https://issues.apache.org/jira/secure/attachment/12913649/ReloadCombinedBug.zip,,,,1,,,,,,,,,,,,,,,,,,,06:14.2,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Thu May 10 17:29:56 UTC 2018,,,,,,0|i3r2bj:,9.22337E+18,,,,,,,,,"08/Mar/18 20:06;ggregory;Thank you for your test case and analysis. This sounds nasty indeed. Would you be willing to provide a fix? You can use a PR on GitHub https://github.com/apache/commons-configuration
+
+Gary
+
+","08/Mar/18 20:31;wlhamaty;I'll consider it. Or maybe a patch. I am not sure when, and I might have to clear with management.","10/May/18 17:29;oheger;This was indeed a major problem. Many thanks for spotting it.
+
+A fix was committed in SVN revision 1831360. The builders for child configurations are now created only once. The trouble with unnecessary reloading operations should be solved by this fix as well.
+
+Could you please double-check?",,,,,,,,,,,,,,,,,,
+ExprLookup will never return variables using getVariables(),CONFIGURATION-690,13145579,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,spaligo,spaligo,3/16/2018 4:48,8/8/2018 20:28,6/19/2019 18:57,3/17/2018 20:50,2.2,,2.3,Interpolation,,,0,,,ExprLookup's getVariables() method always returns null,,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,50:52.6,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Sat Mar 17 20:50:52 UTC 2018,,,,,,0|i3rdov:,9.22337E+18,,,,,,,,,"17/Mar/18 20:50;oheger;This is indeed strange.
+
+A fix has been applied in SVN revision 1827107, so that the method now returns a copy of the variables of this lookup object.",,,,,,,,,,,,,,,,,,,,
+FileHandler does not  produce root node attributes for XMLConfiguration ,CONFIGURATION-652,13041847,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,claudenw,claudenw,2/9/2017 21:28,8/8/2018 20:28,6/19/2019 18:57,4/11/2018 15:45,2.1.1,2.2,2.3,Interpolation,,,0,namespace,xml,I have a case where I need to take a Configuration file and write it as an XML document.  The document should have one or more xmlns properties on the root node but the xmlns attributes are not output.,Java 8  on Linux,,,,,,,,,09/Feb/17 21:31;claudenw;Test.java;https://issues.apache.org/jira/secure/attachment/12851951/Test.java,10/Apr/18 13:38;claudenw;configuration-652.patch;https://issues.apache.org/jira/secure/attachment/12918386/configuration-652.patch,11/Apr/18 07:43;claudenw;testChildNamespace.xml;https://issues.apache.org/jira/secure/attachment/12918523/testChildNamespace.xml,11/Apr/18 07:43;claudenw;testRootNamespace.xml;https://issues.apache.org/jira/secure/attachment/12918524/testRootNamespace.xml,4,,,,,,,,,,,,,,,,,,,34:35.2,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Thu Apr 12 15:53:43 UTC 2018,,,,,,0|i39ve7:,9.22337E+18,,,,,,,,,"09/Feb/17 21:31;claudenw;Example source code
+
+Expected output is 
+<?xml version=""1.0"" encoding=""UTF-8"" standalone=""no""?>
+<MyRootElement @xmlns:foo='http://example.com/foo'>
+<one>uno</one>
+<foo:two>dos</foo:two>
+</MyRootElement>
+
+produced output is 
+
+<?xml version=""1.0"" encoding=""UTF-8"" standalone=""no""?>
+<MyRootElement>
+<one>uno</one>
+<foo:two>dos</foo:two>
+</MyRootElement>
+
+Note missing @xmlns",10/Feb/17 09:34;britter;[~claude@xenei.org] has this been working for you with the 2.1 release?,"10/Feb/17 09:46;claudenw;I just tested with 2.1 and it does not work either.
+
+I saw that there is a test case for root properties, however, there is not a test case for root namespace properties and since the parser needs to use them perhaps they follow a different path through the code?",10/Feb/17 10:14;britter;Thank you for double checking! In this case this is at least no regression we introduced in 2.1.1. ,"10/Feb/17 10:33;claudenw;I'm not certain it works in 1.x either, but I have not tested.","10/Feb/17 11:05;claudenw;
+
+In XMLConfiguration class line 868 we find    
+{code}
+    private Document createDocument() throws ConfigurationException
+        {
+            ReferenceNodeHandler handler = getReferenceHandler();
+            XMLDocumentHelper docHelper =
+                    (XMLDocumentHelper) handler.getReference(handler.getRootNode());
+            XMLDocumentHelper newHelper =
+                    (docHelper == null) ? XMLDocumentHelper
+                        .forNewDocument(getRootElementName()) : docHelper
+                        .createCopy();
+{code}
+
+The {code}XMLDocumentHelper.forNewDocument(){code} creates the new document for the root element.  However, the namespace attributes are attached to the {code}handler.getRootNode(){code}.  I think that the document builder needs the namespace defined before usage and so the namespace info should be made available in the {code}XMLDocumentHelper.forNewDocument(){code} method. 
+
+Additionally the {code}forNewDocument(){code} method calls {code}Element rootElem = doc.createElement(rootElementName){code} which does not create a namespace aware name.  To do that {code}doc.createElementNS(){code} method would need to be called.
+","11/Feb/17 16:33;oheger;Support for namespaces has always been limited; so I assume this would no work in 1.x either.
+
+Thank you for your analysis. As you have already identified the problematic areas in the code, is there any chance you can come up with a patch (preferrable with a unit test)?","11/Feb/17 20:16;claudenw;I think the solution might be to check for root level namespaces and add
+them to the xml tag (whatever that first line is before the root node, the
+one that contains the schema definitions and such).  I think this would be
+the approach since the root node namespaces should have the [@xmlns] tag on
+the root node itself.
+
+Does this sound correct to you?
+
+On Sat, Feb 11, 2017 at 4:33 PM, Oliver Heger (JIRA) <jira@apache.org>
+
+
+
+
+-- 
+I like: Like Like - The likeliest place on the web
+<http://like-like.xenei.com>
+LinkedIn: http://www.linkedin.com/in/claudewarren
+","12/Feb/17 20:30;oheger;I must admit that I am not too deep in that namespace stuff. But if we have a corresponding test case with expected output (which can be verified using other XML processing tools), we should be able to figure out a solution, won't we?","10/Apr/18 10:59;claudenw;I have finally gotten back to this issue and think I have a solution.
+
+ 
+
+in org.apache.commons.configuration2.XMLConfiguration at line 1138 insert the line marked below.
+
+        /**
+         * Processes the specified document, updates element values, and adds
+         * new nodes to the hierarchy.
+         *
+         * @param refHandler the \{@code ReferenceNodeHandler}
+         */
+        public void processDocument(ReferenceNodeHandler refHandler)
+        {            
+            updateAttributes(refHandler.getRootNode(), document.getDocumentElement() ); // <-- insert this line
+            NodeTreeWalker.INSTANCE.walkDFS(refHandler.getRootNode(), this,
+                    refHandler);
+        }
+
+ 
+
+I can create a test for this as well. I assume that a patch containing both would be acceptable here?
+
+ 
+
+ ","10/Apr/18 13:40;claudenw;Added patch file.
+
+ ","10/Apr/18 18:47;oheger;Many thanks for the patch! I applied it, but still get two failing test cases: _testLoadWithRootNamespace_, and _testLoadChildNamespace_. Could it be that the test configuration files _testRootNamespace.xml_ and _testChildNamespace.xml_ are missing from the patch?","11/Apr/18 07:44;claudenw;Arrrggg... yes, I managed to miss them.  I have attached them to the Jira both go into the src/test/resources directory.","11/Apr/18 15:45;oheger;Patch applied in SVN in revision 1828908. Many thanks again.
+
+If you want to be added to the contributors section in the pom, please send your personal data that should be included.","12/Apr/18 07:59;claudenw;Oliver,
+
+Thank you for the help.  Would you be so kind as too add the following to
+the pom
+
+<developer><name>Claude Warren</name><id>claudenw</id><email>
+claude@apache.org</email>timezone>0</timezone><roles><role>Java
+Developer</role></roles></developer>
+
+thx
+Claude
+
+On Wed, Apr 11, 2018 at 4:46 PM, Oliver Heger (JIRA) <jira@apache.org>
+
+
+
+
+-- 
+I like: Like Like - The likeliest place on the web
+<http://like-like.xenei.com>
+LinkedIn: http://www.linkedin.com/in/claudewarren
+",12/Apr/18 15:53;oheger;Done. Thanks again.,,,,,
+"xml:space=""preserve"" does not handle blank strings properly",CONFIGURATION-703,13161965,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,pascal.essiembre,pascal.essiembre,5/25/2018 2:59,8/8/2018 20:28,6/19/2019 18:57,6/9/2018 20:02,2.2,,2.3,,,,0,,,"When using XMLConfiguration 2, tags containing only white spaces are not handled properly when xml:space=""preserve"" is set.  'null' is returned instead of the actual spaces.  To reproduce:
+
+ 
+{code:java}
+XMLConfiguration xml = new BasicConfigurationBuilder<>(
+        XMLConfiguration.class).configure(
+            new Parameters().xml()).getConfiguration();
+FileHandler fh = new FileHandler(xml);
+fh.load(new StringReader(""<test xml:space=\""preserve\"">    </test>""));
+System.out.println(""TEST: '"" + xml.getString("""") + ""'"");
+// Outputs   -> TEST: 'null'
+// Should be -> TEST: '    '
+{code}
+ 
+
+ 
+
+ 
+
+ ",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,25:52.2,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Sun Jun 10 20:24:49 UTC 2018,,,,,,0|i3u5jj:,9.22337E+18,,,,,,,,,"25/May/18 03:23;pascal.essiembre;Not sure if it impacts anything else negatively, but removing this change in XMLConfiguration#constructHierarchy(...) seems to do solve the issue:
+
+ 
+{code:java}
+...
+
+else if (w3cNode instanceof Text)
+{
+    //START fix
+    attributes.remove(ATTR_SPACE_INTERNAL);
+    //END fix
+    Text data = (Text) w3cNode;
+    buffer.append(data.getData());
+}
+
+...{code}
+ 
+
+ ","26/May/18 14:25;oheger;Thanks for this report.
+
+From the unit tests of {{XMLConfiguration}} I expect that the handling of the of the _xml:space_ attribute should work in principle. Your case is somewhat special as it applies this attribute to the rool element and does not have any other elements in the XML document. So the problem could be specific to this constellation.
+
+Did you test with other documents containing multiple elements? (Just to rule out that there is a general problem.)
+
+After applying your fix, do the unit tests still pass?","26/May/18 21:55;pascal.essiembre;It applies on any elements, not just root.  For instance, the second test fails here: 
+
+ 
+{code:java}
+String xml = 
+        ""<test>""
+      + ""<tagNoPreserve> </tagNoPreserve>""
+      + ""<tagPreserve xml:space=\""preserve\"">   </tagPreserve>""
+      + ""</test>"";
+ 
+XMLConfiguration c = XMLConfigurationUtil.newXMLConfiguration(xml);
+Assert.assertEquals("""", c.getString(""tagNoPreserve""));
+Assert.assertEquals(""   "", c.getString(""tagPreserve""));
+{code}
+ 
+
+I have not tried running unit tests from the Configuration project itself.  I'll do that when I get a chance.
+
+FYI, ``ConfigurationUtils`` encapsulates the creation logic described in my original post.","26/May/18 23:55;pascal.essiembre;With my suggested fix, this test fails:  TestHierarchicalXMLConfiguration#testXmlNodeTypes 
+
+So we probably need another one.
+
+I also discovered that child with spaces will get returned properly if the parent tag owns the xml:space=""preserve"".  In other words this works :
+{code:java}
+<test>
+  <tagParent xml:space=""preserve"">
+    <tagChild>   </tagChild>
+  </tagParent>
+</test>{code}
+White this does not:
+{code:java}
+<test>
+  <tagParent>
+    <tagChild xml:space=""preserve"">   </tagChild>
+  </tagParent>
+</test>{code}
+ 
+
+Shouldn't ""tagChild"" spaces be preserved in both cases?","27/May/18 16:11;oheger;Yes, it should. What confuses me is that we have a test exactly for this use case: _TestXMLConfiguration.testPreserveSpaceOnElement()_. This test has been introduced for a similar report: [CONFIGURATION-555|https://issues.apache.org/jira/browse/CONFIGURATION-555]. Not sure why this now pops up again. Maybe the solution implemented then was not complete.","27/May/18 16:22;oheger;Oh, found the reason: The _determineValue()_ method in {{XMLConfiguration}} handles elements that have only whitespace as content in a special way. Space is only preserved if the element has some other text content rather than exclusively whitespace. This was obviously implemented this way to not change behavior and break existing code. This is of course still a problem.","31/May/18 03:54;pascal.essiembre;OK, I've got a fix that does not break any tests.
+
+In XMLConfiguration#constructHierarchy, where the ""childrenFlag"" is set, the attribute size is ""wrongfully"" 2 when the ""xml:space"" attribute is present, since ""config-xml:space"" get added by the code.  So the following is my fix for it, without modifying the attributes gathered so far:
+{code:java}
+boolean childrenFlag = hasChildren || (attributes.size() > 1 && !VALUE_PRESERVE.equals(attributes.get(ATTR_SPACE)));{code}
+ ","31/May/18 15:13;oheger;Yes, this looks good. So the actual bug was that an element was considered to have children if it had at least one 'real' attribute, but in this case the attributes related to whitespace management were counted.","31/May/18 17:38;pascal.essiembre;Yes, but now that I think about it, even if the tests pass, I think the following would be safer (just reducing the count when dealing with space preserve):
+
+{code:java}
+boolean childrenFlag = hasChildren || (attributes.size() - (VALUE_PRESERVE.equals(attributes.get(ATTR_SPACE)) ? 1 : 0)  > 1);
+{code}
+
+That makes me wonder.  I am not familiar with the entire logic, but why are we considering attributes as ""children"" for the purpose of preserving spaces?  Shouldn't we care about child ""elements"" only?  I mean, don't we want to preserve spaces in this context:
+
+{code:xml}
+<tag xml:space=""preserve"" attribute1=""value1"" attribute2=""value2"" attribute3=""value3"" ...>   </tagChild>
+{code}
+","01/Jun/18 18:35;oheger;To be honest, I do not remember why it has been implemented this way. What you say sounds logic, and I also do not see a reason why an element with attributes should not be able to preserve its spaces. How do the tests react when this is changed?","02/Jun/18 06:21;pascal.essiembre;Some of the tests fail when I do not consider child attributes.  The reason seems to be that some tests expect {{null}} while others expect an empty string when we are not preserving spaces and there is no content.  Shouldn't it be consistent? If so, I have a fix, but for it to work we would have to settle on one or the other and modify a few tests accordingly.","04/Jun/18 20:30;oheger;Yes, it would be better if this was handled in a consistent way, and I am a bit worried that this does not seem to be the case. I remember that already for Configuration 1.0 there was a change so that one can find out whether there is an empty element or no element at all, such as <myElem/>. I think if such an element is present, a query for its value will not return *null*, but an empty string.","05/Jun/18 02:24;pascal.essiembre;I did a bit of research, and it seems the XML specs says {{<myElem/>}} and {{<myElem></myElem>}} should both be treated the same: empty string.  {{null}} can be returned if the element does not exist at all.  The one that is unclear to me is when an element has an {{xsi:nil=""true""}} attribute.  That attribute signifies an element is {{null}}.  It looks as if that special flag is used to indicate no values when dealing with enums since technically an empty string is not a valid value for those.","05/Jun/18 19:41;oheger;Thanks for looking this up.
+
+However, I am still not sure how to interpret this in the context of Commons Configuration where the focus lies in providing access to configuration data and not necessarily exact XML processing. I don't think that it is a frequent use case to define configuration properties with whitespace in all possible variations. So if we can comply to the specs with reasonable effort (and do not break existing code), this is great. But IMHO it is more important to be consistent in our own API, and we do not have to support every corner case mentioned in the specs.","06/Jun/18 05:22;pascal.essiembre;It all makes sense.  What should it be then?  I think it is logical for a missing element to be null while any empty element should be an empty string, unless there are white spaces and xml:space=""preserve"" is set.
+
+Is that what you have in mind?","06/Jun/18 19:29;oheger;Yes, I agree - and I think this is mostly in-line with the current implementation in {{XMLConfiguration}} except for the issues with whitespace preserving. So if you could create a patch that goes in this direction, this will be highly appreciated.","07/Jun/18 04:44;pascal.essiembre;OK, I gave it a serious look and provided a simple fix that resolves the issue and does not break any tests: https://github.com/apache/commons-configuration/pull/11/",07/Jun/18 19:50;oheger;Many thanks! I will have a look in a few days.,"09/Jun/18 20:02;oheger;The patch was applied (with minor tweaks) in SVN revision 1833251. Many thanks again.
+
+If you want to be listed in the contributors section of pom.xml, please send us the data you want to have added.","10/Jun/18 01:25;pascal.essiembre;Sure, here you go:
+
+{code:xml}
+<name>Pascal Essiembre</name>
+<email>pascal.essiembre@norconex.com</email>
+<organization>Norconex Inc.</organization>
+<organizationUrl>https://www.norconex.com</organizationUrl>
+<roles>
+    <role>developer</role>
+</roles>
+<timezone>-4</timezone>
+{code}
+
+ Thanks.",10/Jun/18 20:24;oheger;Added.
+Including a property file moves locator to that file,CONFIGURATION-688,13143889,Bug,Closed,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Fixed,,achelon,achelon,3/9/2018 13:00,8/8/2018 20:28,6/19/2019 18:57,3/11/2018 21:02,2.2,,2.3,File reloading,,,0,,,"1. Create files:
+{code:java}
+# toBeIncluded.properties
+some_prop=someValue{code}
+{code:java}
+ # toBeIncluded2.properties
+some_prop_2=someValue2
+
+{code}
+{code:java}
+ # someDirectory/prop.properties
+include=../toBeIncluded.properties
+include=../toBeIncluded2.properties
+
+{code}
+2. Load someDirectory/prop.properties file
+
+Expected:
+ * Both files are loaded
+
+Actual:
+ * toBeIncluded2 cannot be loaded with org.apache.commons.configuration2.ex.ConfigurationException: Cannot resolve include file exception",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,16:39.8,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Sun Mar 11 21:02:07 UTC 2018,,,,,,0|i3r3pj:,9.22337E+18,,,,,,,,,"09/Mar/18 13:03;achelon;It is happening because in org.apache.commons.configuration2.PropertiesConfiguration#loadIncludeFile fh.load(url); line causes FileHandler to change locator field value in PropertiesConfiguration class making current working path to toBeIncluded.properties.
+
+Beacause of that this works:
+{code:java}
+ # someDirectory/prop.properties
+ include=../toBeIncluded.properties
+ include=toBeIncluded2.properties{code}
+But I would rather expect that include resolves file path in relation to file position in which it is defined.
+
+The current behaviour would make a maintenance nightmare if toBeIncluded would include other files.","09/Mar/18 16:16;ggregory;I can see that this behavior breaks (for me) the principle of least surprise.
+
+I wonder how many apps would break if we were to fix this?",10/Mar/18 08:15;achelon;I agree. I suspect that not so many people use it to include properties from other directories if someone does I would expect they ether stop using commons-configuration or would rise an issue. It is very hard to live with such behaviour.,"10/Mar/18 14:57;ggregory;I agree that the behavior is too surprising and hard to 'use' to be considered a feature and that it should be fixed.
+
+Would you provide a PR on github? [https://github.com/apache/commons-configuration]
+
+Does the Commons community have any feedback here?
+
+ ","10/Mar/18 15:18;erans;I agree with the ""Expected"" outcome mentioned in the issue's description.","10/Mar/18 15:29;oheger;Yes, this is a bug and should be fixed. I am going to have a look, or if somebody wants to contribute a fix, even better.",10/Mar/18 15:31;ggregory;Please feel free to fix :),11/Mar/18 21:02;oheger;Fixed in SVN in revision 1826462. Many thanks for the report.,,,,,,,,,,,,,
+NullPointerException in ExprLookup when not using variables,CONFIGURATION-689,13145577,Bug,Resolved,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Not A Problem,,spaligo,spaligo,3/16/2018 4:30,3/24/2018 19:32,6/19/2019 18:57,3/24/2018 19:32,2.2,,,Interpolation,,,0,,,"When an ExprLookup instance is created with the default constructor, the ""variables"" object is null. During a lookup, initializeContext(JexlContext) iterates over ""variables"" which triggers a NullPointerException.",,,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,32:48.3,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Sat Mar 24 19:32:07 UTC 2018,,,,,,0|i3rdof:,9.22337E+18,,,,,,,,,"17/Mar/18 20:32;oheger;This is true; however, the NPE is not propagated to the outside, but caught and logged. The lookup operation returns the same variable that has been passed in.
+
+The default constructor could be modified to set an empty Variables object, but without further modifications this would change the behavior of the class: A lookup on an undefined variable would then return *null* rather than the variable name.
+
+Do you have a concrete use case in which this internal NPE causes a problem?",19/Mar/18 05:04;spaligo;Never mind. I don't have a use case where it causes a problem.,24/Mar/18 19:32;oheger;Closing as it was confirmed that the current implementation does not cause any concrete problem.,,,,,,,,,,,,,,,,,,
+FileBasedConfigurationBuilder allowFailOnInit vs HomeDirectoryLocationStrategy,CONFIGURATION-677,13122344,Bug,Open,CONFIGURATION,Commons Configuration,software,issues@commons.apache.org,,http://commons.apache.org/configuration/,Major,Unresolved,,psko,psko,12/2/2017 10:17,12/6/2017 23:59,6/19/2019 18:57,,2.2,,2.x,Documentation,File reloading,,0,,,"It seems there's a problem with configuration creation when using FileBasedConfigurationBuilder with allowFailOnInit together with HomeDirectoryLocationStrategy and autoSave option.
+
+If the configuration is present in user.home directory (let's say ~/.some.config) it is being loaded and updated properly, but if the file does *not exist* then the configuration is created in current working directory (where the java program was launched) and *not* in user home directory.
+
+Javadoc of BasicConfigurationBuilder states as follows:
+{quote}A builder instance can be constructed with an <em>allowFailOnInit</em>
+ * flag. If set to <strong>true</strong>, exceptions during initialization
+ * of the configuration are ignored; in such a case an empty configuration
+ * object is returned. A use case for this flag is a scenario in which a
+ * configuration is optional and created on demand the first time configuration
+ * data is to be stored. Consider an application that stores user-specific
+ * configuration data in the user's home directory: When started for the first
+ * time by a new user there is no configuration file; so it makes sense to
+ * start with an empty configuration object. On application exit, settings
+ * can be stored in this object and written to the associated file. Then they
+ * are available on next application start.
+{quote}
+
+So, either it is a bug and it should be fixed in the Configuration project or it is the correct behavior and it is the programmer to ensure to write the configuration in the right place for the first time. If the latter then I would suggest to update javadoc to state that clearly enough (and maybe provide an example on the project website).
+
+Code sample:
+{code}
+        // file not present: ~/.some.config
+        BuilderParameters params = new Parameters().properties().setFileName("".some.config"")
+            .setLocationStrategy(new HomeDirectoryLocationStrategy());
+        builder = new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class, params.getParameters(), true);
+        builder.setAutoSave(true);
+        config = builder.getConfiguration();
+        config.setProperty(""test"", ""test);
+        // config file .some.config not present in ~/.some.config but present in CWD
+{code}
+
+
+","macOS Sierra 10.12.6, Java 1.8.0_152",,,,,,,,,,,,,0,,,,,,,,,,,,,,,,,,,14:44.9,,,FALSE,,,,,,,,,,,,9.22337E+18,,,Tue Dec 05 20:41:58 UTC 2017,,,,,,0|i3nglb:,9.22337E+18,,,,,,,,,"02/Dec/17 20:14;oheger;Thanks for this report.
+
+I agree that based on the documentation a user may expect too much. The ideal solution in your case would probably be that the configuration file was created correctly in the user's home directory. With the current interfaces of location strategies this cannot be achieved, however. HomeDirectoryLocationStrategy can only find out that the requested file does not exist, but there is no way for it to give a hint upstream where the file should be stored once it has been created. (With multiple location strategies in place, there would probably be no clear solution which one should define the target location.)
+
+So an update of documentation would be appropriate. The feature of optional configuration sources was originally intended to be used together with {{CombinedConfigurationBuilder}}. Here optional sources can be included, and by using interpolation with system properties the target path can be specified exactly. I will try to improve the documentation in this area.","03/Dec/17 14:48;psko;Thanks for the comment.
+
+My two cents - I think that there is kinda design flaw regarding ""allowFailOnInit"".
+Firstly, it is only configurable via C-tor which then requires parameters to be given to C-tor. This then brakes DSL way of building ConfigurationBuilder using BasicConfigurationBuilder#configure().
+Secondly, there should be a mechanism to state where the configuration should be saved (to hint the upstream) + a priority hierarchy for chained/combined configurations.
+This sounds like an enhancement to properly support configuration creation in user defined places.
+
+
+For future reference, this is a workaround where HomeDirectoryLocationStrategy can be used and the configuration file will be created if needed:
+{code}
+        HomeDirectoryLocationStrategy location = new HomeDirectoryLocationStrategy();
+        File configFile = new File(location.getHomeDirectory(), "".some.config""); // let HomeDirectoryLocationStrategy work out the parent path
+        BuilderParameters params = new Parameters().properties()
+                .setFile(configFile)   // use setFile to set the full path
+                .setEncoding(""UTF-8"");
+        builder = new FileBasedConfigurationBuilder<FileBasedConfiguration>(
+                PropertiesConfiguration.class, params.getParameters(), true);
+        builder.setAutoSave(true);
+        config = builder.getConfiguration();
+        config.setProperty(""test"", ""test);
+{code}","05/Dec/17 20:41;oheger;So far the setting whether a configuration source is optional has been seen as a property of the builder that creates the configuration and not of the configuration itself. It may be possible and beneficial to implement this as a configuration property. It would then have to be placed in one of the parameter objects.
+
+I would not go so far to introduce a priority for location strategies to determine a default path for optional sources. This solution seems to be too clever and will be hard to understand. It may already be sufficient to just specify a default location explicitly.",,,,,,,,,,,,,,,,,,
