@@ -15,6 +15,7 @@ Now inside the commons-collections folder we have:
 - pitest: It contains pit reports for all the versions of the project.
 - CodeChurn.txt file contains the code churn data which was retrieved by running CLOC tool.
 - SizeOfRelease.txt file contains the size of release using CLOC tool.
+- Graphs.doc file contains the graphs we plotted for the spearman coefficient for each of the project. 
 
 Projects folder also contains the spearman coefficient and p-values calculated for all the projects. 
 Similar structure is followed by commons-configuration and commons-io folders.
