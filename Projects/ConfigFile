@@ -1,3 +1,63 @@
+ Plug-in for Jacoco
+<dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>jacoco-maven-plugin</artifactId>
+      <version>0.7.7.201606060606</version>
+    </dependency>
+This dependency was added in the dependencies tag in the pom.xml in order to run the jacoco tests. 
+<plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.7.7.201606060606</version>
+        <configuration>
+          <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+          <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+        </configuration>
+        <executions>
+          <execution>
+            <id>jacoco-initialize</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-site</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+This plugin was added in the pom.xml file for the functioning of the jacoco testing. This was added in the plugins tags.
+
+Plug-in for pitest
+<plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.4.8</version>
+        <configuration>
+          <targetClasses>
+            <param>org.apache.commons.collections4*</param>
+          </targetClasses>
+          <targetTests>
+            <param>org.apache.commons.collections4*</param>
+          </targetTests>
+        </configuration>
+        <executions>
+          <execution>
+            <id>pit-report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>mutationCoverage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+This plugin was added in plugins tags for the pi test. This worked well and gave the results. 
+
+
  Instructions to run the CLOC tools –
 •	Install the latest version of Node.js from https://nodejs.org/en
 •	Download the CLOC python script by using command -  npm install -g cloc
