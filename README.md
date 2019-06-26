@@ -8,6 +8,8 @@ Now inside the commons-collections folder we have:
 - code_churn_defect_density: It contains an excel file with defect density and code churn calculated.
 - jacoco: It contains the reports retrieved for branch and statement in csv, html, xml form for each of the version we have used in this project.
 - pitest: It contains pit reports for all the versions of the project.
+- CodeChurn.txt file contains the code churn data which was retrieved by running CLOC tool.
+- SizeOfRelease.txt file contains the size of release using CLOC tool.
 
 Similar structure is followed by commons-configuration and commons-io folders.
 
