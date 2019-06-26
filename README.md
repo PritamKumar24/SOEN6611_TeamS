@@ -11,6 +11,7 @@ Now inside the commons-collections folder we have:
 - CodeChurn.txt file contains the code churn data which was retrieved by running CLOC tool.
 - SizeOfRelease.txt file contains the size of release using CLOC tool.
 
+Projects folder also contains the spearman coefficient and p-values calculated for all the projects. 
 Similar structure is followed by commons-configuration and commons-io folders.
 
 Team S.
