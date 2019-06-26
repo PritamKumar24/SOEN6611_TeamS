@@ -1,0 +1,408 @@
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\comm
+ons-collections-collections-4_3\src C:\Users\sony\Downloads\Measurement\Project\
+ProjectReleases\commons-collections-collections-4_2\src
+     566 text files.
+     564 text files.
+     124 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=18.75 s (0.1 files/s, 0.1 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                   520          12660          43971
+   62204
+ modified                                15              0             79
+     144
+ added                                    0              0            110
+     314
+ removed                                  1             30            166
+     521
+XML
+ same                                    20            228            459
+    2713
+ modified                                 4              0              7
+      34
+ added                                    0              0              0
+       0
+ removed                                  1              9             16
+     100
+HTML
+ same                                     2             11             30
+     113
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+Velocity Template Language
+ same                                     1             14             25
+     101
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+Bourne Shell
+ same                                     1              0              2
+       2
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                   544          12913          44487
+   65133
+ modified                                19              0             86
+     178
+ added                                    0              0            110
+     314
+ removed                                  2             39            182
+     621
+--------------------------------------------------------------------------------
+--------
+
+C:\>
+
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\comm
+ons-collections-collections-4_2\src C:\Users\sony\Downloads\Measurement\Project\
+ProjectReleases\commons-collections-collections-4_1\src
+     564 text files.
+     553 text files.
+     121 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=22.01 s (0.0 files/s, 0.0 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                     6             48          42955
+   58081
+ modified                               519              0            321
+    2313
+ added                                    0              1            575
+     339
+ removed                                 10            274            884
+    2268
+XML
+ same                                     8            113            416
+    2450
+ modified                                15              0             25
+     125
+ added                                    0              1              1
+      14
+ removed                                  1              9             25
+     172
+HTML
+ same                                     2             11             30
+     113
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+Velocity Template Language
+ same                                     0              0             25
+     100
+ modified                                 1              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              1              0
+       1
+Bourne Shell
+ same                                     1              0              2
+       2
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                    17            172          43428
+   60746
+ modified                               535              0            346
+    2438
+ added                                    0              2            576
+     353
+ removed                                 11            284            909
+    2441
+--------------------------------------------------------------------------------
+--------
+
+C:\>C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\comm
+ons-collections-collections-4_1\src C:\Users\sony\Downloads\Measurement\Project\
+ProjectReleases\commons-collections-collections-4_0\src
+     553 text files.
+     494 text files.
+     111 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=14.56 s (0.1 files/s, 0.1 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                   252           4987          37364
+   50670
+ modified                               218              0            655
+     583
+ added                                    0             44            135
+     369
+ removed                                 55           1896           5832
+    9480
+XML
+ same                                     2             18            253
+    2021
+ modified                                16              0            119
+      44
+ added                                    2              7             28
+      66
+ removed                                  5             36             70
+     524
+HTML
+ same                                     2             11             30
+     113
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+Velocity Template Language
+ same                                     1             13             25
+     100
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+Bourne Shell
+ same                                     1              0              2
+       2
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                   258           5029          37674
+   52906
+ modified                               234              0            774
+     627
+ added                                    2             51            163
+     435
+ removed                                 60           1932           5902
+   10004
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\comm
+ons-collections-collections-4_0\src C:\Users\sony\Downloads\Measurement\Project\
+ProjectReleases\commons-collections-collections-3_3\src
+     494 text files.
+     486 text files.
+      92 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=8.14 s (0.1 files/s, 0.1 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                     0              0          16645
+   10720
+ modified                               220              0           5497
+    6406
+ added                                  248           8988          19248
+   39123
+ removed                                250           7053          16012
+   34496
+XML
+ same                                     0              0              0
+       0
+ modified                                 0              0              0
+       0
+ added                                    3             10             42
+      91
+ removed                                 20            208            400
+    2131
+HTML
+ same                                     1              4             15
+      94
+ modified                                 0              0              0
+       0
+ added                                   13             32            203
+     255
+ removed                                  1              7             15
+      19
+Velocity Template Language
+ same                                     0              0              0
+       0
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  1             13             25
+     100
+Bourne Shell
+ same                                     0              0              0
+       0
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                     1              4          16660
+   10814
+ modified                               220              0           5497
+    6406
+ added                                  264           9030          19493
+   39469
+ removed                                273           7281          16454
+   36748
+--------------------------------------------------------------------------------
+--------
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\comm
+ons-collections-collections-3_3\src C:\Users\sony\Downloads\Measurement\Project\
+ProjectReleases\commons-collections-collections-3_2\src
+     487 text files.
+     482 text files.
+      76 files ignored.
+
+2 errors:
+Diff error (quoted comments?):  C:\Users\sony\Downloads\Measurement\Project\Proj
+ectReleases\commons-collections-collections-3_3\src/test/org/apache/commons/coll
+ections/list/TestNodeCachingLinkedList.java
+Diff error (quoted comments?):  C:\Users\sony\Downloads\Measurement\Project\Proj
+ectReleases\commons-collections-collections-3_2\src/test/org/apache/commons/coll
+ections/list/TestNodeCachingLinkedList.java
+
+github.com/AlDanial/cloc v 1.82  T=12.31 s (0.1 files/s, 0.1 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java
+ same                            0              0          38008          54961
+ modified                      467              0           2029            274
+ added                           0              1            451             67
+ removed                         2            177           1353           1014
+HTML
+ same                            0              0            134            344
+ modified                       14              0             56              5
+ added                           0             14              0              0
+ removed                         0              0             28              0
+XML
+ same                            0              0              0              0
+ modified                        0              0              0              0
+ added                           0              0              0              0
+ removed                         3             10             42             91
+-------------------------------------------------------------------------------
+SUM:
+ same                            0              0          38142          55305
+ modified                      481              0           2085            279
+ added                           0             15            451             67
+ removed                         5            187           1423           1105
+-------------------------------------------------------------------------------
+
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\comm
+ons-collections-collections-3_1\src C:\Users\sony\Downloads\Measurement\Project\
+ProjectReleases\commons-collections-collections-3_0\src
+     470 text files.
+     432 text files.
+      72 files ignored.
+
+2 errors:
+Diff error (quoted comments?):  C:\Users\sony\Downloads\Measurement\Project\Proj
+ectReleases\commons-collections-collections-3_1\src/test/org/apache/commons/coll
+ections/list/TestNodeCachingLinkedList.java
+Diff error (quoted comments?):  C:\Users\sony\Downloads\Measurement\Project\Proj
+ectReleases\commons-collections-collections-3_0\src/test/org/apache/commons/coll
+ections/list/TestNodeCachingLinkedList.java
+
+github.com/AlDanial/cloc v 1.82  T=18.04 s (0.1 files/s, 0.1 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java
+ same                            0              0          27607          44604
+ modified                      417              0           4957            383
+ added                           0            203          16629            880
+ removed                        38           1258           5905           6043
+HTML
+ same                            0              0              8            338
+ modified                       14              0              3              3
+ added                           0              0              0             19
+ removed                         0             41            179              7
+-------------------------------------------------------------------------------
+SUM:
+ same                            0              0          27615          44942
+ modified                      431              0           4960            386
+ added                           0            203          16629            899
+ removed                        38           1299           6084           6050
+-------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

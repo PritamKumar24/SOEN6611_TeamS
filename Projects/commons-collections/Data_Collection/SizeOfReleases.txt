@@ -1,0 +1,184 @@
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-4_3\src
+     566 text files.
+     566 unique files.
+      61 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=13.90 s (40.6 files/s, 8945.9 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    536          13399          44216
+   62869
+XML                                      25            254            482
+    2847
+HTML                                      2             11             30
+     113
+Velocity Template Language                1             14             25
+     101
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    565          13678          44755
+   65932
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-4_2\src
+     564 text files.
+     564 unique files.
+      61 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.78 s (72.4 files/s, 15930.2 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    535          13369          44160
+   62662
+XML                                      24            245            466
+    2747
+HTML                                      2             11             30
+     113
+Velocity Template Language                1             14             25
+     101
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    563          13639          44683
+   65625
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-4_1\src
+     553 text files.
+     553 unique files.
+      58 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=8.99 s (61.4 files/s, 13493.7 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    525          13096          43851
+   60733
+XML                                      23            237            442
+    2589
+HTML                                      2             11             30
+     113
+Velocity Template Language                1             13             25
+     100
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    552          13357          44350
+   63537
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-4_0\src
+     494 text files.
+     494 unique files.
+      53 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=6.83 s (72.3 files/s, 15223.9 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    470          11244          38154
+   51622
+XML                                      20            208            400
+    2131
+HTML                                      2             11             30
+     113
+Velocity Template Language                1             13             25
+     100
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    494          11476          38611
+   53968
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-3_3\src
+     486 text files.
+     486 unique files.
+      39 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=10.55 s (46.0 files/s, 10571.1 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                           468          13179          41390          56249
+HTML                            14             36            218            349
+XML                              3             10             42             91
+-------------------------------------------------------------------------------
+SUM:                           485          13225          41650          56689
+-------------------------------------------------------------------------------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-3_2\src
+     481 text files.
+     481 unique files.
+      35 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=8.92 s (53.8 files/s, 12264.0 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                           466          13003          40488          55302
+HTML                            14             50            190            349
+-------------------------------------------------------------------------------
+SUM:                           480          13053          40678          55651
+-------------------------------------------------------------------------------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-3_1\src
+     470 text files.
+     470 unique files.
+      35 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=8.25 s (56.8 files/s, 12421.3 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                           455          12315          38508          51126
+HTML                            14             50            190            348
+-------------------------------------------------------------------------------
+SUM:                           469          12365          38698          51474
+-------------------------------------------------------------------------------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\ProjectReleases\commons-col
+lections-collections-3_0\src
+     432 text files.
+     432 unique files.
+      35 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.91 s (54.5 files/s, 13504.3 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                           417          11260          49270          45963
+HTML                            14              9             11            360
+-------------------------------------------------------------------------------
+SUM:                           431          11269          49281          46323
+-------------------------------------------------------------------------------
