@@ -1,0 +1,332 @@
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\comm
+ons-io-2_5\src C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\commo
+ns-io-2_4\src
+     274 text files.
+     242 text files.
+      98 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.21 s (0.1 files/s, 0.1 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                     4             34          16737
+   17940
+ modified                               194              0           1763
+    5313
+ added                                    0             64            472
+    1130
+ removed                                 29            689           1942       DD = --6443
+    5897
+XML
+ same                                    17            289            450
+    1913
+ modified                                 8              0              2
+      82
+ added                                    2              4             28
+      88
+ removed                                  3             18             43
+     344
+Velocity Template Language
+ same                                     0              0             32
+     734
+ modified                                 1              0              0
+       1
+ added                                    0              0              0
+       0
+ removed                                  0              8              0
+      45
+HTML
+ same                                     7             25             98
+     362
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  1              2             14
+       8
+Bourne Shell
+ same                                     0              0              0
+       0
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                    28            348          17317
+   20949
+ modified                               203              0           1765
+    5396
+ added                                    2             68            500
+    1218
+ removed                                 34            717           2001
+    6296
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\comm
+ons-io-2_4\src C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\commo
+ns-io-2_3\src
+     242 text files.
+     241 text files.
+      96 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=3.34 s (0.3 files/s, 0.3 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                   184           3849          18553
+   23792
+ modified                                14              0            124
+     136
+ added                                    0              0             10
+      54
+ removed                                  0            100            295    KLOC= 190
+     455 
+XML
+ same                                    22            391            465
+    1956
+ modified                                 4              0              0
+      22
+ added                                    0              0              0
+       0
+ removed                                  1             12             15
+     105
+Velocity Template Language
+ same                                     0              0             32
+     715
+ modified                                 1              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              7              0
+      20
+HTML
+ same                                     7             25             98
+     362
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                   213           4265          19148
+   26825
+ modified                                19              0            124
+     158
+ added                                    0              0             10
+      54
+ removed                                  1            119            310
+     580
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\comm
+ons-io-2_3\src C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\commo
+ns-io-2_2\src
+     241 text files.
+     238 text files.
+      96 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=4.36 s (0.2 files/s, 0.2 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                   144           2643          17859
+   23562
+ modified                                52              0            283
+     114
+ added                                    0              3              9
+     112
+ removed                                  2             75            545
+     306
+XML
+ same                                    21            381            447
+    1894
+ modified                                 4              0              0
+      35
+ added                                    0              0              1
+       0
+ removed                                  1             13             18
+      49
+Velocity Template Language
+ same                                     0              0             32
+     663
+ modified                                 1              0              0
+      13
+ added                                    0              0              0
+       0
+ removed                                  0              8              0
+      39
+HTML
+ same                                     7             25             98
+     362
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                   172           3049          18436
+   26481
+ modified                                57              0            283
+     162
+ added                                    0              3             10
+     112
+ removed                                  3             96            563
+     394
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\comm
+ons-io-2_2\src C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\commo
+ns-io-2_1\src
+     238 text files.
+     217 text files.
+      79 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=5.20 s (0.2 files/s, 0.2 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java
+ same                                    41            667          16914
+   21295
+ modified                               147              0            393
+     761
+ added                                    0              1            204
+      72
+ removed                                  8            349            844
+    1732
+XML
+ same                                    18            345            405
+    1743
+ modified                                 4              0              0
+      27
+ added                                    0              2              0
+      28
+ removed                                  3             36             43
+     159
+Velocity Template Language
+ same                                     0              0              0
+       0
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  1            194             32
+     676
+HTML
+ same                                     7             25             98
+     362
+ modified                                 0              0              0
+       0
+ added                                    0              0              0
+       0
+ removed                                  0              0              0
+       0
+--------------------------------------------------------------------------------
+--------
+SUM:
+ same                                    66           1037          17417
+   23400
+ modified                               151              0            393
+     788
+ added                                    0              3            204
+     100
+ removed                                 12            579            919
+    2567
+--------------------------------------------------------------------------------
+--------
+
+C:\>
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\comm
+ons-io-2_1\src C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\commo
+ns-io-2_0\src
+     217 text files.
+     215 text files.
+      63 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=3.16 s (0.3 files/s, 0.3 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java
+ same                          148           2952          17072          21278
+ modified                       40              0             19            131
+ added                           0              0              7             24
+ removed                         0            153            420            719
+XML
+ same                           13            307            348           1550
+ modified                        5              0              0             19
+ added                           2              4             28             57
+ removed                         4             42             57            229
+HTML
+ same                            7             25             98            362
+ modified                        0              0              0              0
+ added                           0              0              0              0
+ removed                         0              0              0              0
+-------------------------------------------------------------------------------
+SUM:
+ same                          168           3284          17518          23190
+ modified                       45              0             19            150
+ added                           2              4             35             81
+ removed                         4            195            477            948
+-------------------------------------------------------------------------------
+C:\>cloc --diff C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\comm
+ons-io-2_0\src C:\Users\sony\Downloads\Measurement\Project\ApacheCommonsIO\commo
+ns-io-1_4\src
+     215 text files.
+     146 text files.
+      57 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=2.78 s (0.4 files/s, 0.4 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java
+ same                            3             56           8854           4776
+ modified                       69              0             87            378
+ added                          64           1958           2623           9454
+ removed                       116           3257           8157          16279
+XML
+ same                            0              0              0              0
+ modified                        0              0              0              0
+ added                           4             21             67            115
+ removed                        20            341            376           1626
+HTML
+ same                            5             18             84            192
+ modified                        1              0              0              0
+ added                           0              0              0              0
+ removed                         1              4             14            170
+-------------------------------------------------------------------------------
+SUM:
+ same                            8             74           8938           4968
+ modified                       70              0             87            378
+ added                          68           1979           2690           9569
+ removed                       137           3602           8547          18075
+-------------------------------------------------------------------------------
