@@ -58,7 +58,8 @@ Plug-in for pitest
 This plugin was added in plugins tags for the pi test. This worked well and gave the results. 
 
 
- Instructions to run the CLOC tools –
+   Instructions to run the CLOC tools –
+ 
 •	Install the latest version of Node.js from https://nodejs.org/en
 •	Download the CLOC python script by using command -  npm install -g cloc
 •	CLOC is tool written in python. 
@@ -67,20 +68,23 @@ This plugin was added in plugins tags for the pi test. This worked well and gave
 •	Install “ActiveState Perl” – to recognize the perl.
 •	Installation of Strawberry Perl – to make CLOC executable
 •	This will make the CLOC executable.
-3. Commands to obtain the results –
-1. To get the total lines of code – cloc path\projectname
-2. To get the code churn between different versions of project – cloc  - -diff path\Project_Name_Version_A path \Project_Name_Version_B
 
-4. Instructions to run the SciPy script for spearman correlation –
+    Commands to obtain the results –
+    
+. To get the total lines of code – cloc path\projectname
+. To get the code churn between different versions of project: cloc  --diff path\'Project_Name_Version_A' path\'Project_Name_Version_B'
+
+  Instructions to run the SciPy script for spearman correlation –
 •	Install the python IDE - Idle (Python GUI)
 •	Download the python script file get-pip.py to install the pip library
 •	This script will be used to run the scipy script which is used to run the spearman script
-Commands to run the SciPy script –
+
+  Commands to run the SciPy script –
 •	Path\python get-pip.py
 •	Path\python -m pip install scipy
 To obtain the spearman coefficient results –
 •	Stats.spearmanr([‘comma_separated_values_of_varibale_1’],[comma_separated_values_of_varibale_2])
 
 
-To get the bugs from the issue tracking system we used below query for all the projects:
-project = "commons-collections" AND issuetype = Bug AND affectedVersion = 4.3 ORDER BY priority DESC, updated DESC
+To get the bugs from the issue tracking system we used below Jira query for all the projects:
+project = "Project+_Name" AND issuetype = Bug AND affectedVersion = "ReleaseNumber" ORDER BY priority DESC, updated DESC
