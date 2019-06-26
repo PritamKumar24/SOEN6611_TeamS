@@ -13,5 +13,20 @@ Now inside the commons-collections folder we have:
 
 Similar structure is followed by commons-configuration and commons-io folders.
 
+Team S.
 
+Team Details:
+Ankur Singla
+40090208
+singla.ankur147@gmail.com
+
+Pritam Kumar
+40090865
+pritamdabby@gmail.com
+
+Piyush Piyush
+40081576
+piyusharora1736@gmail.com
+
+ 
 
