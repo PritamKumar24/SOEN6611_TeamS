@@ -10,7 +10,7 @@ Now inside the commons-collections folder we have:
 - pitest: It contains pit reports for all the versions of the project.
 - CodeChurn.txt file contains the code churn data which was retrieved by running CLOC tool.
 - SizeOfRelease.txt file contains the size of release using CLOC tool.
-
+project = COLLECTIONS AND issuetype = Bug AND affectedVersion = 4.3 ORDER BY priority DESC, updated DESC
 Similar structure is followed by commons-configuration and commons-io folders.
 
 Team S.
