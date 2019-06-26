@@ -1,0 +1,261 @@
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_2_5\src
+     629 text files.
+     626 unique files.
+      88 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.98 s (75.3 files/s, 18616.3 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    458          10639          47511
+   67430
+XML                                     133            912           2164
+   19493
+XSD                                       2              4             28
+     119
+Velocity Template Language                1             15             31
+      76
+JSON                                      1              0              0
+      37
+DTD                                       3             15             46
+      22
+YAML                                      1              5              0
+      21
+INI                                       1              0              1
+      16
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    601          11590          49783
+   87216
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_2_4\src
+     627 text files.
+     624 unique files.
+      86 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.41 s (81.1 files/s, 20077.2 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    458          10610          47844
+   67260
+XML                                     133            912           2162
+   19511
+XSD                                       2              4             28
+     119
+Velocity Template Language                1             15             31
+      76
+JSON                                      1              0              0
+      37
+DTD                                       3             15             46
+      22
+YAML                                      1              5              0
+      21
+INI                                       1              0              1
+      16
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    601          11561          50114
+   87064
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_2_3\src
+     625 text files.
+     622 unique files.
+      85 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.16 s (83.8 files/s, 20688.0 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    457          10526          47543
+   67045
+XML                                     133            911           2162
+   19433
+XSD                                       2              4             28
+     119
+Velocity Template Language                1             15             31
+      76
+JSON                                      1              0              0
+      37
+DTD                                       3             15             46
+      22
+YAML                                      1              5              0
+      21
+INI                                       1              0              1
+      16
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    600          11476          49813
+   86771
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_2_2\src
+     624 text files.
+     621 unique files.
+      84 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=7.75 s (77.4 files/s, 19010.0 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    457          10485          47401
+   66646
+XML                                     133            909           2162
+   19341
+XSD                                       2              4             28
+     119
+Velocity Template Language                1             15             31
+      76
+JSON                                      1              0              0
+      27
+DTD                                       3             15             46
+      22
+YAML                                      1              5              0
+      21
+INI                                       1              0              1
+      16
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    600          11433          49671
+   86270
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_2_1\src
+     612 text files.
+     609 unique files.
+      84 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=9.27 s (63.4 files/s, 15633.4 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    447          10285          46598
+   65508
+XML                                     133            906           2151
+   19165
+XSD                                       2              4             28
+     119
+Velocity Template Language                1             15             31
+      76
+DTD                                       3             15             46
+      22
+INI                                       1              0              1
+      16
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    588          11225          48857
+   84908
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_2_0\src
+     606 text files.
+     603 unique files.
+      81 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=10.25 s (56.9 files/s, 14056.4 lines/s)
+--------------------------------------------------------------------------------
+--------
+Language                              files          blank        comment
+    code
+--------------------------------------------------------------------------------
+--------
+Java                                    442          10199          46348
+   65037
+XML                                     133            902           2151
+   19095
+XSD                                       2              4             28
+     119
+Velocity Template Language                1             15             31
+      76
+DTD                                       3             15             46
+      22
+INI                                       1              0              1
+      16
+Bourne Shell                              1              0              2
+       2
+--------------------------------------------------------------------------------
+--------
+SUM:                                    583          11135          48607
+   84367
+--------------------------------------------------------------------------------
+--------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_1_10\src
+     362 text files.
+     359 unique files.
+      68 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=1.89 s (179.2 files/s, 46592.9 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                           224           7485          25923          42817
+XML                             99            538           1590           9197
+HTML                            10             39            140            143
+XSD                              2              4             28            119
+DTD                              3             15             46             22
+INI                              1              0              1             16
+-------------------------------------------------------------------------------
+SUM:                           339           8081          27728          52314
+-------------------------------------------------------------------------------
+
+C:\>cloc C:\Users\sony\Downloads\Measurement\Project\CommonsConfigurations\commo
+ns-configuration-CONFIGURATION_1_9\src
+     357 text files.
+     354 unique files.
+      67 files ignored.
+
+github.com/AlDanial/cloc v 1.82  T=1.72 s (193.8 files/s, 50585.5 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Java                           219           7383          25642          42291
+XML                             99            538           1590           9141
+HTML                            10             39            140            143
+XSD                              2              4             28            119
+DTD                              3             15             46             22
+INI                              1              0              1             16
+-------------------------------------------------------------------------------
+SUM:                           334           7979          27447          51732
+-------------------------------------------------------------------------------
+
+C:\>
