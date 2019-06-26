@@ -16,6 +16,7 @@ Now inside the commons-collections folder we have:
 - CodeChurn.txt file contains the code churn data which was retrieved by running CLOC tool.
 - SizeOfRelease.txt file contains the size of release using CLOC tool.
 - Graphs.doc file contains the graphs we plotted for the spearman coefficient for each of the project. 
+- Jacoco_pitest_common_classes.xls contains the classes which were retrieved after removing the classes skipped by jacoco. So it contains the data such as Statement Coverage, branch Coverage and Mutation Score for that particular classes. This file was used to generate the Spearman value and graphs plotting correlation.
 
 Projects folder also contains the spearman coefficient and p-values calculated for all the projects. 
 Similar structure is followed by commons-configuration and commons-io folders.
