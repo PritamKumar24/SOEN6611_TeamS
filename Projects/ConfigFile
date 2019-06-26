@@ -80,3 +80,7 @@ Commands to run the SciPy script –
 •	Path\python -m pip install scipy
 To obtain the spearman coefficient results –
 •	Stats.spearmanr([‘comma_separated_values_of_varibale_1’],[comma_separated_values_of_varibale_2])
+
+
+To get the bugs from the issue tracking system we used below query for all the projects:
+project = "commons-collections" AND issuetype = Bug AND affectedVersion = 4.3 ORDER BY priority DESC, updated DESC
