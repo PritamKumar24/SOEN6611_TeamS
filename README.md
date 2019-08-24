@@ -25,13 +25,13 @@ Team S.
 
 Team Details:
 
-Ankur Singla
-40090208
-singla.ankur147@gmail.com
-
 Pritam Kumar
 40090865
 pritamdabby@gmail.com
+
+Ankur Singla
+40090208
+singla.ankur147@gmail.com
 
 Piyush Piyush
 40081576
